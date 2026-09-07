@@ -1,0 +1,23 @@
+# Audio/sound files
+/songs
+/soundboard-main
+/soundboard-main.zip
+
+# Pyodide (large binaries)
+/.hub/pyodide/
+*.asm.wasm
+*.wasm
+
+# Original games (tracked separately)
+/.Offline-HTML-Games-Pack-master/
+/.library2/
+
+# Test artifacts
+test-*.png
+_tmp_*.js
+.unfixable-games.json
+python-test-screenshot*.png
+.aider*
+
+# Backups within project (none currently)
+*.bak

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-256-GCM Decryption Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --dark-bg: #0f172a;
+            --darker-bg: #020617;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .input-group .label-desc {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: normal;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper textarea {
+            width: 100%;
+            padding: 15px;
+            background: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 50px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-wrapper textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: #1a2332;
+        }
+
+        .input-wrapper textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(99, 102, 241, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success-color);
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result.error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result h3 {
+            color: var(--success-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result.error h3 {
+            color: var(--error-color);
+        }
+
+        .result-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result-content.error {
+            color: var(--error-color);
+        }
+
+        .info-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .info-box h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .copy-btn {
+            background: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .required-indicator {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">🔓</div>
+            <h1>AES-256-GCM Decryption</h1>
+            <p>Enter the four components required to decrypt your encrypted message using industry-standard AES-256-GCM encryption.</p>
+        </div>
+
+        <div class="info-box">
+            <h4>📋 Required Components</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 0.85rem;">
+                <div><strong>🔑 Key:</strong> 64 hex characters (32 bytes)</div>
+                <div><strong>🌊 IV:</strong> 24 hex characters (12 bytes)</div>
+                <div><strong>📝 Ciphertext:</strong> Encrypted data (variable length)</div>
+                <div><strong>✅ Auth Tag:</strong> 32 hex characters (16 bytes)</div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="key">Key <span class="required-indicator">*</span></label>
+            <div class="input-wrapper">
+                <textarea id="key" placeholder="Enter your 64-character hex key here..." required></textarea>
+                <span class="label-desc">64 hexadecimal characters (letters A-F, numbers 0-9)</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="iv">IV (Initialization Vector) <span class="required-indicator">*</span></label>
+            <div class="input-wrapper">
+                <textarea id="iv" placeholder="Enter your 24-character hex IV here..." required></textarea>
+                <span class="label-desc">24 hexadecimal characters, unique for each encryption</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="ciphertext">Ciphertext <span class="required-indicator">*</span></label>
+            <div class="input-wrapper">
+                <textarea id="ciphertext" placeholder="Enter your encrypted hex data here..." required></textarea>
+                <span class="label-desc">Your encrypted message in hexadecimal format</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="auth">Auth Tag <span class="required-indicator">*</span></label>
+            <div class="input-wrapper">
+                <textarea id="auth" placeholder="Enter your 32-character hex auth tag here..." required></textarea>
+                <span class="label-desc">Authentication tag (32 hex chars), ensures integrity</span>
+            </div>
+        </div>
+
+        <button class="btn" id="decryptBtn" onclick="decryptMessage()">
+            🔓 Decrypt Message
+        </button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Decrypting message...</p>
+        </div>
+
+        <div class="result" id="result">
+            <h3 id="resultTitle">✅ Decryption Successful</h3>
+            <div class="result-content" id="resultContent"></div>
+            <button class="copy-btn" onclick="copyResult()">📋 Copy Result</button>
+        </div>
+    </div>
+
+    <script>
+        // Convert hex string to Uint8Array
+        function hexToBytes(hex) {
+            // Remove any whitespace or invalid characters
+            hex = hex.replace(/\s+/g, '').toLowerCase();
+            const bytes = new Uint8Array(hex.length / 2);
+            for (let i = 0; i < hex.length; i += 2) {
+                bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+            }
+            return bytes;
+        }
+
+        // Convert Uint8Array to string
+        function uint8ToString(arr) {
+            const decoder = new TextDecoder();
+            return decoder.decode(arr);
+        }
+
+        // Main decryption function
+        async function decryptMessage() {
+            const keyInput = document.getElementById('key').value.trim();
+            const ivInput = document.getElementById('iv').value.trim();
+            const ciphertextInput = document.getElementById('ciphertext').value.trim();
+            const authInput = document.getElementById('auth').value.trim();
+
+            // Validation
+            if (!keyInput || !ivInput || !ciphertextInput || !authInput) {
+                showResult('Please fill in all fields marked with *', true);
+                return;
+            }
+
+            const hexRegex = /^[0-9a-fA-F]+$/;
+            
+            if (!hexRegex.test(keyInput) || keyInput.length !== 64) {
+                showResult('Key must be exactly 64 hexadecimal characters', true);
+                return;
+            }
+            if (!hexRegex.test(ivInput) || ivInput.length !== 24) {
+                showResult('IV must be exactly 24 hexadecimal characters', true);
+                return;
+            }
+            if (!hexRegex.test(authInput) || authInput.length !== 32) {
+                showResult('Auth tag must be exactly 32 hexadecimal characters', true);
+                return;
+            }
+            if (!hexRegex.test(ciphertextInput)) {
+                showResult('Ciphertext contains invalid hexadecimal characters', true);
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('decryptBtn').disabled = true;
+            document.getElementById('result').style.display = 'none';
+
+            try {
+                const keyBytes = hexToBytes(keyInput);
+                const ivBytes = hexToBytes(ivInput);
+                const ciphertextBytes = hexToBytes(ciphertextInput);
+                const authTagBytes = hexToBytes(authInput);
+
+                // Combine ciphertext and auth tag
+                // In AES-GCM, the auth tag is typically appended to the ciphertext
+                const combinedData = new Uint8Array(ciphertextBytes.length + authTagBytes.length);
+                combinedData.set(ciphertextBytes);
+                combinedData.set(authTagBytes, ciphertextBytes.length);
+
+                // Import the key
+                const cryptoKey = await crypto.subtle.importKey(
+                    "raw",
+                    keyBytes,
+                    { name: "AES-GCM" },
+                    false,
+                    ["decrypt"]
+                );
+
+                // Perform decryption
+                const decryptedBuffer = await crypto.subtle.decrypt(
+                    {
+                        name: "AES-GCM",
+                        iv: ivBytes,
+                        tagLength: 128
+                    },
+                    cryptoKey,
+                    combinedData
+                );
+
+                const decryptedText = uint8ToString(new Uint8Array(decryptedBuffer));
+                showResult(decryptedText, false);
+
+            } catch (error) {
+                let errorMsg = "Decryption failed. ";
+                if (error.name === "OperationError") {
+                    errorMsg += "This usually means the key, IV, ciphertext, or auth tag is incorrect.";
+                } else {
+                    errorMsg += error.message || "Unknown error occurred.";
+                }
+                showResult(errorMsg, true);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('decryptBtn').disabled = false;
+            }
+        }
+
+        function showResult(message, isError) {
+            const resultElement = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            const resultTitle = document.getElementById('resultTitle');
+
+            resultTitle.textContent = isError ? '❌ Decryption Failed' : '✅ Decryption Successful';
+            resultContent.textContent = message;
+            resultElement.className = 'result' + (isError ? ' error' : '');
+            resultContent.className = 'result-content' + (isError ? ' error' : '');
+            resultElement.style.display = 'block';
+        }
+
+        async function copyResult() {
+            const resultContent = document.getElementById('resultContent').textContent;
+            if (!resultContent || resultContent.includes('failed') || resultContent.includes('Error')) return;
+            
+            try {
+                await navigator.clipboard.writeText(resultContent);
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = resultContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // Auto-format hex input (only allow valid hex characters)
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', function(e) {
+                let value = e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+                e.target.value = value;
+            });
+        });
+    </script>
+</body>
+</html>
