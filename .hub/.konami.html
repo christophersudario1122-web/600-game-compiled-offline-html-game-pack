@@ -406,7 +406,7 @@ function startMath(el) {
     let score = 0, total = 0;
     function next() {
         if (total >= 10) {
-            el.innerHTML = `<h2>Done!</h2><div style="font-size:2rem;">Score: ${score}/10</div><button class="back-btn" onclick="startMinigame('math')">Play Again</button>`;
+            el.innerHTML = `<h2>Done!</h2><div style="font-size:2rem;">Score: ${score}/10</div><button class="back-btn" onclick="playMinigame('math')">Play Again</button>`;
             return;
         }
         const a = Math.floor(Math.random()*20), b = Math.floor(Math.random()*20);

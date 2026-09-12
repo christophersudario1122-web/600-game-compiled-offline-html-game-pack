@@ -749,6 +749,9 @@ function updateGameOfTheDay() {
     if (countdownEl) countdownEl.textContent = 'Resets in ' + hours + 'h ' + mins + 'm';
 }
 
+const HTM_GAMES = new Set(["paperio2","rooftopsnipers","snowrider","snowroad","soccerrandom","tombofthemask","vex6","vex7","vex8","bitplanes","boxingrandom","cookieclicker","crossyroad","dreadheadparkour","driftboss","drivemad","elasticface","getawayshootout","monkeymart","motox3m","ragdollarchers","templerun2","timeshooter3"]);
+function getExt(g) { return HTM_GAMES.has(g) ? ".htm" : ".html"; }
+
 function playGameOfTheDay() {
     const game = getGameOfTheDay();
     const ext = HTM_GAMES.has(game) ? '.htm' : '.html';
@@ -765,7 +768,7 @@ setInterval(updateGameOfTheDay, 60000);
 // RECENTLY PLAYED SHELF (Feature #3)
 // Horizontal row of the last 8 games you opened, above the grid.
 // =====================================================
-const SHELF_HTM_GAMES = new Set(["paperio2","rooftopsnipers","snowrider","snowroad","soccerrandom","tombofthemask","vex6","vex7","vex8","bitplanes","boxingrandom","cookieclicker","crossyroad","dreadheadparkour","driftboss","drivemad","elasticface","getawayshootout","monkeymart","motox3m","ragdollarchers","templerun2","timeshooter3"]);
+const SHELF_HTM_GAMES = HTM_GAMES;
 
 function ensureRecentShelf() {
     let shelf = document.getElementById('recent-shelf');
@@ -814,9 +817,7 @@ function displayGames() {
     filteredCache = getFilteredGames();
     document.getElementById("game-count").textContent = `[ SHOWING ${filteredCache.length} FILTERED GAMES ]` + ((typeof totalPlays !== 'undefined') ? ' | PLAYS: ' + totalPlays : '');
     
-    // All 23 .htm games (rest use .html)
-    const HTM_GAMES = new Set(["paperio2","rooftopsnipers","snowrider","snowroad","soccerrandom","tombofthemask","vex6","vex7","vex8","bitplanes","boxingrandom","cookieclicker","crossyroad","dreadheadparkour","driftboss","drivemad","elasticface","getawayshootout","monkeymart","motox3m","ragdollarchers","templerun2","timeshooter3"]);
-    const getExt = g => HTM_GAMES.has(g) ? ".htm" : ".html";
+    // All 23 .htm games (rest use .html) — global HTM_GAMES/getExt shared by GOTD, rollDice, shelf & grid
 
     filteredCache.forEach(g => {
         const ext = getExt(g);

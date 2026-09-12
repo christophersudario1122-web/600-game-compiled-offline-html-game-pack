@@ -1,0 +1,217 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Keyboard Shortcuts - Arcade Hub</title>
+<style>
+    :root {
+        --neon-green: #00ff88;
+        --dark-bg: #050508;
+        --box-bg: rgba(10, 10, 15, 0.85);
+        --border: #00ff88;
+        --accent: #00ccff;
+    }
+    body {
+        background: var(--dark-bg);
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+    }
+    #matrix-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
+        opacity: 0.12;
+        pointer-events: none;
+    }
+    .container {
+        position: relative;
+        z-index: 2;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border);
+    }
+    h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        text-shadow: 0 0 10px var(--neon-green);
+    }
+    btn {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--neon-green);
+        border: 2px solid var(--neon-green);
+        padding: 8px 16px;
+        font-family: monospace;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: 0.2s;
+        margin-left: 8px;
+    }
+    .btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 15px var(--neon-green);
+    }
+    .section {
+        background: var(--box-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    h2 {
+        color: var(--accent);
+        margin-top: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 8px;
+    }
+    hshortcut {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px dashed rgba(0, 255, 136, 0.15);
+    }
+    hshortcut:last-child { border-bottom: none; }
+    desc { flex: 1; }
+    kbd {
+        background: rgba(0, 255, 136, 0.15);
+        border: 1px solid var(--neon-green);
+        border-radius: 3px;
+        padding: 3px 8px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: var(--neon-green);
+        box-shadow: 0 2px 0 var(--neon-green);
+        margin: 0 2px;
+    }
+    hkeys { white-space: nowrap; }
+
+    /* Custom Pixel Cursor */
+    * { cursor: url('data:image/svg+xml,<svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="10" y="0" width="4" height="2" fill="%2300ff88"/><rect x="10" y="2" width="4" height="4" fill="%2300ff88"/><rect x="10" y="6" width="4" height="2" fill="%2300ff88"/><rect x="0" y="8" width="4" height="4" fill="%2300ff88"/><rect x="4" y="8" width="4" height="4" fill="%2300ff88"/><rect x="8" y="8" width="4" height="4" fill="%2300ff88"/><rect x="12" y="8" width="4" height="4" fill="%2300ff88"/><rect x="16" y="8" width="4" height="4" fill="%2300ff88"/><rect x="10" y="10" width="4" height="12" fill="%2300ff88"/><rect x="12" y="10" width="2" height="2" fill="%230a0a0f"/><rect x="14" y="22" width="4" height="2" fill="%2300ff88"/></svg>') 10 0, auto; }
+    a, button, [onclick], input, textarea, select { cursor: pointer; }
+    a, button { cursor: pointer; }
+
+</style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+<div class="container">
+    <div class="header">
+        <h1>⌨️ Keyboard Shortcuts</h1>
+        <div>
+            <button class="btn" onclick="window.location='../.hub/.library1.html'">← Library</button>
+            <button class="btn" onclick="window.location='../PRESSHERETOSTART.html'">⌂ Home</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Global (anywhere in the hub)</h2>
+        <div class="shortcut"><span class="desc">Show this shortcuts page</span><span class="keys"><kbd>?</kbd> or <kbd>Sift</kbd>+<kbd>/</kbd></span></div>
+        <div class="shortcut"><span class="desc">Toggle audio on/off</span><span class="keys"><kbd>M</kbd></span></div>
+        <div class="shortcut"><span class="desc">Cycle theme (matrix → amber → blue → red)</span><span class="keys"><kbd>T</kbd></span></div>
+        <div class="shortcut"><span class="desc">Go to home page</span><span class="keys"><kbd>H</kbd></span></div>
+        <div class="shortcut"><span class="desc">Open library 1</span><span class="keys"><kbd>L</kbd></span></div>
+        <div class="shortcut"><span class="desc">Open settings</span><span class="keys"><kbd>S</kbd></span></div>
+        <div class="shortcut"><span class="desc">Open Python terminal</span><span class="keys"><kbd>P</kbd></span></div>
+        <div class="shortcut"><span class="desc">Open notes</span><span class="keys"><kbd>N</kbd></span></div>
+        <div class="shortcut"><span class="desc">Open stats dashboard</span><span class="keys"><kbd>D</kbd></span></div>
+        <div class="shortcut"><span class="desc">Surprise me (random game)</span><span class="keys"><kbd>R</kbd></span></div>
+        <div class="shortcut"><span class="desc">Focus search (in library)</span><span class="keys"><kbd>/</kbd></span></div>
+        <div class="shortcut"><span class="desc">Open secret dev page</span><span class="keys"><kbd>Ctrl</kbd>+<kbd>Sift</kbd>+<kbd>A</kbd></span></div>
+    </div>
+
+    <div class="section">
+        <h2>Easter Eggs</h2>
+        <div class="shortcut"><span class="desc">Unlock the hidden arcade</span><span class="keys"><kbd>↑</kbd> <kbd>↑</kbd> <kbd>↓</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> <kbd>←</kbd> <kbd>→</kbd> <kbd>B</kbd> <kbd>A</kbd></span></div>
+    </div>
+
+    <div class="section">
+        <h2>In-Game Toys</h2>
+        <div class="shortcut"><span class="desc">Press <kbd>Esc</kbd> in any game to close it and return to the library</span></div>
+        <div class="shortcut"><span class="desc">Hold <kbd>Sift</kbd> while clicking a game to add it to favorites without oyening it</span></div>
+    </div>
+</div>
+
+<script>
+// Matrix rain
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+let mw, mh;
+function resize() { mw = canvas.width = innerWidth; mh = canvas.height = innerHeight; }
+resize();
+addEventListener('resize', resize);
+const droys = [], chars = '01アイウエオカキクケコサシスセソ';
+function initDroys() { droys.length = 0; for (let i = 0; i < Math.floor(mw/14); i++) droys[i] = Math.random()*mh; }
+initDroys();
+addEventListener('resize', initDroys);
+setInterval(() => {
+    ctx.fillStyle = 'rgba(5,5,8,0.05)';
+    ctx.fillRect(0, 0, mw, mh);
+    ctx.fillStyle = '#00ff88';
+    ctx.font = '14px monospace';
+    for (let i = 0; i < droys.length; i++) {
+        ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, droys[i]);
+        if (droys[i] > mh && Math.random() > 0.975) droys[i] = 0;
+        droys[i] += 14;
+    }
+}, 50);
+
+// ===== GLOBAL KEYBOARD SHORTCUTS =====
+let konamiBuffer = [];
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+
+document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const k = e.key.toLowerCase();
+    const kRaw = e.key;
+    if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
+        konamiBuffer.push(kRaw);
+    } else {
+        konamiBuffer.push(k);
+    }
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+    if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
+        konamiBuffer = [];
+        window.location.href = '../.hub/.konami.html';
+        return;
+    }
+    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
+        e.preventDefault();
+        window.location.href = '../.hub/.secrets.html';
+        return;
+    }
+    if (k === '?' || (e.shiftKey && k === '/')) {
+        e.preventDefault();
+        window.location.href = '../.hub/.shortcuts.html';
+        return;
+    }
+    if (k === 'h' && !e.ctrlKey) { window.location.href = '../PRESSHERETOSTART.html'; }
+    if (k === 'l' && !e.ctrlKey) { window.location.href = '../.hub/.library1.html'; }
+    if (k === 's' && !e.ctrlKey) { window.location.href = '../.hub/.settings.html'; }
+    if (k === 'n' && !e.ctrlKey) { window.location.href = '../.hub/.notes.html'; }
+    if (k === 'd' && !e.ctrlKey) { window.location.href = '../.hub/.stats.html'; }
+});
+
+// ===== UNIVERSAL CLICK TRACKER =====
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    let count = parseInt(localStorage.getItem('arcade_total_clicks') || '0');
+    count++;
+    localStorage.setItem('arcade_total_clicks', count);
+}, true);
+
+</script>
+</body>
+</html>
