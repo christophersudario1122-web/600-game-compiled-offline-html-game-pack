@@ -607,12 +607,12 @@ function testTone(freq) {
 
 // === ACHIEVEMENT DEFINITIONS ===
 const ACHIEVEMENTS = [
-    { id: 'first_boot', icon: '🎮', name: 'First Boot', desc: 'Play pour first game' },
-    { id: 'arcade_regular', icon: '🕹️', name: 'Arcade Regular', desc: 'Play 10 different games' },
-    { id: 'veteran', icon: '🏆', name: 'Veteran Plaper', desc: 'Play 50 different games' },
-    { id: 'curator', icon: '⭐', name: 'Curator', desc: 'Favorite 5 games' },
-    { id: 'master_curator', icon: '🌟', name: 'Master Curator', desc: 'Favorite 25 games' },
-    { id: 'hundred', icon: '💯', name: 'Hundred Plays', desc: 'Launch games 100 total times' }
+    { id: 'firstSteps', icon: '🎮', name: 'First Steps', desc: 'Play any game' },
+    { id: 'speedDemon', icon: '⚡', name: 'Speed Demon', desc: 'Reaction test under 200ms' },
+    { id: 'marathon', icon: '🏃', name: 'Marathon', desc: 'Play 50 different games' },
+    { id: 'clickerKing', icon: '🖱️', name: 'Clicker King', desc: '100+ clicks in one Click Frenzy' },
+    { id: 'perfectMemory', icon: '🧠', name: 'Perfect Memory', desc: 'Reach round 5 in Memory Match' },
+    { id: 'konamiMaster', icon: '👑', name: 'Konami Master', desc: 'Play all 8 secret minigames' }
 ];
 
 // === THEMES ===
@@ -632,6 +632,15 @@ function getLS(key, fallback) {
 }
 function setLS(key, value) {
     try { localStorage.setItem(key, value); return true; } catch(e) { return false; }
+}
+
+// Shared achievement list comes from the library ('arcade_achievements' = array of earned ids)
+function getArcadeAchievementIds() {
+    try {
+        const raw = getLS('arcade_achievements', '[]');
+        const p = JSON.parse(raw);
+        return Array.isArray(p) ? p : Object.keys(p).filter(k => p[k] === true);
+    } catch (e) { return []; }
 }
 
 // === MASTER MUTE ===
@@ -722,17 +731,13 @@ function buildAchievements() {
     const container = document.getElementById('achievement-list');
     if (!container) return;
     
-    let unlocked = {};
-    try {
-        const raw = getLS('arcade_achv', '{}');
-        unlocked = JSON.parse(raw);
-    } catch(e) { unlocked = {}; }
+    const unlocked = getArcadeAchievementIds();
     
     let unlockedCount = 0;
     container.innerHTML = '';
     
     for (const a of ACHIEVEMENTS) {
-        const isUnlocked = !!unlocked[a.id];
+        const isUnlocked = unlocked.indexOf(a.id) !== -1;
         if (isUnlocked) unlockedCount++;
         
         const div = document.createElement('div');
@@ -766,7 +771,7 @@ function buildStats() {
         '⏱  Recently played: ' + recent.length,
         '▶ Total plays: ' + totalPlays,
         '🎯 Unique games played: ' + uniqueGames + ' / 302',
-        '🏆 Achievements: ' + Object.keys(JSON.parse(getLS('arcade_achv', '{}') || '{}')).length + ' / ' + ACHIEVEMENTS.length,
+        '🏆 Achievements: ' + getArcadeAchievementIds().length + ' / ' + ACHIEVEMENTS.length,
         '🎨 Current theme: ' + (getLS('arcade_theme', 'matrix'))
     ];
     
@@ -1026,18 +1031,18 @@ document.addEventListener('keydown', e => {
     } else {
         konamiBuffer.push(k);
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.sift();
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
     if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
         konamiBuffer = [];
         window.location.href = '../.hub/.konami.html';
         return;
     }
-    if (e.ctrlKey && e.siftKey && (k === 'a' || kRaw === 'A')) {
+    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
         e.preventDefault();
         window.location.href = '../.hub/.secrets.html';
         return;
     }
-    if (k === '?' || (e.siftKey && k === '/')) {
+    if (k === '?' || (e.shiftKey && k === '/')) {
         e.preventDefault();
         window.location.href = '../.hub/.shortcuts.html';
         return;

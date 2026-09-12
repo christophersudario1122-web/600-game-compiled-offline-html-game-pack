@@ -439,18 +439,18 @@ document.addEventListener('keydown', e => {
     } else {
         konamiBuffer.push(k);
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.sift();
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
     if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
         konamiBuffer = [];
         window.location.href = '../.hub/.konami.html';
         return;
     }
-    if (e.ctrlKey && e.siftKey && (k === 'a' || kRaw === 'A')) {
+    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
         e.preventDefault();
         window.location.href = '../.hub/.secrets.html';
         return;
     }
-    if (k === '?' || (e.siftKey && k === '/')) {
+    if (k === '?' || (e.shiftKey && k === '/')) {
         e.preventDefault();
         window.location.href = '../.hub/.shortcuts.html';
         return;

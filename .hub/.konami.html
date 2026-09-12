@@ -140,7 +140,7 @@
     <div class="secret-game" onclick="playMinigame('reaction')">
         <div class="icon">⚡</div>
         <div class="name">Reaction Test</div>
-        <div class="desc">How fast are pour reflexes?</div>
+        <div class="desc">How fast are your reflexes?</div>
     </div>
     <div class="secret-game" onclick="playMinigame('memory')">
         <div class="icon">🧠</div>
@@ -182,10 +182,20 @@
 </div>
 
 <script>
+// Track how many distinct secret minigames have been played (Konami Master)
+function trackMinigame(name) {
+    try {
+        const minis = JSON.parse(localStorage.getItem('arcade_minigames') || '{}');
+        minis[name] = (minis[name] || 0) + 1;
+        localStorage.setItem('arcade_minigames', JSON.stringify(minis));
+    } catch (e) {}
+}
+
 function playMinigame(name) {
     const area = document.getElementById('minigame-area');
     const content = document.getElementById('minigame-content');
     area.style.display = 'flex';
+    trackMinigame(name);
     if (name === 'clicker') startClicker(content);
     else if (name === 'reaction') startReaction(content);
     else if (name === 'memory') startMemory(content);
@@ -217,6 +227,7 @@ function startClicker(el) {
             clearInterval(timer);
             document.getElementById('cb').disabled = true;
             document.getElementById('cr').textContent = 'Final: ' + count + ' clicks! (' + (count/10).toFixed(1) + '/sec)';
+            if (count >= 100) { try { localStorage.setItem('arcade_clicker_king', '1'); } catch(e) {} }
         }
     }, 1000);
     document.getElementById('cb').onclick = () => { count++; document.getElementById('cc').textContent = count; };
@@ -243,6 +254,10 @@ function startReaction(el) {
             status.style.color = '#00ff00';
             const click = () => {
                 const ms = Date.now() - start;
+                try {
+                    const prev = parseInt(localStorage.getItem('arcade_best_reaction') || '9999', 10);
+                    if (ms < prev) localStorage.setItem('arcade_best_reaction', String(ms));
+                } catch(e) {}
                 result.textContent = ms + 'ms! ' + (ms < 200 ? '🔥 FAST!' : ms < 300 ? '👌 Good' : '🐌 Slow');
                 status.textContent = 'Click START to try again';
                 status.style.color = '#ffcc00';
@@ -275,6 +290,7 @@ function startMemory(el) {
             if (plaper.length === seq.length) {
                 round++;
                 document.getElementById('mr').textContent = round;
+                if (round >= 5) { try { localStorage.setItem('arcade_perfect_memory', '1'); } catch(e) {} }
                 plaper = [];
                 setTimeout(nextRound, 800);
             }
@@ -424,18 +440,18 @@ document.addEventListener('keydown', e => {
     } else {
         konamiBuffer.push(k);
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.sift();
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
     if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
         konamiBuffer = [];
         window.location.href = '../.hub/.konami.html';
         return;
     }
-    if (e.ctrlKey && e.siftKey && (k === 'a' || kRaw === 'A')) {
+    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
         e.preventDefault();
         window.location.href = '../.hub/.secrets.html';
         return;
     }
-    if (k === '?' || (e.siftKey && k === '/')) {
+    if (k === '?' || (e.shiftKey && k === '/')) {
         e.preventDefault();
         window.location.href = '../.hub/.shortcuts.html';
         return;

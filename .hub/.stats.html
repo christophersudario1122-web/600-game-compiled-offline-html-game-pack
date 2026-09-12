@@ -280,12 +280,12 @@ setInterval(() => {
 
 // Achievement definitions (must match library1)
 const ACHIEVEMENTS = [
-    { id: 'first_play', icon: '🎮', name: 'First Days', desc: 'Open your first game' },
-    { id: 'play_10', icon: '🔟', name: 'Decade', desc: 'Open 10 different games' },
-    { id: 'play_50', icon: '🎯', name: 'Half Century', desc: 'Open 50 different games' },
-    { id: 'fav_5', icon: '⭐', name: 'Curator', desc: 'Favorite 5 games' },
-    { id: 'click_100', icon: '🖱️', name: 'Clicker', desc: '100 total clicks' },
-    { id: 'click_1000', icon: '🚀', name: 'Power User', desc: '1000 total clicks' }
+    { id: 'firstSteps', icon: '🎮', name: 'First Steps', desc: 'Play any game' },
+    { id: 'speedDemon', icon: '⚡', name: 'Speed Demon', desc: 'Reaction test under 200ms' },
+    { id: 'marathon', icon: '🏃', name: 'Marathon', desc: 'Play 50 different games' },
+    { id: 'clickerKing', icon: '🖱️', name: 'Clicker King', desc: '100+ clicks in one Click Frenzy' },
+    { id: 'perfectMemory', icon: '🧠', name: 'Perfect Memory', desc: 'Reach round 5 in Memory Match' },
+    { id: 'konamiMaster', icon: '👑', name: 'Konami Master', desc: 'Play all 8 secret minigames' }
 ];
 
 function loadStats() {
@@ -308,9 +308,13 @@ function loadStats() {
     document.getElementById('stat-played').textContent = uniquePlayed;
     document.getElementById('stat-total').textContent = totalPlays;
 
-    // Achievements
-    const ach = JSON.parse(localStorage.getItem('arcade_achievements') || '{}');
-    const unlocked = Object.values(ach).filter(v => v === true).length;
+    // Achievements (library stores an array of earned ids; legacy object format also supported)
+    let ach = [];
+    try {
+        const raw = JSON.parse(localStorage.getItem('arcade_achievements') || '[]');
+        ach = Array.isArray(raw) ? raw : Object.keys(raw).filter(k => raw[k] === true);
+    } catch(e) { ach = []; }
+    const unlocked = ach.length;
     document.getElementById('stat-ach').textContent = unlocked + '/6';
 
     // Most played
@@ -338,10 +342,11 @@ function loadStats() {
         recentDiv.innerHTML = '<div class="empty">No recent activity yet</div>';
     } else {
         recentDiv.innerHTML = recent.slice(0, 10).map((item, i) => {
-            const t = new Date(item.time);
+            const name = (typeof item === 'string') ? item : (item.name || '?');
+            const t = new Date((typeof item === 'string') ? 0 : (item.time || 0));
             const ago = timeAgo(t);
             return `<div class="bar-row">
-                <div class="bar-name">${i+1}h ${escapeHtml(item.name)}</div>
+                <div class="bar-name">${i+1}. ${escapeHtml(name)}</div>
                 <div></div>
                 <div class="bar-count" style="opacity:0.6">${ago}</div>
             </div>`;
@@ -351,7 +356,7 @@ function loadStats() {
     // Achievements list
     const achDiv = document.getElementById('achievements-list');
     achDiv.innerHTML = ACHIEVEMENTS.map(a => {
-        const isUnlocked = ach[a.id] === true;
+        const isUnlocked = ach.indexOf(a.id) !== -1;
         return `<div class="achievement ${isUnlocked ? 'unlocked' : ''}">
             <div class="achievement-icon">${a.icon}</div>
             <div class="achievement-info">
@@ -372,7 +377,7 @@ function timeAgo(date) {
 }
 
 function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amy;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function resetStats() {
@@ -404,18 +409,18 @@ document.addEventListener('keydown', e => {
     } else {
         konamiBuffer.push(k);
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.sift();
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
     if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
         konamiBuffer = [];
         window.location.href = '../.hub/.konami.html';
         return;
     }
-    if (e.ctrlKey && e.siftKey && (k === 'a' || kRaw === 'A')) {
+    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
         e.preventDefault();
         window.location.href = '../.hub/.secrets.html';
         return;
     }
-    if (k === '?' || (e.siftKey && k === '/')) {
+    if (k === '?' || (e.shiftKey && k === '/')) {
         e.preventDefault();
         window.location.href = '../.hub/.shortcuts.html';
         return;
