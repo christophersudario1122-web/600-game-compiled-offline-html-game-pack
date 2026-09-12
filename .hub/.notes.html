@@ -245,7 +245,35 @@ function drawMatrix() {
         droys[i] += 14;
     }
 }
-setInterval(drawMatrix, 50);
+// =====================================================
+// BACKGROUND INTENSITY (Feature #11)
+// localStorage 'arcade_bg_intensity' (0-100, default 100)
+// =====================================================
+const BG_INTENSITY_KEY = 'arcade_bg_intensity';
+const BASE_MATRIX_MS = 50;
+let matrixTimer = null;
+const crtOverlay = document.querySelector('.crt-overlay');
+
+function getBgIntensity() {
+    try {
+        const v = parseInt(localStorage.getItem(BG_INTENSITY_KEY) || '100', 10);
+        return (isNaN(v)) ? 100 : Math.max(0, Math.min(100, v));
+    } catch (e) { return 100; }
+}
+
+function applyBgIntensity() {
+    const level = getBgIntensity();
+    if (matrixTimer) { clearInterval(matrixTimer); matrixTimer = null; }
+    if (level > 0) {
+        const ms = Math.max(50, Math.round(BASE_MATRIX_MS * 100 / level));
+        matrixTimer = setInterval(drawMatrix, ms);
+    }
+}
+
+applyBgIntensity();
+window.addEventListener('storage', (e) => {
+    if (e.key === BG_INTENSITY_KEY || e.key === null) applyBgIntensity();
+});
 
 // ===== NOTES LOGIC =====
 const STORAGE_KEY = 'arcade_notes';
