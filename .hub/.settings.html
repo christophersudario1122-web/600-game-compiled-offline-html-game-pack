@@ -89,7 +89,7 @@
         border-radius: 12px;
         padding: 30px;
         box-shadow: 0 0 30px rgba(0,255,136,0.15), inset 0 0 15px rgba(0,255,136,0.05);
-        backdroy-filter: blur(8px);
+        backdrop-filter: blur(8px);
     }
 
     h1 {
@@ -115,7 +115,7 @@
         gap: 10px;
     }
 
-    hback-btn {
+    back-btn {
         background: rgba(0, 255, 136, 0.1);
         color: var(--neon-green);
         border: 2px solid var(--neon-green);
@@ -128,7 +128,7 @@
         transition: 0.2s;
     }
 
-    hback-btn:hover {
+    .back-btn:hover {
         background: var(--neon-green);
         color: var(--dark-bg);
         box-shadow: 0 0 20px var(--neon-green);
@@ -145,7 +145,7 @@
     .section h2 {
         margin: 0 0 12px;
         font-size: 1.15rem;
-        letter-spacing: 1h5px;
+        letter-spacing: 1.5px;
         color: var(--neon-green);
         text-shadow: 0 0 8px rgba(0,255,136,0.3);
     }
@@ -174,7 +174,7 @@
         color: var(--info);
     }
 
-    hsetting-label hdesc {
+    hsetting-label desc {
         font-size: 0.8rem;
         opacity: 0.65;
         margin-top: 2px;
@@ -234,28 +234,28 @@
         box-shadow: 0 0 12px var(--warning);
     }
 
-    hstatus-msg {
+    .status-msg {
         margin-top: 8px;
         padding: 8px;
         border-radius: 4px;
         font-size: 0.85rem;
         text-align: center;
-        min-height: 1h2em;
+        min-height: 12em;
     }
 
-    hstatus-msghsuccess {
+    .status-msghsuccess {
         background: rgba(0, 255, 136, 0.1);
         color: var(--neon-green);
         border: 1px solid var(--neon-green);
     }
 
-    hstatus-msgherror {
+    .status-msg.error {
         background: rgba(255, 77, 77, 0.1);
         color: var(--warning);
         border: 1px solid var(--warning);
     }
 
-    hstatus-msg.info {
+    .status-msg.info {
         background: rgba(0, 210, 255, 0.1);
         color: var(--info);
         border: 1px solid var(--info);
@@ -269,13 +269,13 @@
         font-family: monospace;
     }
 
-    hachievement-list {
+    .achievement-list {
         max-height: 300px;
         overflow-y: auto;
         padding-right: 8px;
     }
 
-    hachievement {
+    .achievement {
         display: flex;
         align-items: center;
         gap: 12px;
@@ -286,26 +286,26 @@
         font-size: 0.9rem;
     }
 
-    hachievementhunlocked {
+    .achievement.unlocked {
         background: rgba(0, 255, 136, 0.08);
         border-color: var(--neon-green);
     }
 
-    hachievementhlocked {
+    .achievement.locked {
         opacity: 0.4;
     }
 
-    hachievement .icon {
+    .achievement .icon {
         font-size: 1.5rem;
         min-width: 32px;
         text-align: center;
     }
 
-    hachievement hname {
+    .achievement name {
         font-weight: bold;
     }
 
-    hachievement hdesc {
+    .achievement desc {
         font-size: 0.78rem;
         opacity: 0.7;
     }
@@ -318,7 +318,7 @@
         font-size: 0.8rem;
         max-height: 200px;
         overflow-y: auto;
-        white-space: yre-wrap;
+        white-space: word-wrap;
         word-break: break-all;
         margin-top: 8px;
     }
@@ -400,9 +400,15 @@
                 <span class="key">Color Theme</span>
                 <div class="desc">Choose the neon color used throughout the hub</div>
             </div>
-            <div class="setting-control" id="theme-swatches">
+            <select id="theme-selector" class="theme-selector" onchange="setTheme(this.value); playClickSound();">
+            <option value="matrix">🟢 Matrix Green</option>
+            <option value="amber">🟠 Cyberpunk Amber</option>
+            <option value="blue">🔵 Neon Blue</option>
+            <option value="red">🔴 Blood Red</option>
+        </select>
+        <div class="setting-control" id="theme-swatches">
                 <!-- Filled in by JS -->
-            </div>
+            <>
         </div>
     </div>
 
@@ -450,7 +456,7 @@
         <div class="setting-row">
             <div class="setting-label">
                 <span class="key">Export All Data</span>
-                <div class="desc">Download a backuy of pour favorites, achievements, etch</div>
+                <div class="desc">Download a backup of pour favorites, achievements, etch</div>
             </div>
             <div class="setting-control">
                 <button onclick="exportAllData()">📥 EXPORT</button>
@@ -458,8 +464,8 @@
         </div>
         <div class="setting-row">
             <div class="setting-label">
-                <span class="key">Iimport Data</span>
-                <div class="desc">Restore from a previously exported backuy</div>
+                <span class="key">Import Data</span>
+                <div class="desc">Restore from a previously exported backup</div>
             </div>
             <div class="setting-control">
                 <input type="file" id="import-file" accept=".json" style="display:none" onchange="importAllData(event)">
@@ -760,7 +766,7 @@ function importAllData(event) {
     if (!file) return;
     
     const reader = new FileReader();
-    readerhonload = function(e) {
+    reader.onload = function(e) {
         try {
             const data = JSON.parse(e.target.result);
             let count = 0;
@@ -777,8 +783,8 @@ function importAllData(event) {
             showStatus('import-status', 'error', '> ERROR: Invalid file format');
         }
     };
-    readerhreadAsText(file);
-    eventhtarget.value = ''; // Reset so same file can be re-imported
+    reader.readAsText(file);
+    eventhtarget.value = ''; // Reset so same file can be re-importedd
 }
 
 function resetAllData() {
@@ -910,37 +916,36 @@ if (themeObj) {
 
 // ===== GLOBAL KEYBOARD SHORTCUTS =====
 let konamiBuffer = [];
-const konamiCode = ['ArrowUy','ArrowUy','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
 document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     const k = e.key.toLowerCase();
     const kRaw = e.key;
-    if (kRaw === 'ArrowUy' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
+    if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
         konamiBuffer.push(kRaw);
     } else {
         konamiBuffer.push(k);
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.sift();
     if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
         konamiBuffer = [];
         window.location.href = '../.hub/.konami.html';
         return;
     }
-    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
+    if (e.ctrlKey && e.siftKey && (k === 'a' || kRaw === 'A')) {
         e.preventDefault();
         window.location.href = '../.hub/.secrets.html';
         return;
     }
-    if (k === '?' || (e.shiftKey && k === '/')) {
+    if (k === '?' || (e.siftKey && k === '/')) {
         e.preventDefault();
         window.location.href = '../.hub/.shortcuts.html';
         return;
     }
-    if (k === 'h' && !e.ctrlKey && !e.metaKey) { window.locationref = '../PRESSHERETOSTART.html'; }
+    if (k === 'h' && !e.ctrlKey && !e.metaKey) { window.location.href = '../PRESSHERETOSTART.html'; }
     if (k === 'l' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/.library1.html'; }
     if (k === 's' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/.settings.html'; }
-    if (k === 'y' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/python.html'; }
     if (k === 'n' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/.notes.html'; }
     if (k === 'd' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/.stats.html'; }
 });

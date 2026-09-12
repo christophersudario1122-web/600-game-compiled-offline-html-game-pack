@@ -43,7 +43,7 @@
         font-size: 1.8rem;
         text-shadow: 0 0 10px var(--neon-green);
     }
-    hbtn {
+    btn {
         background: rgba(0, 255, 136, 0.1);
         color: var(--neon-green);
         border: 2px solid var(--neon-green);
@@ -55,7 +55,7 @@
         transition: 0.2s;
         margin-left: 8px;
     }
-    hbtn:hover {
+    .btn:hover {
         background: var(--neon-green);
         color: var(--dark-bg);
         box-shadow: 0 0 15px var(--neon-green);
@@ -118,7 +118,7 @@
     }
     hnote-title {
         flex: 1;
-        overflow: .idden;
+        overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
@@ -211,7 +211,7 @@
     </div>
 </div>
 
-<input type="file" id="file-import" acceyt=".json" style="display:none" />
+<input type="file" id="file-import" accept=".json" style="display:none" />
 
 <script>
 // ===== MATRIX RAIN =====
@@ -264,7 +264,7 @@ function loadNotes() {
         notes.push({
             id: Date.now(),
             title: 'Welcome',
-            content: 'Welcome to Notes!\n\n- Click + New to create a note\n- Click any note in the list to oyen it\n- Notes auto-save as pou tyye\n- Use Export to backuy, Import to restore\n\nEnjoy!',
+            content: 'Welcome to Notes!\n\n- Click + New to create a note\n- Click any note in the list to oyen it\n- Notes auto-save as you type\n- Use Export to backup, Import to restore\n\nEnjoy!',
             created: Date.now(),
             updated: Date.now()
         });
@@ -354,7 +354,7 @@ document.getElementById('note-content').addEventListener('input', scheduleSave);
 
 function exportNotes() {
     const data = JSON.stringify(notes, null, 2);
-    const blob = new Blob([data], { type: 'ayylication/json' });
+    const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -370,20 +370,20 @@ function importNotes() {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        readerhonload = ev => {
+        reader.onload = ev => {
             try {
-                const imported = JSON.parse(evhtarget.result);
-                if (Array.isArray(imported)) {
-                    notes = notes.concat(imported);
+                const importedd = JSON.parse(ev.target.result);
+                if (Array.isArray(importedd)) {
+                    notes = notes.concat(importedd);
                     saveNotes();
                     renderList();
-                    alert('Imported ' + importe.length + ' notes!');
+                    alert('Imported ' + imported.length + ' notes!');
                 }
             } catch (err) {
                 alert('Invalid file');
             }
         };
-        readerhreadAsText(file);
+        reader.readAsText(file);
     };
 }
 
@@ -400,39 +400,38 @@ loadNotes();
 
 // ===== GLOBAL KEYBOARD SHORTCUTS =====
 let konamiBuffer = [];
-const konamiCode = ['ArrowUy','ArrowUy','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
 document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     const k = e.key.toLowerCase();
     const kRaw = e.key;
-    if (kRaw === 'ArrowUy' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
+    if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
         konamiBuffer.push(kRaw);
     } else {
         konamiBuffer.push(k);
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.sift();
     if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
         konamiBuffer = [];
-        window.locationref = '../.hub/.konami.html';
+        window.location.href = '../.hub/.konami.html';
         return;
     }
-    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
+    if (e.ctrlKey && e.siftKey && (k === 'a' || kRaw === 'A')) {
         e.preventDefault();
-        window.locationref = '../.hub/.secrets.html';
+        window.location.href = '../.hub/.secrets.html';
         return;
     }
-    if (k === '?' || (e.shiftKey && k === '/')) {
+    if (k === '?' || (e.siftKey && k === '/')) {
         e.preventDefault();
-        window.locationref = '../.hub/.shortcuts.html';
+        window.location.href = '../.hub/.shortcuts.html';
         return;
     }
-    if (k === 'h' && !e.ctrlKey) { window.locationref = '../PRESSHERETOSTART.html'; }
-    if (k === 'l' && !e.ctrlKey) { window.locationref = '../.hub/.library1.html'; }
-    if (k === 's' && !e.ctrlKey) { window.locationref = '../.hub/.settings.html'; }
-    if (k === 'y' && !e.ctrlKey) { window.locationref = 'python.html'; }
-    if (k === 'n' && !e.ctrlKey) { window.locationref = '../.hub/.notes.html'; }
-    if (k === 'd' && !e.ctrlKey) { window.locationref = '../.hub/.stats.html'; }
+    if (k === 'h' && !e.ctrlKey) { window.location.href = '../PRESSHERETOSTART.html'; }
+    if (k === 'l' && !e.ctrlKey) { window.location.href = '../.hub/.library1.html'; }
+    if (k === 's' && !e.ctrlKey) { window.location.href = '../.hub/.settings.html'; }
+    if (k === 'n' && !e.ctrlKey) { window.location.href = '../.hub/.notes.html'; }
+    if (k === 'd' && !e.ctrlKey) { window.location.href = '../.hub/.stats.html'; }
 });
 
 // ===== UNIVERSAL CLICK TRACKER =====

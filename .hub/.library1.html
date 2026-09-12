@@ -326,6 +326,19 @@
         line-height: 1.3;
         letter-spacing: 1px;
     }
+
+    .gotd-section {
+        animation: gotdPulse 3s ease-in-out infinite;
+    }
+    @keyframes gotdPulse {
+        0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+        50% { box-shadow: 0 0 35px rgba(0,255,136,0.4); }
+    }
+    .gotd-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px var(--neon-green);
+    }
+
 </style>
 </head>
 <body>
@@ -350,7 +363,36 @@
     <div class="counter" id="game-count">Loading core sectors...</div>
 </div>
 
-<div class="action-bar">
+
+<div class="gotd-section" style="max-width:1300px;margin:0 auto 20px;position:relative;z-index:2;">
+    <div class="gotd-card" style="background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,200,255,0.1));border:2px solid var(--neon-green);border-radius:12px;padding:20px;display:flex;align-items:center;gap:20px;box-shadow:0 0 20px rgba(0,255,136,0.2);">
+        <div class="gotd-badge" style="font-size:3rem;">🌟</div>
+        <div class="gotd-info" style="flex:1;">
+            <div class="gotd-label" style="color:var(--accent);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;">GAME OF THE DAY</div>
+            <div class="gotd-name" id="gotd-name" style="font-size:1.6rem;font-weight:700;color:var(--neon-green);text-shadow:0 0 10px var(--neon-green);"></div>
+            <div class="gotd-countdown" id="gotd-countdown" style="font-size:0.85rem;opacity:0.7;margin-top:4px;"></div>
+        </div>
+        <div class="gotd-play" style="text-align:center;">
+            <button class="gotd-btn" onclick="playGameOfTheDay()" style="background:var(--neon-green);color:var(--dark-bg);border:none;padding:12px 24px;border-radius:6px;font-family:monospace;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 0 15px var(--neon-green);">▶ PLAY NOW</button>
+            <div style="font-size:0.7rem;opacity:0.6;margin-top:4px;">Today's featured game</div>
+        </div>
+    </div>
+</div>
+
+<div class="gotd-section" style="max-width:1300px;margin:0 auto 20px;position:relative;z-index:2;">
+    <div class="gotd-card" style="background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,200,255,0.1));border:2px solid var(--neon-green);border-radius:12px;padding:20px;display:flex;align-items:center;gap:20px;box-shadow:0 0 20px rgba(0,255,136,0.2);">
+        <div class="gotd-badge" style="font-size:3rem;">🌟</div>
+        <div class="gotd-info" style="flex:1;">
+            <div class="gotd-label" style="color:var(--accent);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;">GAME OF THE DAY</div>
+            <div class="gotd-name" id="gotd-name" style="font-size:1.6rem;font-weight:700;color:var(--neon-green);text-shadow:0 0 10px var(--neon-green);"></div>
+            <div class="gotd-countdown" id="gotd-countdown" style="font-size:0.85rem;opacity:0.7;margin-top:4px;"></div>
+        </div>
+        <div class="gotd-play" style="text-align:center;">
+            <button class="gotd-btn" onclick="playGameOfTheDay()" style="background:var(--neon-green);color:var(--dark-bg);border:none;padding:12px 24px;border-radius:6px;font-family:monospace;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 0 15px var(--neon-green);">▶ PLAY NOW</button>
+            <div style="font-size:0.7rem;opacity:0.6;margin-top:4px;">Today's featured game</div>
+        </div>
+    </div>
+</div><div class="action-bar">
     <input type="text" id="search-input" class="search-input" placeholder=">> SEARCH DATABASE BY GAME NAME..." oninput="displayGames()" onmouseenter="playHoverSound()">
     <button class="dice-btn" onclick="rollDice(); playClickSound();" onmouseenter="playHoverSound()" title="Pick a random game">🎲 ROLL DICE</button>
 </div>
@@ -544,7 +586,7 @@ function toggleFavorite(g, event) {
 function recordRecent(g) {
     playClickSound();
     recentlyPlayed = recentlyPlayed.filter(item => item !== g);
-    recentlyPlayed.unshift(g);
+    recentlyPlayed.unsift(g);
     if (recentlyPlayed.length > 12) recentlyPlayed.pop();
     localStorage.setItem('arcade_recent', JSON.stringify(recentlyPlayed));
     if (typeof recordPlay === 'function') recordPlay(g);
@@ -641,6 +683,60 @@ function getFilteredGames() {
 }
 
 var totalPlays = parseInt(localStorage.getItem('arcade_total_plays') || '0', 10);
+
+// ===== GAME OF THE DAY =====
+function getGameOfTheDay() {
+    const today = new Date().toDateString();
+    const cached = localStorage.getItem('arcade_gotd');
+    if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.date === today) return parsed.game;
+    }
+    // Pick a random game for today based on date
+    const seed = today.split('').reduce((a,b) => a + b.charCodeAt(0), 0);
+    const game = games[seed % games.length];
+    localStorage.setItem('arcade_gotd', JSON.stringify({ date: today, game }));
+    return game;
+}
+
+function updateGameOfTheDay() {
+    const game = getGameOfTheDay();
+    const nameEl = document.getElementById('gotd-name');
+    if (nameEl) {
+        // Format game name nicely
+        let n = game.replace(/([0-9\.]+)/g, ' $1 ').replace(/([A-Z])/g, ' $1').replace(/_|-/g, ' ').replace(/\s+/g, ' ').trim();
+        n = n.split(' ').map(w => {
+            const lower = w.toLowerCase();
+            if (['td','fnaf','lol','3d','2','3','4','5','6','7','8'].includes(lower)) return w.toUpperCase();
+            return w.charAt(0).toUpperCase() + w.slice(1);
+        }).join(' ');
+        nameEl.textContent = n;
+    }
+    
+    // Update countdown
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const diff = tomorrow - now;
+    const hours = Math.floor(diff / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const countdownEl = document.getElementById('gotd-countdown');
+    if (countdownEl) countdownEl.textContent = 'Resets in ' + hours + 'h ' + mins + 'm';
+}
+
+function playGameOfTheDay() {
+    const game = getGameOfTheDay();
+    const ext = HTM_GAMES.has(game) ? '.htm' : '.html';
+    window.open(dir + game + ext, '_blank');
+    recordRecent(game);
+    playClickSound();
+}
+
+// Update on load and every minute
+updateGameOfTheDay();
+setInterval(updateGameOfTheDay, 60000);
+
 function displayGames() {
     const c = document.getElementById("game-grid");
     c.innerHTML = "";
@@ -990,7 +1086,7 @@ const KONAMI_PATTERN = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft',
 let konamiBuffer = [];
 function konamiCheck(key) {
     konamiBuffer.push(key);
-    if (konamiBuffer.length > KONAMI_PATTERN.length) konamiBuffer.shift();
+    if (konamiBuffer.length > KONAMI_PATTERN.length) konamiBuffer.sift();
     if (konamiBuffer.join(',') === KONAMI_PATTERN.join(',')) {
         konamiBuffer = [];
         activateKonami();

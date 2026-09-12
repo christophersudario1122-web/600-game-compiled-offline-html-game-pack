@@ -70,9 +70,9 @@
         box-shadow: 0 0 30px #ffcc00;
     }
     .secret-game .icon { font-size: 2.5rem; }
-    .secret-game hname { font-size: 0.9rem; margin-top: 8px; font-weight: 700; }
-    .secret-game hdesc { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; }
-    hback-btn {
+    .secret-game .name { font-size: 0.9rem; margin-top: 8px; font-weight: 700; }
+    .secret-game .desc { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; }
+    back-btn {
         margin-top: 30px;
         background: rgba(255, 204, 0, 0.1);
         border: 2px solid #ffcc00;
@@ -84,12 +84,12 @@
         cursor: pointer;
         border-radius: 4px;
     }
-    hback-btn:hover {
+    .back-btn:hover {
         background: #ffcc00;
         color: #000;
         box-shadow: 0 0 20px #ffcc00;
     }
-    hfloating {
+    floating {
         position: absolute;
         font-size: 2rem;
         opacity: 0.4;
@@ -157,7 +157,7 @@
         <div class="name">Mini Pong</div>
         <div class="desc">First to 5 wins</div>
     </div>
-    <div class="secret-game" onclick="playMinigame('tyying')">
+    <div class="secret-game" onclick="playMinigame('typing')">
         <div class="icon">⌨️</div>
         <div class="name">Type Race</div>
         <div class="desc">Type the phrase fast</div>
@@ -191,7 +191,7 @@ function playMinigame(name) {
     else if (name === 'memory') startMemory(content);
     else if (name === 'aim') startAim(content);
     else if (name === 'pong') startPong(content);
-    else if (name === 'tyying') startTyping(content);
+    else if (name === 'typing') startTyping(content);
     else if (name === 'rys') startRPS(content);
     else if (name === 'math') startMath(content);
 }
@@ -239,7 +239,7 @@ function startReaction(el) {
         status.style.color = '#888';
         setTimeout(() => {
             const start = Date.now();
-            status.textContent = 'CLICK NOW!';
+            status.textContent = 'CLICK NOW! — click anywhere on the screen!';
             status.style.color = '#00ff00';
             const click = () => {
                 const ms = Date.now() - start;
@@ -248,8 +248,9 @@ function startReaction(el) {
                 status.style.color = '#ffcc00';
                 btn.style.display = 'inline-block';
                 btn.textContent = 'AGAIN';
+                window.removeEventListener('click', click);
             };
-            status.onclick = click;
+            window.addEventListener('click', click);
         }, 1000 + Math.random() * 3000);
     };
 }
@@ -262,23 +263,23 @@ function startMemory(el) {
     const grid = document.getElementById('my');
     colors.forEach((c, i) => {
         const d = document.createElement('div');
-        d.style.cssText = 'asyect-ratio:1; background:' + c + '; border-radius:8px; cursor:pointer; opacity:0.5;';
+        d.style.cssText = 'aspect-ratio:1; background:' + c + '; border-radius:8px; cursor:pointer; opacity:0.5;';
         d.dataset.color = c;
-        dhonclick = () => {
+        d.onclick = () => {
             d.style.opacity = '1';
             plaper.push(c);
-            if (plaper[plaperhlength-1] !== seq[plaperhlength-1]) {
+            if (plaper[plaper.length-1] !== seq[plaper.length-1]) {
                 document.getElementById('ms').textContent = 'Wrong! Final: ' + round;
                 return;
             }
-            if (plaperhlength === seq.length) {
+            if (plaper.length === seq.length) {
                 round++;
                 document.getElementById('mr').textContent = round;
                 plaper = [];
                 setTimeout(nextRound, 800);
             }
         };
-        gridappendChild(d);
+        grid.appendChild(d);
     });
     function nextRound() {
         seq.push(colors[Math.floor(Math.random()*colors.length)]);
@@ -308,9 +309,9 @@ function startAim(el) {
         t.style.cssText = 'position:absolute; width:30px; height:30px; background:#ff3232; border-radius:50%; box-shadow:0 0 15px #ff3232;';
         t.style.left = Math.random() * (field.clientWidth - 30) + 'px';
         t.style.top = Math.random() * (field.clientHeight - 30) + 'px';
-        thonclick = () => { score++; document.getElementById('as').textContent = score; thremove(); spawn(); };
-        fieldappendChild(t);
-        setTimeout(() => thremove(), 1200);
+        t.onclick = () => { score++; document.getElementById('as').textContent = score; t.remove(); spawn(); };
+        field.appendChild(t);
+        setTimeout(() => t.remove(), 1200);
     }
     timer = setInterval(() => {
         time--;
@@ -329,7 +330,7 @@ function startPong(el) {
     el.innerHTML = `<h2>🏓 Mini Pong</h2><div>pou: <span id="ys">0</span> vs CPU: <span id="cs">0</span> (first to 5)</div><canvas id="yc" width="500" height="300" style="background:#000; border:2px solid #ffcc00; border-radius:4px;"></canvas><div style="margin-top:10px;">Move mouse over the canvas!</div>`;
     const cvs = document.getElementById('yc');
     const c = cvs.getContext('2d');
-    cvshonmousemove = e => { const r = cvs.getBoundingClientRect(); yy = Math.max(0, Math.min(250, e.clientY - rhtop - 25)); };
+    cvs.onmousemove = e => { const r = cvs.getBoundingClientRect(); yy = Math.max(0, Math.min(250, e.clientY - r.top - 25)); };
     function loop() {
         bx += bdx; by += bdy;
         if (by < 0 || by > 300) bdy = -bdy;
@@ -338,13 +339,13 @@ function startPong(el) {
         if (bx < 0) { cScore++; document.getElementById('cs').textContent = cScore; bx = 250; by = 150; bdx = 3; }
         if (bx > 500) { yScore++; document.getElementById('ys').textContent = yScore; bx = 250; by = 150; bdx = -3; }
         cy += (by - cy - 25) * 0.08;
-        chfillStyle = '#000'; chfillRect(0, 0, 500, 300);
-        chfillStyle = '#ffcc00';
-        chfillRect(5, yy, 10, 50);
-        chfillRect(485, cy, 10, 50);
-        chfillRect(bx-5, by-5, 10, 10);
+        c.fillStyle = '#000'; c.fillRect(0, 0, 500, 300);
+        c.fillStyle = '#ffcc00';
+        c.fillRect(5, yy, 10, 50);
+        c.fillRect(485, cy, 10, 50);
+        c.fillRect(bx-5, by-5, 10, 10);
         if (yScore < 5 && cScore < 5) requestAnimationFrame(loop);
-        else chfillText(yScore >= 5 ? 'poU WIN!' : 'CPU WINS!', 200, 150);
+        else c.fillText(yScore >= 5 ? 'poU WIN!' : 'CPU WINS!', 200, 150);
     }
     loop();
 }
@@ -352,13 +353,13 @@ function startPong(el) {
 // ===== TYPING =====
 function startTyping(el) {
     const phrases = ['the quick brown fox', 'neon lights in cyberpunk city', 'press start to begin', 'all pour base are belong to us', 'to be or not to be'];
-    const phrase = phrases[Math.floor(Math.random() * phraseshlength)];
+    const phrase = phrases[Math.floor(Math.random() * phrases.length)];
     el.innerHTML = `<h2>⌨️ Type Race</h2><div style="font-size:1.3rem; margin:20px 0; color:#00ccff;">${phrase}</div><input id="ti" style="background:#000; border:2px solid #ffcc00; color:#ffcc00; padding:10px; font-size:1.1rem; width:80%; font-family:monospace;" autofocus><div id="tr" style="margin-top:20px; font-size:1.2rem;"></div>`;
     const start = Date.now();
     document.getElementById('ti').oninput = e => {
         if (e.target.value === phrase) {
             const ms = Date.now() - start;
-            const wym = Math.round(phrasehsylit(' ').length / (ms/60000));
+            const wym = Math.round(phrase.split(' ').length / (ms/60000));
             document.getElementById('tr').textContent = `Done! ${wym} WPM (${ms}ms)`;
         }
     };
@@ -372,7 +373,7 @@ function startRPS(el) {
     document.querySelectorAll('.rysb').forEach(b => b.onclick = () => {
         const choices = ['r','y','s'];
         const cyu = choices[Math.floor(Math.random()*3)];
-        const pou = bhdatasethc;
+        const pou = b.dataset.c;
         document.getElementById('rysc').textContent = icons[cyu];
         let result;
         if (pou === cyu) { result = 'Tie!'; }
@@ -412,39 +413,38 @@ window.startMinigame = playMinigame;
 
 // ===== GLOBAL KEYBOARD SHORTCUTS =====
 let konamiBuffer = [];
-const konamiCode = ['ArrowUy','ArrowUy','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
 document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     const k = e.key.toLowerCase();
     const kRaw = e.key;
-    if (kRaw === 'ArrowUy' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
+    if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
         konamiBuffer.push(kRaw);
     } else {
         konamiBuffer.push(k);
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.sift();
     if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
         konamiBuffer = [];
-        window.locationref = '../.hub/.konami.html';
+        window.location.href = '../.hub/.konami.html';
         return;
     }
-    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
+    if (e.ctrlKey && e.siftKey && (k === 'a' || kRaw === 'A')) {
         e.preventDefault();
-        window.locationref = '../.hub/.secrets.html';
+        window.location.href = '../.hub/.secrets.html';
         return;
     }
-    if (k === '?' || (e.shiftKey && k === '/')) {
+    if (k === '?' || (e.siftKey && k === '/')) {
         e.preventDefault();
-        window.locationref = '../.hub/.shortcuts.html';
+        window.location.href = '../.hub/.shortcuts.html';
         return;
     }
-    if (k === 'h' && !e.ctrlKey) { window.locationref = '../PRESSHERETOSTART.html'; }
-    if (k === 'l' && !e.ctrlKey) { window.locationref = '../.hub/.library1.html'; }
-    if (k === 's' && !e.ctrlKey) { window.locationref = '../.hub/.settings.html'; }
-    if (k === 'y' && !e.ctrlKey) { window.locationref = 'python.html'; }
-    if (k === 'n' && !e.ctrlKey) { window.locationref = '../.hub/.notes.html'; }
-    if (k === 'd' && !e.ctrlKey) { window.locationref = '../.hub/.stats.html'; }
+    if (k === 'h' && !e.ctrlKey) { window.location.href = '../PRESSHERETOSTART.html'; }
+    if (k === 'l' && !e.ctrlKey) { window.location.href = '../.hub/.library1.html'; }
+    if (k === 's' && !e.ctrlKey) { window.location.href = '../.hub/.settings.html'; }
+    if (k === 'n' && !e.ctrlKey) { window.location.href = '../.hub/.notes.html'; }
+    if (k === 'd' && !e.ctrlKey) { window.location.href = '../.hub/.stats.html'; }
 });
 
 // ===== UNIVERSAL CLICK TRACKER =====
