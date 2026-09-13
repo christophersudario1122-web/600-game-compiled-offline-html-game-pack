@@ -145,6 +145,20 @@
 </div>
 
 <script>
+// THEME SYNC (cross-page)
+try {
+    const t = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+    const r = document.documentElement.style;
+    if (t && t.color) {
+        r.setProperty('--neon-green', t.color);
+        if (t.bg) r.setProperty('--dark-bg', t.bg);
+        if (t.accent) r.setProperty('--accent', t.accent);
+    } else {
+        const c = localStorage.getItem('arcade_custom_color');
+        if (c) r.setProperty('--neon-green', c);
+    }
+} catch (e) {}
+
 // Matrix rain
 const canvas = document.getElementById('matrix-canvas');
 const ctx = canvas.getContext('2d');
@@ -153,10 +167,12 @@ function resize() { mw = canvas.width = innerWidth; mh = canvas.height = innerHe
 resize();
 addEventListener('resize', resize);
 const droys = [], chars = '01アイウエオカキクケコサシスセソ';
+let matrixBrightness = 1.0; // 0-1, controls letter opacity
 function initDroys() { droys.length = 0; for (let i = 0; i < Math.floor(mw/14); i++) droys[i] = Math.random()*mh; }
 initDroys();
 addEventListener('resize', initDroys);
 setInterval(() => {
+    ctx.globalAlpha = matrixBrightness;
     ctx.fillStyle = 'rgba(5,5,8,0.05)';
     ctx.fillRect(0, 0, mw, mh);
     ctx.fillStyle = '#00ff88';

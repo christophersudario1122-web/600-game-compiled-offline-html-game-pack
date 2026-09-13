@@ -357,6 +357,7 @@
             <option value="amber">🟠 Cyberpunk Amber</option>
             <option value="blue">🔵 Neon Blue</option>
             <option value="red">🔴 Blood Red</option>
+            <option value="custom">🎨 Custom</option>
         </select>
     </div>
     <h1>[ EXPANDED_ARCADE_DATABASE ]</h1>
@@ -371,6 +372,7 @@
             <div class="gotd-label" style="color:var(--accent);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;">GAME OF THE DAY</div>
             <div class="gotd-name" id="gotd-name" style="font-size:1.6rem;font-weight:700;color:var(--neon-green);text-shadow:0 0 10px var(--neon-green);"></div>
             <div class="gotd-countdown" id="gotd-countdown" style="font-size:0.85rem;opacity:0.7;margin-top:4px;"></div>
+            <div class="gotd-streak" id="gotd-streak" style="font-size:0.75rem;opacity:0.6;margin-top:6px;"></div>
         </div>
         <div class="gotd-play" style="text-align:center;">
             <button class="gotd-btn" onclick="playGameOfTheDay()" style="background:var(--neon-green);color:var(--dark-bg);border:none;padding:12px 24px;border-radius:6px;font-family:monospace;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 0 15px var(--neon-green);">▶ PLAY NOW</button>
@@ -379,20 +381,7 @@
     </div>
 </div>
 
-<div class="gotd-section" style="max-width:1300px;margin:0 auto 20px;position:relative;z-index:2;">
-    <div class="gotd-card" style="background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(0,200,255,0.1));border:2px solid var(--neon-green);border-radius:12px;padding:20px;display:flex;align-items:center;gap:20px;box-shadow:0 0 20px rgba(0,255,136,0.2);">
-        <div class="gotd-badge" style="font-size:3rem;">🌟</div>
-        <div class="gotd-info" style="flex:1;">
-            <div class="gotd-label" style="color:var(--accent);font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;">GAME OF THE DAY</div>
-            <div class="gotd-name" id="gotd-name" style="font-size:1.6rem;font-weight:700;color:var(--neon-green);text-shadow:0 0 10px var(--neon-green);"></div>
-            <div class="gotd-countdown" id="gotd-countdown" style="font-size:0.85rem;opacity:0.7;margin-top:4px;"></div>
-        </div>
-        <div class="gotd-play" style="text-align:center;">
-            <button class="gotd-btn" onclick="playGameOfTheDay()" style="background:var(--neon-green);color:var(--dark-bg);border:none;padding:12px 24px;border-radius:6px;font-family:monospace;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 0 15px var(--neon-green);">▶ PLAY NOW</button>
-            <div style="font-size:0.7rem;opacity:0.6;margin-top:4px;">Today's featured game</div>
-        </div>
-    </div>
-</div><div class="action-bar">
+<div class="action-bar">
     <input type="text" id="search-input" class="search-input" placeholder=">> SEARCH DATABASE BY GAME NAME..." oninput="displayGames()" onmouseenter="playHoverSound()">
     <button class="dice-btn" onclick="rollDice(); playClickSound();" onmouseenter="playHoverSound()" title="Pick a random game">🎲 ROLL DICE</button>
 </div>
@@ -575,19 +564,37 @@ const themes = {
 
 let matrixColor = "#00ff88";
 let matrixBg = "#050508";
+let matrixBrightness = 1.0; // 0-1, controls letter opacity
 
 function changeTheme(themeName) {
     const t = themes[themeName] || themes.matrix;
-    document.documentElement.style.setProperty('--neon-green', t.green);
-    document.documentElement.style.setProperty('--dark-bg', t.bg);
+    let green = t.green, bg = t.bg, accent = t.accent || t.green;
+    if (themeName === 'custom') {
+        try {
+            const c = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+            if (c && c.color) { green = c.color; if (c.bg) bg = c.bg; if (c.accent) accent = c.accent; }
+        } catch (e) {}
+    }
+    document.documentElement.style.setProperty('--neon-green', green);
+    document.documentElement.style.setProperty('--dark-bg', bg);
+    if (!document.documentElement.style.getPropertyValue('--accent')) {
+        document.documentElement.style.setProperty('--accent', accent);
+    } else {
+        document.documentElement.style.setProperty('--accent', accent);
+    }
     localStorage.setItem('arcade_theme', themeName);
-    matrixColor = t.green;
-    matrixBg = t.bg;
+    matrixColor = green;
+    matrixBg = bg;
 }
 
 const savedTheme = localStorage.getItem('arcade_theme') || 'matrix';
-document.getElementById('theme-select').value = savedTheme;
-changeTheme(savedTheme);
+let effectiveTheme = savedTheme;
+try {
+    const ct = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+    if (ct && ct.color) effectiveTheme = 'custom';
+} catch (e) {}
+document.getElementById('theme-select').value = effectiveTheme;
+changeTheme(effectiveTheme);
 
 // --- GAME DATABASE & RECENTLY PLAYED ---
 const dir = "../.Offline-HTML-Games-Pack-master/offline/";
@@ -604,6 +611,7 @@ function toggleFavorite(g, event) {
     if (index > -1) favorites.splice(index, 1);
     else favorites.push(g);
     localStorage.setItem('arcade_favorites', JSON.stringify(favorites));
+    if (typeof updateFavBadge === 'function') updateFavBadge();
     displayGames();
 }
 
@@ -747,6 +755,7 @@ function updateGameOfTheDay() {
     const mins = Math.floor((diff % 3600000) / 60000);
     const countdownEl = document.getElementById('gotd-countdown');
     if (countdownEl) countdownEl.textContent = 'Resets in ' + hours + 'h ' + mins + 'm';
+    renderGotdStreak();
 }
 
 const HTM_GAMES = new Set(["paperio2","rooftopsnipers","snowrider","snowroad","soccerrandom","tombofthemask","vex6","vex7","vex8","bitplanes","boxingrandom","cookieclicker","crossyroad","dreadheadparkour","driftboss","drivemad","elasticface","getawayshootout","monkeymart","motox3m","ragdollarchers","templerun2","timeshooter3"]);
@@ -754,12 +763,39 @@ function getExt(g) { return HTM_GAMES.has(g) ? ".htm" : ".html"; }
 
 function playGameOfTheDay() {
     const game = getGameOfTheDay();
+    try {
+        const st = getGotdStreak();
+        const today = new Date().toDateString();
+        if (st.days.indexOf(today) === -1) { st.days.push(today); st.last = today; }
+        localStorage.setItem('arcade_gotd_streak', JSON.stringify(st));
+        renderGotdStreak();
+    } catch (e) {}
     const ext = HTM_GAMES.has(game) ? '.htm' : '.html';
     window.open(dir + game + ext, '_blank');
     recordRecent(game);
+    recordPlay(game);
     playClickSound();
 }
 
+function getGotdStreak() {
+    try { return JSON.parse(localStorage.getItem('arcade_gotd_streak') || '{"days":[]}'); }
+    catch (e) { return { days: [] }; }
+}
+
+function computeGotdStreak(days) {
+    const set = new Set(days || []);
+    let streak = 0;
+    const d = new Date();
+    while (set.has(d.toDateString())) { streak++; d.setDate(d.getDate() - 1); }
+    return streak;
+}
+
+function renderGotdStreak() {
+    const el = document.getElementById('gotd-streak');
+    if (!el) return;
+    const st = computeGotdStreak(getGotdStreak().days);
+    el.textContent = st > 0 ? '🔥 GOTD streak: ' + st + ' day' + (st === 1 ? '' : 's') : 'Play the Game of the Day daily to build a streak!';
+}
 // Update on load and every minute
 updateGameOfTheDay();
 setInterval(updateGameOfTheDay, 60000);
@@ -775,6 +811,7 @@ function ensureRecentShelf() {
     if (shelf) return shelf;
     shelf = document.createElement('div');
     shelf.id = 'recent-shelf';
+    shelf.className = 'recent-shelf';
     const grid = document.getElementById('game-grid');
     if (grid && grid.parentNode) grid.parentNode.insertBefore(shelf, grid);
     return shelf;
@@ -804,7 +841,7 @@ function renderRecentShelf() {
         a.className = 'recent-chip';
         a.href = dir + g + ext;
         a.onmouseenter = playHoverSound;
-        a.onclick = (ev) => { ev.preventDefault(); recordRecent(g); setTimeout(() => { window.open(dir + g + ext, '_blank'); }, 0); };
+        a.onclick = (ev) => { ev.preventDefault(); launchGame(g); };
         a.innerHTML = getI(g) + ' ' + n;
         row.appendChild(a);
     });
@@ -828,14 +865,16 @@ function displayGames() {
             return w.charAt(0).toUpperCase() + w.slice(1);
         }).join(" ");
 
+        const plays = (typeof playCounts !== 'undefined' ? playCounts : {})[g] || 0;
         const isFav = favorites.includes(g);
         const a = document.createElement("a");
         a.className = "card";
         a.href = dir + g + ext;
         a.onmouseenter = playHoverSound;
-        a.onclick = () => recordRecent(g);
+        a.onclick = (ev) => { if (ev.ctrlKey || ev.metaKey || ev.button === 1) return true; ev.preventDefault(); launchGame(g); };
         a.innerHTML = `
             <button class="fav-btn" onclick="toggleFavorite('${g}', event)" title="Toggle Favorite" onmouseenter="playHoverSound()">${isFav ? '⭐' : '☆'}</button>
+            ${plays > 0 ? '<span class="play-badge">' + plays + (plays === 1 ? ' play' : ' plays') + '</span>' : ''}
             <div class="icon">${getI(g)}</div>
             <b>${n}</b>
         `;
@@ -879,6 +918,7 @@ function drawMatrix() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = 1.0;
     
+    ctx.globalAlpha = matrixBrightness;
     ctx.fillStyle = matrixColor;
     ctx.font = fontSize + 'px monospace';
     
@@ -921,7 +961,40 @@ applyBgIntensity();
 window.addEventListener('storage', (e) => {
     if (e.key === BG_INTENSITY_KEY || e.key === null) applyBgIntensity();
     if (e.key === 'arcade_master_mute' || e.key === null) updateMasterGain();
+    if (e.key === MATRIX_BRIGHTNESS_KEY || e.key === null) applyMatrixBrightness();
 });
+
+// =====================================================
+// MATRIX BRIGHTNESS (New feature)
+// localStorage 'arcade_matrix_brightness' (0-100, default 100)
+// Controls letter opacity independently of background intensity
+// =====================================================
+const MATRIX_BRIGHTNESS_KEY = 'arcade_matrix_brightness';
+
+function getMatrixBrightness() {
+    try {
+        const v = parseInt(localStorage.getItem(MATRIX_BRIGHTNESS_KEY) || '100', 10);
+        return (isNaN(v)) ? 1.0 : Math.max(0, Math.min(100, v)) / 100;
+    } catch (e) { return 1.0; }
+}
+
+function applyMatrixBrightness() {
+    matrixBrightness = getMatrixBrightness();
+}
+
+function setMatrixBrightness(value) {
+    const level = Math.max(0, Math.min(100, parseInt(value, 10) || 100));
+    try { localStorage.setItem(MATRIX_BRIGHTNESS_KEY, String(level)); } catch (e) {}
+    const label = document.getElementById('matrix-brightness-label');
+    if (label) {
+        label.textContent = '[ ' + level + '% ]';
+    }
+    applyMatrixBrightness();
+    try { playClickSound(); } catch (e) {}
+}
+
+// Apply initial brightness
+applyMatrixBrightness();
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
@@ -968,6 +1041,12 @@ function recordPlay(gameName) {
     totalPlays += 1;
     Storage.setJSON(Storage.KEYS.plays, playCounts);
     try { localStorage.setItem(Storage.KEYS.totalPlays, String(totalPlays)); } catch (e) {}
+    try {
+        const dayKey = new Date().toISOString().slice(0, 10);
+        const dayMap = Storage.getJSON('arcade_play_days', {});
+        dayMap[dayKey] = (dayMap[dayKey] || 0) + 1;
+        Storage.setJSON('arcade_play_days', dayMap);
+    } catch (e) {}
     // Update tag history for recommendations
     const tags = (typeof getT === 'function') ? getT(gameName) : [];
     if (tags.length) {
@@ -1055,19 +1134,54 @@ function getRecommendations(count) {
 
 function showRecommendations() {
     const recs = getRecommendations(8);
-    if (recs.length === 0) {
-        alert('Play a few games first to get recommendations!');
-        return;
+    let shelf = document.getElementById('rec-shelf');
+    if (!shelf) {
+        shelf = document.createElement('div');
+        shelf.id = 'rec-shelf';
+        shelf.className = 'recent-shelf';
+        const ref = document.getElementById('recent-shelf') || document.getElementById('game-grid');
+        if (ref && ref.parentNode) ref.parentNode.insertBefore(shelf, ref);
     }
-    const lines = recs.map(g => {
-        let n = g.replace(/([0-9.]+)/g, ' $1 ').replace(/([A-Z])/g, ' $1')
-                 .replace(/_|-/g, ' ').replace(/\s+/g, ' ').trim();
-        n = n.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-        return '  • ' + n;
+    if (!shelf) return;
+    shelf.innerHTML = '';
+    if (recs.length === 0) { shelf.style.display = 'none'; return; }
+    shelf.style.display = 'block';
+    const title = document.createElement('div');
+    title.className = 'recent-shelf-title';
+    title.textContent = '🎯 RECOMMENDED FOR YOU';
+    shelf.appendChild(title);
+    const row = document.createElement('div');
+    row.className = 'recent-shelf-row';
+    recs.forEach(g => {
+        const ext = (typeof SHELF_HTM_GAMES !== 'undefined' && SHELF_HTM_GAMES.has(g)) ? '.htm' : '.html';
+        let n = g.replace(/([0-9\.]+)/g, ' $1 ').replace(/([A-Z])/g, ' $1').replace(/_|-/g, ' ').replace(/\s+/g, ' ').trim();
+        n = n.split(' ').map(w => { const lo = w.toLowerCase();
+            if (['td','fnaf','lol','3d','2','3','4','5','6','7','8'].indexOf(lo) !== -1) return w.toUpperCase();
+            return w.charAt(0).toUpperCase() + w.slice(1);
+        }).join(' ');
+        const a = document.createElement('a');
+        a.className = 'recent-chip';
+        a.href = dir + g + ext;
+        a.onmouseenter = playHoverSound;
+        a.onclick = (ev) => { ev.preventDefault(); launchGame(g); };
+        a.innerHTML = '🎯 ' + n;
+        row.appendChild(a);
     });
-    alert('✨ RECOMMENDED FOR poU:\n\n' + lines.join('\n'));
+    shelf.appendChild(row);
 }
 
+function updateFavBadge() {
+    const tab = document.querySelector('.favorites-tab');
+    if (!tab) return;
+    let b = tab.querySelector('.fav-count-badge');
+    if (!b) {
+        b = document.createElement('span');
+        b.className = 'fav-count-badge';
+        b.style.cssText = 'margin-left:6px;background:var(--neon-green,#00ff88);color:#000;border-radius:8px;padding:1px 7px;font-size:0.72rem;font-family:"Courier New",monospace;';
+        tab.appendChild(b);
+    }
+    b.textContent = favorites.length;
+}
 // ---------- 5. IMPORT / EXPORT ----------
 function exportData() {
     const data = {
@@ -1134,7 +1248,7 @@ const ACHIEVEMENTS = {
     marathon:      { name: 'Marathon',       desc: 'Play 50 different games',              icon: '🏃' },
     clickerKing:   { name: 'Clicker King',   desc: 'Hit 100+ clicks in one Click Frenzy',  icon: '🖱️' },
     perfectMemory: { name: 'Perfect Memory', desc: 'Reach round 5 in Memory Match',        icon: '🧠' },
-    konamiMaster:  { name: 'Konami Master',  desc: 'Play all 8 secret minigames',          icon: '👑' },
+    konamiMaster:  { name: 'Konami Master',  desc: 'Play all 9 secret minigames',          icon: '👑' },
 };
 
 function getAchievementEarned() {
@@ -1171,7 +1285,7 @@ function checkAchievements() {
     if (skill.clickerKing) tryEarn('clickerKing');
     if (skill.perfectMemory) tryEarn('perfectMemory');
     const playedMinis = Object.keys(skill.minis).filter(k => skill.minis[k] > 0);
-    if (playedMinis.length >= 8) tryEarn('konamiMaster');
+    if (playedMinis.length >= 9) tryEarn('konamiMaster');
     if (newOnes.length) {
         Storage.setJSON(Storage.KEYS.achievements, earned);
         newOnes.forEach(showAchievementToast);
@@ -1340,7 +1454,7 @@ function initV2Features() {
             'font-family:"Courier New",monospace;}' +
             '.achievement-toast.show{top:20px;}' +
             '.achievement-toast .ach-icon{font-size:2em;}' +
-            '.play-badge{position:absolute;top:5px;right:5px;background:rgba(0,255,136,0.3);' +
+            '.play-badge{position:absolute;top:5px;left:5px;background:rgba(0,255,136,0.3);' +
             'color:var(--neon-green,#00ff88);padding:2px 6px;border-radius:3px;font-size:0.7em;' +
             'font-family:"Courier New",monospace;}' +
             '.recent-shelf{max-width:1300px;margin:18px auto 6px;position:relative;z-index:2;}' +
@@ -1348,7 +1462,13 @@ function initV2Features() {
             'text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;opacity:0.8;' +
             'font-family:"Courier New",monospace;}' +
             '.recent-shelf-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;}' +
-            '.recent-chip{flex:0 0 auto;background:rgba(0,255,136,0.08);' +
+            '.launcher-overlay{position:fixed;inset:0;background:rgba(2,4,8,0.92);display:none;align-items:center;justify-content:center;z-index:10000;font-family:"Courier New",monospace;backdrop-filter:blur(4px);}' +
+'.launcher-box{background:var(--box-bg,#0a0a0f);border:2px solid var(--neon-green,#00ff88);border-radius:10px;padding:36px 48px;text-align:center;box-shadow:0 0 40px rgba(0,255,136,0.35);max-width:520px;}' +
+'.launcher-name{font-size:1.5rem;color:var(--neon-green,#00ff88);margin-bottom:8px;text-shadow:0 0 12px var(--neon-green,#00ff88);}' +
+'.launcher-sub{font-size:0.8rem;opacity:0.6;margin-bottom:24px;}' +
+'.launcher-btn{background:var(--neon-green,#00ff88);color:#000;border:none;border-radius:6px;padding:12px 28px;font-size:1rem;font-family:inherit;cursor:pointer;margin:0 6px;font-weight:700;}' +
+'.launcher-cancel{background:transparent;color:var(--neon-green,#00ff88);border:1px solid rgba(0,255,136,0.5);border-radius:6px;padding:12px 20px;font-size:0.9rem;font-family:inherit;cursor:pointer;}' +
+'.recent-chip{flex:0 0 auto;background:rgba(0,255,136,0.08);' +
             'border:1px solid rgba(0,255,136,0.4);color:var(--neon-green,#00ff88);' +
             'padding:8px 12px;border-radius:6px;font-family:"Courier New",monospace;' +
             'font-size:0.8rem;text-decoration:none;white-space:nowrap;}' +
@@ -1365,6 +1485,49 @@ if (document.readyState === 'loading') {
     initV2Features();
 }
 
+function launchGame(g) {
+    if (!g) return;
+    const ext = (typeof SHELF_HTM_GAMES !== 'undefined' && SHELF_HTM_GAMES.has(g)) ? '.htm' : '.html';
+    const overlay = document.getElementById('launcher-overlay');
+    if (overlay) {
+        const nm = document.getElementById('launcher-name');
+        const btn = document.getElementById('launcher-play');
+        if (nm) {
+            let n = g.replace(/([0-9\.]+)/g, ' $1 ').replace(/([A-Z])/g, ' $1').replace(/_|-/g, ' ').replace(/\s+/g, ' ').trim();
+            n = n.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            nm.textContent = n;
+        }
+        if (btn) btn.onclick = () => { openGame(g, ext); closeLauncher(); };
+        overlay.style.display = 'flex';
+    } else {
+        openGame(g, ext);
+    }
+}
+
+function openGame(g, ext) {
+    try { window.open(dir + g + ext, '_blank'); } catch (e) {}
+    if (typeof recordRecent === 'function') recordRecent(g);
+    if (typeof recordPlay === 'function') recordPlay(g);
+    playClickSound();
+}
+
+function closeLauncher() {
+    const overlay = document.getElementById('launcher-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+window.addEventListener('load', () => {
+    if (typeof showRecommendations === 'function') showRecommendations();
+    if (typeof updateFavBadge === 'function') updateFavBadge();
+});
 </script>
+<div id="launcher-overlay" class="launcher-overlay">
+    <div class="launcher-box">
+        <div class="launcher-name" id="launcher-name"></div>
+        <div class="launcher-sub">▸ SYSTEM READY — SELECT BOOT MODE</div>
+        <button class="launcher-btn" id="launcher-play" onmouseenter="playHoverSound()">▶ LAUNCH GAME</button>
+        <button class="launcher-cancel" onclick="closeLauncher()" onmouseenter="playHoverSound()">✕ Cancel</button>
+    </div>
+</div>
 </body>
 </html>

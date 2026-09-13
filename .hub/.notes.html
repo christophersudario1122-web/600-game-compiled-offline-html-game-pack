@@ -214,6 +214,20 @@
 <input type="file" id="file-import" accept=".json" style="display:none" />
 
 <script>
+// THEME SYNC (cross-page)
+try {
+    const t = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+    const r = document.documentElement.style;
+    if (t && t.color) {
+        r.setProperty('--neon-green', t.color);
+        if (t.bg) r.setProperty('--dark-bg', t.bg);
+        if (t.accent) r.setProperty('--accent', t.accent);
+    } else {
+        const c = localStorage.getItem('arcade_custom_color');
+        if (c) r.setProperty('--neon-green', c);
+    }
+} catch (e) {}
+
 // ===== MATRIX RAIN =====
 const canvas = document.getElementById('matrix-canvas');
 const ctx = canvas.getContext('2d');
@@ -234,6 +248,7 @@ function initDroys() {
 initDroys();
 window.addEventListener('resize', initDroys);
 function drawMatrix() {
+    ctx.globalAlpha = matrixBrightness || 1.0;
     ctx.fillStyle = 'rgba(5, 5, 8, 0.05)';
     ctx.fillRect(0, 0, mw, mh);
     ctx.fillStyle = '#00ff88';
@@ -249,6 +264,7 @@ function drawMatrix() {
 // BACKGROUND INTENSITY (Feature #11)
 // localStorage 'arcade_bg_intensity' (0-100, default 100)
 // =====================================================
+let matrixBrightness = 1.0; // 0-1, controls letter opacity
 const BG_INTENSITY_KEY = 'arcade_bg_intensity';
 const BASE_MATRIX_MS = 50;
 let matrixTimer = null;

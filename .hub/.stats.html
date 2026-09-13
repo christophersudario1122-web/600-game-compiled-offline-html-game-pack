@@ -144,6 +144,13 @@
         opacity: 0.5;
         font-style: italic;
     }
+    .activity-chart { padding: 10px 0; }
+    .activity-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; height: 170px; }
+    .activity-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .activity-val { font-size: 0.75rem; color: var(--accent); margin-bottom: 4px; }
+    .activity-bar { width: 60%; background: linear-gradient(180deg, var(--neon), var(--accent)); border-radius: 3px 3px 0 0; min-height: 3px; }
+    .activity-day { font-size: 0.7rem; opacity: 0.6; margin-top: 6px; }
+    .rank-badge { font-weight: 700; margin-right: 6px; opacity: 0.95; }
     .reset-btn {
         background: rgba(255, 50, 50, 0.15);
         border-color: #ff3232;
@@ -231,6 +238,13 @@
     </div>
 
     <div class="section">
+        <h2>7-Day Play Activity</h2>
+        <div id="activity-chart" class="activity-chart">
+            <div class="empty">No plays recorded yet this week</div>
+        </div>
+    </div>
+
+    <div class="section">
         <h2>🏆 Most Played Games (Top 15)</h2>
         <div id="most-played">
             <div class="empty">Play some games to see stats here!</div>
@@ -255,6 +269,20 @@
 </div>
 
 <script>
+// THEME SYNC (stats)
+try {
+    const t = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+    const r = document.documentElement.style;
+    if (t && t.color) {
+        r.setProperty('--neon', t.color);
+        if (t.bg) r.setProperty('--bg', t.bg);
+        if (t.accent) r.setProperty('--accent', t.accent);
+    } else {
+        const c = localStorage.getItem('arcade_custom_color');
+        if (c) r.setProperty('--neon', c);
+    }
+} catch (e) {}
+
 // Matrix rain
 const canvas = document.getElementById('matrix-canvas');
 const ctx = canvas.getContext('2d');
@@ -263,10 +291,12 @@ function resize() { mw = canvas.width = innerWidth; mh = canvas.height = innerHe
 resize();
 addEventListener('resize', resize);
 const droys = [], chars = '01アイウエオカキクケコ';
+let matrixBrightness = 1.0; // 0-1, controls letter opacity
 function initDroys() { droys.length = 0; for (let i = 0; i < Math.floor(mw/14); i++) droys[i] = Math.random()*mh; }
 initDroys();
 addEventListener('resize', initDroys);
 setInterval(() => {
+    ctx.globalAlpha = matrixBrightness;
     ctx.fillStyle = 'rgba(5,5,8,0.05)';
     ctx.fillRect(0, 0, mw, mh);
     ctx.fillStyle = '#00ff88';
@@ -285,7 +315,7 @@ const ACHIEVEMENTS = [
     { id: 'marathon', icon: '🏃', name: 'Marathon', desc: 'Play 50 different games' },
     { id: 'clickerKing', icon: '🖱️', name: 'Clicker King', desc: '100+ clicks in one Click Frenzy' },
     { id: 'perfectMemory', icon: '🧠', name: 'Perfect Memory', desc: 'Reach round 5 in Memory Match' },
-    { id: 'konamiMaster', icon: '👑', name: 'Konami Master', desc: 'Play all 8 secret minigames' }
+    { id: 'konamiMaster', icon: '👑', name: 'Konami Master', desc: 'Play all 9 secret minigames' }
 ];
 
 function loadStats() {
@@ -324,11 +354,13 @@ function loadStats() {
     } else {
         const sorted = entries.sort((a, b) => (b[1].count || 0) - (a[1].count || 0)).slice(0, 15);
         const max = sorted[0][1].count || 1;
-        mostPlayedDiv.innerHTML = sorted.map(([name, stat]) => {
+        mostPlayedDiv.innerHTML = sorted.map(([name, stat], idx) => {
             const count = stat.count || 0;
             const yct = (count / max * 100).toFixed(1);
+            const rank = idx + 1;
+            const medal = rank === 1 ? 'style="color:#ffd700"' : (rank === 2 ? 'style="color:#c0c0c0"' : (rank === 3 ? 'style="color:#cd7f32"' : ''));
             return `<div class="bar-row">
-                <div class="bar-name">${escapeHtml(name)}</div>
+                <div class="bar-name"><span class="rank-badge" ${medal}>#${rank}</span> ${escapeHtml(name)}</div>
                 <div class="bar-track"><div class="bar-fill" style="width:${yct}%"></div></div>
                 <div class="bar-count">${count}</div>
             </div>`;
@@ -366,6 +398,36 @@ function loadStats() {
             <div>${isUnlocked ? '✅' : '🔒'}</div>
         </div>`;
     }).join('');
+    renderActivityChart();
+}
+
+function renderActivityChart() {
+    const el = document.getElementById('activity-chart');
+    if (!el) return;
+    const days = {};
+    try { Object.assign(days, JSON.parse(localStorage.getItem('arcade_play_days') || '{}')); } catch (e) {}
+    const now = new Date();
+    const labels = [];
+    let max = 1;
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(now); d.setDate(d.getDate() - i);
+        const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        const c = days[key] || 0;
+        if (c > max) max = c;
+        labels.push({ key: key, c: c, d: d });
+    }
+    if (max === 1 && labels.every(l => l.c === 0)) {
+        el.innerHTML = '<div class="empty">Play games in the hub to see daily activity here</div>';
+        return;
+    }
+    const names = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    el.innerHTML = '<div class="activity-row">' + labels.map(l => {
+        const pct = Math.max(4, Math.round(l.c / max * 100));
+        return '<div class="activity-col" title="' + l.key + ': ' + l.c + ' play(s)">' +
+            '<div class="activity-val">' + l.c + '</div>' +
+            '<div class="activity-bar" style="height:' + pct + '%"></div>' +
+            '<div class="activity-day">' + names[l.d.getDay()] + '</div></div>';
+    }).join('') + '</div>';
 }
 
 function timeAgo(date) {

@@ -172,6 +172,11 @@
         <div class="name">Math Sprint</div>
         <div class="desc">Solve 10 problems fast</div>
     </div>
+    <div class="secret-game" onclick="playMinigame('wam')">
+        <div class="icon">🔨</div>
+        <div class="name">Wack-A-Mole</div>
+        <div class="desc">Whack moles before time runs out</div>
+    </div>
 </div>
 
 <button class="back-btn" onclick="window.location='../.library1.html'">← Back to Library</button>
@@ -204,6 +209,7 @@ function playMinigame(name) {
     else if (name === 'typing') startTyping(content);
     else if (name === 'rys') startRPS(content);
     else if (name === 'math') startMath(content);
+    else if (name === 'wam') startWAM(content);
 }
 
 function closeMinigame() {
@@ -423,6 +429,62 @@ function startMath(el) {
         };
     }
     next();
+}
+
+// ===== WACK-A-MOLE =====
+function startWAM(el) {
+    let score = 0, time = 30, moles = 0, timer, moleTimer;
+    el.innerHTML = `
+        <h2>🔨 Wack-A-Mole</h2>
+        <div style="font-size:2rem; color:#ffcc00; margin:10px 0;">Score: <span id="wscore">0</span></div>
+        <div>Time: <span id="wtime">30</span>s | Escaped: <span id="wmoles">0</span></div>
+        <div style="display:grid; grid-template-columns:repeat(3, 110px); gap:12px; margin:20px auto; width:max-content;">
+            ${Array.from({length:9}, (_,i) => '<button id="whole'+i+'" onclick="whack('+i+')" style="width:110px; height:90px; font-size:2rem; background:#224; border:2px solid #555; border-radius:8px; cursor:pointer;">⬛</button>').join('')}
+        </div>
+        <div id="wmsg" style="font-size:1.2rem;"></div>
+    `;
+    const spawn = () => {
+        if (time <= 0) return;
+        for (let i = 0; i < 9; i++) {
+            const h = document.getElementById('whole'+i);
+            if (h && h.dataset.mole === '1') { moleTimer = setTimeout(spawn, 500); return; }
+        }
+        const i = Math.floor(Math.random()*9);
+        const h = document.getElementById('whole'+i);
+        if (!h) { moleTimer = setTimeout(spawn, 500); return; }
+        h.dataset.mole = '1';
+        h.textContent = '🐽';
+        h.style.background = '#3a2';
+        setTimeout(() => {
+            if (h && h.dataset.mole === '1') { h.dataset.mole = '0'; h.textContent = '⬛'; h.style.background = '#224'; moles++; const me = document.getElementById('wmoles'); if (me) me.textContent = moles; }
+        }, 900 + Math.random()*700);
+        moleTimer = setTimeout(spawn, 480 + Math.random()*520);
+    };
+    window.whack = (i) => {
+        const h = document.getElementById('whole'+i);
+        if (!h || h.dataset.mole !== '1') return;
+        h.dataset.mole = '0';
+        h.textContent = '💥';
+        h.style.background = '#a22';
+        score++;
+        const sc = document.getElementById('wscore');
+        if (sc) sc.textContent = score;
+        const msg = document.getElementById('wmsg');
+        if (msg) msg.textContent = 'Nice! +1';
+        setTimeout(() => { if (h) { h.textContent = '⬛'; h.style.background = '#224'; } }, 200);
+    };
+    timer = setInterval(() => {
+        time--;
+        const wt = document.getElementById('wtime');
+        if (wt) wt.textContent = time;
+        if (time <= 0) {
+            clearInterval(timer);
+            if (typeof moleTimer !== 'undefined') clearTimeout(moleTimer);
+            for (let i = 0; i < 9; i++) { const h = document.getElementById('whole'+i); if (h) h.disabled = true; }
+            el.innerHTML = `<h2>Done!</h2><div style="font-size:2rem;">Score: ${score}</div><div style="opacity:0.7;">Moles escaped: ${moles}</div><button class="back-btn" onclick="playMinigame('wam')">Play Again</button>`;
+        }
+    }, 1000);
+    spawn();
 }
 
 window.startMinigame = playMinigame;

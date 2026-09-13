@@ -138,10 +138,12 @@ function resize() {
 resize();
 addEventListener('resize', resize);
 const droys = [], chars = '01アイウエオ';
+let matrixBrightness = 1.0; // 0-1, controls letter opacity
 function initD() { droys.length = 0; for (let i = 0; i < Math.floor(mw/14); i++) droys[i] = Math.random()*mh; }
 initD();
 addEventListener('resize', initD);
 setInterval(() => {
+    mtx.globalAlpha = matrixBrightness;
     mtx.fillStyle = 'rgba(5,5,8,0.05)';
     mtx.fillRect(0, 0, mw, mh);
     mtx.fillStyle = '#00ff88';

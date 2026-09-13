@@ -286,6 +286,20 @@
 </div>
 
 <script>
+// THEME SYNC (cross-page)
+try {
+    const t = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+    const r = document.documentElement.style;
+    if (t && t.color) {
+        r.setProperty('--neon-green', t.color);
+        if (t.bg) r.setProperty('--dark-bg', t.bg);
+        if (t.accent) r.setProperty('--accent', t.accent);
+    } else {
+        const c = localStorage.getItem('arcade_custom_color');
+        if (c) r.setProperty('--neon-green', c);
+    }
+} catch (e) {}
+
 // --- AUDIO SYSTEM (WEB AUDIO API & HACKER AMBIENT ENGINE) ---
 let audioCtx = null;
 let ambientRunning = false;

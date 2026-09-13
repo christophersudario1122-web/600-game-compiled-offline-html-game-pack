@@ -1,47 +1,13 @@
-﻿
-        <div style="margin-top: 15px; padding: 12px; background: rgba(0,255,136,0.05); border: 1px dashed var(--neon-green); border-radius: 4px;">
-            <div style="color: #00ccff; font-size: 0.85rem; margin-bottom: 8px; letter-spacing: 1px;">🎨 CUSTOM THEME COLOR</div>
-            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <input type="color" id="custom-color-picker" value="#00ff88" style="width: 50px; height: 35px; border: 1px solid var(--neon-green); border-radius: 3px; cursor: pointer; background: transparent;">
-                <input type="text" id="custom-color-hex" value="#00ff88" placeholder="#00ff88" style="background: var(--dark-bg); color: var(--neon-green); border: 1px solid var(--neon-green); padding: 6px 10px; font-family: monospace; width: 100px; border-radius: 3px;" maxlength="7">
-                <button id="apply-custom-theme" style="background: var(--neon-green); color: var(--dark-bg); border: none; padding: 7px 14px; border-radius: 3px; cursor: pointer; font-weight: 700; font-family: monospace;">Apply</button>
-                <button id="reset-custom-theme" style="background: rgba(255, 77, 77, 0.15); color: #ff4d4d; border: 1px solid #ff4d4d; padding: 6px 12px; border-radius: 3px; cursor: pointer; font-family: monospace;">Reset</button>
-            </div>
-            <div style="margin-top: 8px; color: #888; font-size: 0.75rem;">Pick any color and it becomes our hub's neon color</div>
-        </div>
-
-    <!-- CUSTOM COLOR PICKER SECTION -->
-    <div class="section">
-        <h2>🎨 CUSTOM COLOR</h2>
-        <div class="setting-row">
-            <div class="setting-label">
-                <span class="key">🎯 Preview Color</span>
-                <div class="desc">See how pour chosen color looks on a sample card</div>
-            </div>
-            <div class="setting-control" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                <div id="color-preview-card" style="background: rgba(10,10,15,0.9); border: 2px solid #00ff88; border-radius: 8px; padding: 15px; min-width: 180px; text-align: center; transition: all 0.3s;">
-                    <div style="font-size: 2rem;">🎮</div>
-                    <div style="font-size: 0.9rem; font-weight: 700; margin-top: 5px;">Sample Game</div>
-                    <div style="font-size: 0.75rem; opacity: 0.6; margin-top: 3px;">Sample Tag</div>
-                </div>
-                <div>
-                    <input type="color" id="preview-color" value="#00ff88" style="width: 60px; height: 45px; border: 1px solid var(--neon-green); border-radius: 4px; cursor: pointer;">
-                    <div style="margin-top: 5px; font-size: 0.8rem; color: #888;">Live preview</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
-<title>Arcade_Settings</title>
+<title>Terminal Arcade Settings</title>
 <style>
     :root {
         --neon-green: #00ff88;
         --dark-bg: #050508;
         --box-bg: rgba(10, 10, 15, 0.85);
-        --warning: #ff4d4d;
-        --info: #00d2ff;
     }
 
     body {
@@ -52,6 +18,7 @@
         margin: 0;
         position: relative;
         min-height: 100vh;
+        overflow-x: hidden;
         transition: background 0.3s, color 0.3s;
     }
 
@@ -78,291 +45,298 @@
         pointer-events: none;
     }
 
-    .container {
+    .header-container {
         position: relative;
         z-index: 2;
-        max-width: 800px;
-        margin: 0 auto;
-        background: var(--box-bg);
-        border: 2px solid var(--neon-green);
-        border-radius: 12px;
-        padding: 30px;
-        box-shadow: 0 0 30px rgba(0,255,136,0.15), inset 0 0 15px rgba(0,255,136,0.05);
-        backdrop-filter: blur(8px);
+        max-width: 1300px;
+        margin: 0 auto 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    h1 {
-        text-align: center;
-        letter-spacing: 4px;
-        text-shadow: 0 0 15px rgba(0,255,136,0.5);
-        margin: 0 0 8px;
-    }
-
-    .subtitle {
-        text-align: center;
-        opacity: 0.6;
-        font-size: 0.9rem;
-        margin-bottom: 25px;
-    }
-
-    .top-bar {
+    .top-controls {
+        width: 100%;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
         flex-wrap: wrap;
         gap: 10px;
     }
 
-    back-btn {
+    .left-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .back-hub-btn, .audio-toggle-btn {
         background: rgba(0, 255, 136, 0.1);
         color: var(--neon-green);
         border: 2px solid var(--neon-green);
         padding: 8px 18px;
         border-radius: 4px;
-        text-decoration: none;
+        cursor: pointer;
         font-weight: 700;
         font-family: monospace;
+        font-size: 0.9rem;
+        text-decoration: none;
         box-shadow: 0 0 10px rgba(0,255,136,0.2);
         transition: 0.2s;
     }
 
-    .back-btn:hover {
+    .back-hub-btn:hover, .audio-toggle-btn:hover {
         background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 20px var(--neon-green);
+        transform: scale(1.05);
+    }
+
+    .theme-selector {
+        background: var(--box-bg);
+        border: 2px solid var(--neon-green);
+        color: var(--neon-green);
+        padding: 8px 14px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-weight: bold;
+        cursor: pointer;
+        outline: none;
+        box-shadow: 0 0 10px rgba(0,255,136,0.1);
+    }
+
+    .theme-selector option {
+        background: #0a0a0f;
+        color: var(--neon-green);
+    }
+
+    h1 {
+        text-align: center;
+        color: var(--neon-green);
+        margin-bottom: 10px;
+        font-size: 2.8rem;
+        letter-spacing: 3px;
+        text-shadow: 0 0 15px rgba(0,255,136,0.5);
+    }
+
+    .counter {
+        text-align: center;
+        color: var(--neon-green);
+        opacity: 0.7;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+    }
+
+    .action-bar {
+        max-width: 700px;
+        margin: 0 auto 25px;
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        padding: 0 10px;
+        box-sizing: border-box;
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px 20px;
+        background: var(--box-bg);
+        border: 2px solid var(--neon-green);
+        border-radius: 6px;
+        color: var(--neon-green);
+        font-size: 1rem;
+        font-family: monospace;
+        outline: none;
+        box-shadow: 0 0 10px rgba(0,255,136,0.1);
+        backdrop-filter: blur(5px);
+        box-sizing: border-box;
+        transition: 0.2s;
+    }
+
+    .search-input::placeholder {
+        color: var(--neon-green);
+        opacity: 0.4;
+    }
+
+    .dice-btn {
+        background: var(--box-bg);
+        border: 2px solid var(--neon-green);
+        color: var(--neon-green);
+        padding: 0 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: monospace;
+        font-size: 1rem;
+        font-weight: bold;
+        transition: 0.2s;
+        box-shadow: 0 0 10px rgba(0,255,136,0.1);
+        white-space: nowrap;
+    }
+
+    .dice-btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 20px var(--neon-green);
+        transform: scale(1.03);
+    }
+
+    .tabs-container {
+        max-width: 1300px;
+        margin: 0 auto 40px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .tab-btn {
+        background: var(--box-bg);
+        border: 2px solid var(--neon-green);
+        border-radius: 6px;
+        color: var(--neon-green);
+        padding: 7px 14px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        font-family: monospace;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 0 5px rgba(0,255,136,0.1);
+        backdrop-filter: blur(5px);
+    }
+
+    .tab-btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 15px var(--neon-green);
+        transform: translateY(-2px);
+    }
+
+    .tab-btn.active {
+        background: var(--neon-green);
+        border-color: var(--neon-green);
         color: var(--dark-bg);
         box-shadow: 0 0 20px var(--neon-green);
     }
 
-    .section {
-        margin: 20px 0;
-        padding: 18px;
-        border: 1px solid rgba(0, 255, 136, 0.3);
-        border-radius: 8px;
-        background: rgba(0, 255, 136, 0.03);
+    .tab-btn.favorites-tab {
+        border-color: #ffd700;
+        color: #ffd700;
+        background: rgba(255, 215, 0, 0.1);
     }
 
-    .section h2 {
-        margin: 0 0 12px;
-        font-size: 1.15rem;
-        letter-spacing: 1.5px;
-        color: var(--neon-green);
-        text-shadow: 0 0 8px rgba(0,255,136,0.3);
-    }
-
-    .setting-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px dashed rgba(0, 255, 136, 0.1);
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-
-    .setting-row:last-child {
-        border-bottom: none;
-    }
-
-    .setting-label {
-        flex: 1;
-        min-width: 180px;
-    }
-
-    .setting-label hkey {
-        font-weight: bold;
-        color: var(--info);
-    }
-
-    .setting-label desc {
-        font-size: 0.8rem;
-        opacity: 0.65;
-        margin-top: 2px;
-    }
-
-    .setting-control {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-
-    input[type="text"],
-    input[type="password"] {
-        background: rgba(0, 255, 136, 0.05);
-        border: 1px solid var(--neon-green);
-        color: var(--neon-green);
-        padding: 6px 10px;
-        font-family: monospace;
-        border-radius: 4px;
-        outline: none;
-        width: 200px;
-    }
-
-    input[type="text"]:focus,
-    input[type="password"]:focus {
-        box-shadow: 0 0 8px rgba(0,255,136,0.3);
-    }
-
-    button {
-        background: rgba(0, 255, 136, 0.1);
-        color: var(--neon-green);
-        border: 1px solid var(--neon-green);
-        padding: 6px 14px;
-        font-family: monospace;
-        font-weight: bold;
-        cursor: pointer;
-        border-radius: 4px;
-        transition: 0.2s;
-        font-size: 0.9rem;
-    }
-
-    button:hover {
-        background: var(--neon-green);
+    .tab-btn.favorites-tab.active {
+        background: #ffd700;
         color: var(--dark-bg);
-        box-shadow: 0 0 12px var(--neon-green);
+        box-shadow: 0 0 20px #ffd700;
     }
 
-    buttonhdanger {
-        border-color: var(--warning);
-        color: var(--warning);
-        background: rgba(255, 77, 77, 0.05);
-    }
-
-    buttonhdanger:hover {
-        background: var(--warning);
-        color: #fff;
-        box-shadow: 0 0 12px var(--warning);
-    }
-
-    .status-msg {
-        margin-top: 8px;
-        padding: 8px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        text-align: center;
-        min-height: 12em;
-    }
-
-    .status-msghsuccess {
-        background: rgba(0, 255, 136, 0.1);
-        color: var(--neon-green);
-        border: 1px solid var(--neon-green);
-    }
-
-    .status-msg.error {
-        background: rgba(255, 77, 77, 0.1);
-        color: var(--warning);
-        border: 1px solid var(--warning);
-    }
-
-    .status-msg.info {
+    .tab-btn.recent-tab {
+        border-color: #00d2ff;
+        color: #00d2ff;
         background: rgba(0, 210, 255, 0.1);
-        color: var(--info);
-        border: 1px solid var(--info);
     }
 
-    .storage-info {
-        background: rgba(0, 0, 0, 0.4);
-        padding: 10px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-family: monospace;
+    .tab-btn.recent-tab.active {
+        background: #00d2ff;
+        color: var(--dark-bg);
+        box-shadow: 0 0 20px #00d2ff;
     }
 
-    .achievement-list {
-        max-height: 300px;
-        overflow-y: auto;
-        padding-right: 8px;
-    }
-
-    .achievement {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px;
-        margin: 4px 0;
-        border: 1px solid rgba(0, 255, 136, 0.2);
-        border-radius: 4px;
-        font-size: 0.9rem;
-    }
-
-    .achievement.unlocked {
-        background: rgba(0, 255, 136, 0.08);
+    .tab-btn.series {
+        border-style: dashed;
         border-color: var(--neon-green);
+        opacity: 0.8;
     }
 
-    .achievement.locked {
-        opacity: 0.4;
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 25px;
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 10px;
+        position: relative;
+        z-index: 2;
     }
 
-    .achievement .icon {
-        font-size: 1.5rem;
-        min-width: 32px;
-        text-align: center;
-    }
-
-    .achievement name {
-        font-weight: bold;
-    }
-
-    .achievement desc {
-        font-size: 0.78rem;
-        opacity: 0.7;
-    }
-
-    .raw-data-display {
-        background: rgba(0, 0, 0, 0.5);
-        border: 1px solid var(--neon-green);
-        border-radius: 4px;
-        padding: 12px;
-        font-size: 0.8rem;
-        max-height: 200px;
-        overflow-y: auto;
-        white-space: word-wrap;
-        word-break: break-all;
-        margin-top: 8px;
-    }
-
-    .theme-swatch {
-        display: inline-block;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        margin-right: 8px;
-        vertical-align: middle;
-        border: 1px solid rgba(255,255,255,0.3);
-        cursor: pointer;
-    }
-
-    .theme-swatch.active {
-        box-shadow: 0 0 10px currentColor;
-        transform: scale(1.15);
-    }
-
-    /* Test tones */
-    .test-btn {
-        margin: 4px;
-        font-size: 0.8rem;
-        padding: 5px 10px;
-    }
-
-    /* Custom Pixel Cursor */
-    * { cursor: url('data:image/svg+xml,<svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="10" y="0" width="4" height="2" fill="%2300ff88"/><rect x="10" y="2" width="4" height="4" fill="%2300ff88"/><rect x="10" y="6" width="4" height="2" fill="%2300ff88"/><rect x="0" y="8" width="4" height="4" fill="%2300ff88"/><rect x="4" y="8" width="4" height="4" fill="%2300ff88"/><rect x="8" y="8" width="4" height="4" fill="%2300ff88"/><rect x="12" y="8" width="4" height="4" fill="%2300ff88"/><rect x="16" y="8" width="4" height="4" fill="%2300ff88"/><rect x="10" y="10" width="4" height="12" fill="%2300ff88"/><rect x="12" y="10" width="2" height="2" fill="%230a0a0f"/><rect x="14" y="22" width="4" height="2" fill="%2300ff88"/></svg>') 10 0, auto; }
-    a, button, [onclick], input, textarea, select { cursor: pointer; }
-    a, button { cursor: pointer; }
-
-    /* Performance slider */
-    .intensity-label {
-        margin-top: 6px;
-        font-family: monospace;
-        font-size: 0.8rem;
+    .card {
+        background: var(--box-bg);
+        border: 2px solid var(--neon-green);
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
         color: var(--neon-green);
-        opacity: 0.85;
+        transition: all 0.25s cubic-bezier(.25,.8,.25,1);
+        text-align: center;
+        padding: 20px;
+        align-items: center;
+        box-shadow: 0 0 10px rgba(0,255,136,0.1), inset 0 0 10px rgba(0,255,136,0.03);
+        backdrop-filter: blur(5px);
+        position: relative;
+    }
+
+    .card:hover {
+        transform: translateY(-6px) scale(1.03);
+        background: var(--neon-green);
+        border-color: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 25px var(--neon-green);
+    }
+
+    .fav-btn {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #ffd700;
+        z-index: 3;
+        padding: 0;
+        transition: transform 0.2s;
+    }
+
+    .fav-btn:hover {
+        transform: scale(1.3);
+    }
+
+    .icon {
+        font-size: 45px;
+        margin-bottom: 12px;
+        filter: drop-shadow(0 0 5px var(--neon-green));
+        transition: 0.2s;
+    }
+
+    .card:hover .icon {
+        filter: drop-shadow(0 0 2px var(--dark-bg));
+        transform: scale(1.1);
+    }
+
+    b {
+        font-size: 1.05rem;
+        line-height: 1.3;
         letter-spacing: 1px;
     }
-    input[type="range"] {
-        width: 220px;
-        accent-color: var(--neon-green);
-        background: transparent;
+
+    .gotd-section {
+        animation: gotdPulse 3s ease-in-out infinite;
+    }
+    @keyframes gotdPulse {
+        0%, 100% { box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+        50% { box-shadow: 0 0 35px rgba(0,255,136,0.4); }
+    }
+    .gotd-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px var(--neon-green);
     }
 
 </style>
@@ -445,6 +419,16 @@
             <div class="setting-control">
                 <input type="range" id="bg-intensity" min="0" max="100" step="5" value="100" oninput="setBgIntensity(this.value)">
                 <div class="intensity-label" id="bg-intensity-label">[ FULL: 100% ]</div>
+            </div>
+        </div>
+        <div class="setting-row">
+            <div class="setting-label">
+                <span class="key">Matrix Brightness</span>
+                <div class="desc">Letter opacity (rain brightness). Independent of background intensity.</div>
+            </div>
+            <div class="setting-control">
+                <input type="range" id="matrix-brightness" min="0" max="100" step="5" value="100" oninput="setMatrixBrightness(this.value)">
+                <div class="intensity-label" id="matrix-brightness-label">[ 100% ]</div>
             </div>
         </div>
     </div>
@@ -940,6 +924,7 @@ const alphabet = 'アァカサタナハマヤャラワガザダバパイィキ�
 const fontSize = 16;
 let columns = Math.floor(canvas.width / fontSize);
 let drops = Array.from({length: columns}, () => 1);
+let matrixBrightness = 1.0; // 0-1, controls letter opacity
 
 function drawMatrix() {
     const themeColor = getComputedStyle(document.documentElement).getPropertyValue('--neon-green').trim() || '#00ff88';
@@ -947,6 +932,7 @@ function drawMatrix() {
     ctx2d.globalAlpha = 0.08;
     ctx2d.fillRect(0, 0, canvas.width, canvas.height);
     ctx2d.globalAlpha = 1.0;
+    ctx2d.globalAlpha = matrixBrightness;
     ctx2d.fillStyle = themeColor;
     ctx2d.font = fontSize + 'px monospace';
     for (let i = 0; i < drops.length; i++) {
@@ -1016,7 +1002,52 @@ window.addEventListener('storage', (e) => {
         if (slider) slider.value = String(getBgIntensity());
         applyBgIntensity();
     }
+    if (e.key === MATRIX_BRIGHTNESS_KEY || e.key === null) {
+        const slider = document.getElementById('matrix-brightness');
+        if (slider) slider.value = String(getMatrixBrightness() * 100);
+        applyMatrixBrightness();
+    }
 });
+
+// =====================================================
+// MATRIX BRIGHTNESS (New feature)
+// localStorage 'arcade_matrix_brightness' (0-100, default 100)
+// Controls letter opacity independently of background intensity
+// =====================================================
+const MATRIX_BRIGHTNESS_KEY = 'arcade_matrix_brightness';
+
+function getMatrixBrightness() {
+    try {
+        const v = parseInt(localStorage.getItem(MATRIX_BRIGHTNESS_KEY) || '100', 10);
+        return (isNaN(v)) ? 1.0 : Math.max(0, Math.min(100, v)) / 100;
+    } catch (e) { return 1.0; }
+}
+
+function applyMatrixBrightness() {
+    matrixBrightness = getMatrixBrightness();
+}
+
+function setMatrixBrightness(value) {
+    const level = Math.max(0, Math.min(100, parseInt(value, 10) || 100));
+    try { localStorage.setItem(MATRIX_BRIGHTNESS_KEY, String(level)); } catch (e) {}
+    const label = document.getElementById('matrix-brightness-label');
+    if (label) {
+        label.textContent = '[ ' + level + '% ]';
+    }
+    applyMatrixBrightness();
+    try { playClickSound(); } catch (e) {}
+}
+
+// Live-apply initial value + sync across tabs
+applyMatrixBrightness();
+(function initMatrixBrightnessSlider() {
+    const slider = document.getElementById('matrix-brightness');
+    if (!slider) return;
+    const level = Math.round(getMatrixBrightness() * 100);
+    slider.value = String(level);
+    const label = document.getElementById('matrix-brightness-label');
+    if (label) label.textContent = '[ ' + level + '% ]';
+})();
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
@@ -1201,4 +1232,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 </body>
-</html>
