@@ -235,6 +235,7 @@ function drawMatrix() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.globalAlpha = 1.0;
     
+    ctx.globalAlpha = matrixBrightness;
     ctx.fillStyle = '#00ff88';
     ctx.font = fontSize + 'px monospace';
     
@@ -275,7 +276,29 @@ function applyBgIntensity() {
 applyBgIntensity();
 window.addEventListener('storage', (e) => {
     if (e.key === BG_INTENSITY_KEY || e.key === null) applyBgIntensity();
+    if (e.key === MATRIX_BRIGHTNESS_KEY || e.key === null) applyMatrixBrightness();
 });
+
+// =====================================================
+// MATRIX BRIGHTNESS (New feature)
+// localStorage 'arcade_matrix_brightness' (0-100, default 100)
+// Controls letter opacity independently of background intensity
+// =====================================================
+const MATRIX_BRIGHTNESS_KEY = 'arcade_matrix_brightness';
+
+function getMatrixBrightness() {
+    try {
+        const v = parseInt(localStorage.getItem(MATRIX_BRIGHTNESS_KEY) || '100', 10);
+        return (isNaN(v)) ? 1.0 : Math.max(0, Math.min(100, v)) / 100;
+    } catch (e) { return 1.0; }
+}
+
+function applyMatrixBrightness() {
+    matrixBrightness = getMatrixBrightness();
+}
+
+// Apply initial brightness
+applyMatrixBrightness();
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;

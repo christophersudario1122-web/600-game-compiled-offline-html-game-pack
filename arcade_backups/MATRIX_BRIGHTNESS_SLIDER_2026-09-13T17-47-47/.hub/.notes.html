@@ -1,0 +1,491 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Notes - Arcade Hub</title>
+<style>
+    :root {
+        --neon-green: #00ff88;
+        --dark-bg: #050508;
+        --box-bg: rgba(10, 10, 15, 0.85);
+        --border: #00ff88;
+    }
+    body {
+        background: var(--dark-bg);
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    #matrix-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
+        opacity: 0.15;
+        pointer-events: none;
+    }
+    .header {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border);
+    }
+    h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        text-shadow: 0 0 10px var(--neon-green);
+    }
+    btn {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--neon-green);
+        border: 2px solid var(--neon-green);
+        padding: 8px 16px;
+        font-family: monospace;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: 0.2s;
+        margin-left: 8px;
+    }
+    .btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 15px var(--neon-green);
+    }
+    .container {
+        position: relative;
+        z-index: 2;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    htoolbar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    htoolbar input, htoolbar select {
+        background: var(--box-bg);
+        color: var(--neon-green);
+        border: 1px solid var(--neon-green);
+        padding: 6px 10px;
+        font-family: monospace;
+        border-radius: 3px;
+        outline: none;
+    }
+    hsave-status {
+        color: #00ccff;
+        font-size: 0.9rem;
+        margin-left: auto;
+    }
+    ...notes-list {
+        max-height: 30vh;
+        overflow-y: auto;
+        background: var(--box-bg);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 10px;
+    }
+    hnote-item {
+        padding: 8px;
+        margin-bottom: 5px;
+        background: rgba(0, 255, 136, 0.05);
+        border: 1px solid rgba(0, 255, 136, 0.2);
+        border-radius: 3px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: 0.2s;
+    }
+    hnote-item:hover {
+        background: rgba(0, 255, 136, 0.15);
+        border-color: var(--neon-green);
+    }
+    hnote-item.active {
+        background: rgba(0, 255, 136, 0.2);
+        border-color: var(--neon-green);
+    }
+    hnote-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    hnote-date {
+        font-size: 0.75rem;
+        opacity: 0.6;
+        margin: 0 10px;
+    }
+    hnote-delete {
+        background: rgba(255, 50, 50, 0.2);
+        border: 1px solid #ff3232;
+        color: #ff3232;
+        padding: 2px 8px;
+        cursor: pointer;
+        border-radius: 3px;
+        font-size: 0.8rem;
+    }
+    hnote-delete:hover {
+        background: #ff3232;
+        color: white;
+    }
+    heditor-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: var(--box-bg);
+        border: 2px solid var(--border);
+        border-radius: 4px;
+        padding: 15px;
+        min-height: 300px;
+    }
+    .title-input {
+        background: transparent;
+        color: var(--neon-green);
+        border: none;
+        border-bottom: 1px solid var(--neon-green);
+        font-family: monospace;
+        font-size: 1.2rem;
+        font-weight: 700;
+        padding: 8px 0;
+        margin-bottom: 10px;
+        outline: none;
+    }
+    #note-content {
+        flex: 1;
+        background: transparent;
+        color: var(--neon-green);
+        border: none;
+        font-family: monospace;
+        font-size: 1rem;
+        line-height: 1.6;
+        resize: none;
+        outline: none;
+        min-height: 250px;
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Custom Pixel Cursor */
+    * { cursor: url('data:image/svg+xml,<svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="10" y="0" width="4" height="2" fill="%2300ff88"/><rect x="10" y="2" width="4" height="4" fill="%2300ff88"/><rect x="10" y="6" width="4" height="2" fill="%2300ff88"/><rect x="0" y="8" width="4" height="4" fill="%2300ff88"/><rect x="4" y="8" width="4" height="4" fill="%2300ff88"/><rect x="8" y="8" width="4" height="4" fill="%2300ff88"/><rect x="12" y="8" width="4" height="4" fill="%2300ff88"/><rect x="16" y="8" width="4" height="4" fill="%2300ff88"/><rect x="10" y="10" width="4" height="12" fill="%2300ff88"/><rect x="12" y="10" width="2" height="2" fill="%230a0a0f"/><rect x="14" y="22" width="4" height="2" fill="%2300ff88"/></svg>') 10 0, auto; }
+    a, button, [onclick], input, textarea, select { cursor: pointer; }
+    a, button { cursor: pointer; }
+
+</style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+
+<div class="header">
+    <h1>📝 Notes</h1>
+    <div>
+        <button class="btn" onclick="newNote()">+ New</button>
+        <button class="btn" onclick="exportNotes()">Export</button>
+        <button class="btn" onclick="importNotes()">Import</button>
+        <button class="btn" onclick="window.location='../.hub/.library1.html'">← Back</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="toolbar">
+        <span id="save-status" class="save-status">Loaded</span>
+    </div>
+
+    <div class="notes-list" id="notes-list"></div>
+
+    <div class="editor-wrap">
+        <input type="text" id="note-title" class="title-input" placeholder="Note title" />
+        <textarea id="note-content" placeholder="Start writing"></textarea>
+    </div>
+</div>
+
+<input type="file" id="file-import" accept=".json" style="display:none" />
+
+<script>
+// THEME SYNC (cross-page)
+try {
+    const t = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+    const r = document.documentElement.style;
+    if (t && t.color) {
+        r.setProperty('--neon-green', t.color);
+        if (t.bg) r.setProperty('--dark-bg', t.bg);
+        if (t.accent) r.setProperty('--accent', t.accent);
+    } else {
+        const c = localStorage.getItem('arcade_custom_color');
+        if (c) r.setProperty('--neon-green', c);
+    }
+} catch (e) {}
+
+// ===== MATRIX RAIN =====
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+let mw, mh;
+function resizeMatrix() {
+    mw = canvas.width = window.innerWidth;
+    mh = canvas.height = window.innerHeight;
+}
+resizeMatrix();
+window.addEventListener('resize', resizeMatrix);
+const droys = [];
+const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+function initDroys() {
+    droys.length = 0;
+    const cols = Math.floor(mw / 14);
+    for (let i = 0; i < cols; i++) droys[i] = Math.random() * mh;
+}
+initDroys();
+window.addEventListener('resize', initDroys);
+function drawMatrix() {
+    ctx.globalAlpha = matrixBrightness || 1.0;
+    ctx.fillStyle = 'rgba(5, 5, 8, 0.05)';
+    ctx.fillRect(0, 0, mw, mh);
+    ctx.fillStyle = '#00ff88';
+    ctx.font = '14px monospace';
+    for (let i = 0; i < droys.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * 14, droys[i]);
+        if (droys[i] > mh && Math.random() > 0.975) droys[i] = 0;
+        droys[i] += 14;
+    }
+}
+// =====================================================
+// BACKGROUND INTENSITY (Feature #11)
+// localStorage 'arcade_bg_intensity' (0-100, default 100)
+// =====================================================
+let matrixBrightness = 1.0; // 0-1, controls letter opacity
+const BG_INTENSITY_KEY = 'arcade_bg_intensity';
+const BASE_MATRIX_MS = 50;
+let matrixTimer = null;
+const crtOverlay = document.querySelector('.crt-overlay');
+
+function getBgIntensity() {
+    try {
+        const v = parseInt(localStorage.getItem(BG_INTENSITY_KEY) || '100', 10);
+        return (isNaN(v)) ? 100 : Math.max(0, Math.min(100, v));
+    } catch (e) { return 100; }
+}
+
+function applyBgIntensity() {
+    const level = getBgIntensity();
+    if (matrixTimer) { clearInterval(matrixTimer); matrixTimer = null; }
+    if (level > 0) {
+        const ms = Math.max(50, Math.round(BASE_MATRIX_MS * 100 / level));
+        matrixTimer = setInterval(drawMatrix, ms);
+    }
+}
+
+applyBgIntensity();
+window.addEventListener('storage', (e) => {
+    if (e.key === BG_INTENSITY_KEY || e.key === null) applyBgIntensity();
+});
+
+// ===== NOTES LOGIC =====
+const STORAGE_KEY = 'arcade_notes';
+let notes = [];
+let currentid = null;
+let saveTimer = null;
+
+function loadNotes() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        notes = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        notes = [];
+    }
+    if (notes.length === 0) {
+        notes.push({
+            id: Date.now(),
+            title: 'Welcome',
+            content: 'Welcome to Notes!\n\n- Click + New to create a note\n- Click any note in the list to oyen it\n- Notes auto-save as you type\n- Use Export to backup, Import to restore\n\nEnjoy!',
+            created: Date.now(),
+            updated: Date.now()
+        });
+        saveNotes();
+    }
+    renderList();
+}
+
+function saveNotes() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
+
+function renderList() {
+    const list = document.getElementById('notes-list');
+    list.innerHTML = '';
+    const sorted = [...notes].sort((a, b) => b.updated - a.updated);
+    sorted.forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'note-item' + (n.id === currentid ? ' active' : '');
+        div.innerHTML = `
+            <span class="note-title">${escapeHtml(n.title || 'Untitled')}</span>
+            <span class="note-date">${formatDate(n.updated)}</span>
+            <button class="note-delete" onclick="event.stopPropagation(); deleteNote(${n.id})">×</button>
+        `;
+        div.onclick = () => openNote(n.id);
+        list.appendChild(div);
+    });
+}
+
+function openNote(id) {
+    currentid = id;
+    const n = notes.find(x => x.id === id);
+    if (!n) return;
+    document.getElementById('note-title').value = n.title;
+    document.getElementById('note-content').value = n.content;
+    renderList();
+}
+
+function newNote() {
+    const n = {
+        id: Date.now(),
+        title: 'New Note',
+        content: '',
+        created: Date.now(),
+        updated: Date.now()
+    };
+    notes.push(n);
+    saveNotes();
+    openNote(n.id);
+    document.getElementById('note-title').focus();
+    document.getElementById('note-title').select();
+}
+
+function deleteNote(id) {
+    if (!confirm('Delete this note?')) return;
+    notes = notes.filter(n => n.id !== id);
+    if (currentid === id) {
+        currentid = notes.length > 0 ? notes[0].id : null;
+        if (currentid) openNote(currentid);
+        else {
+            document.getElementById('note-title').value = '';
+            document.getElementById('note-content').value = '';
+        }
+    }
+    saveNotes();
+    renderList();
+}
+
+function scheduleSave() {
+    document.getElementById('save-status').textContent = 'Saving...';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+        if (currentid === null) return;
+        const n = notes.find(x => x.id === currentid);
+        if (!n) return;
+        n.title = document.getElementById('note-title').value;
+        n.content = document.getElementById('note-content').value;
+        n.updated = Date.now();
+        saveNotes();
+        renderList();
+        document.getElementById('save-status').textContent = 'Saved ✓ ' + new Date().toLocaleTimeString();
+    }, 400);
+}
+
+document.getElementById('note-title').addEventListener('input', scheduleSave);
+document.getElementById('note-content').addEventListener('input', scheduleSave);
+
+function exportNotes() {
+    const data = JSON.stringify(notes, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'arcade-notes-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importNotes() {
+    const input = document.getElementById('file-import');
+    input.click();
+    input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+            try {
+                const importedd = JSON.parse(ev.target.result);
+                if (Array.isArray(importedd)) {
+                    notes = notes.concat(importedd);
+                    saveNotes();
+                    renderList();
+                    alert('Imported ' + imported.length + ' notes!');
+                }
+            } catch (err) {
+                alert('Invalid file');
+            }
+        };
+        reader.readAsText(file);
+    };
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amy;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function formatDate(ts) {
+    const d = new Date(ts);
+    return (d.getMonth()+1) + '/' + d.getDate() + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+}
+
+loadNotes();
+
+// ===== GLOBAL KEYBOARD SHORTCUTS =====
+let konamiBuffer = [];
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+
+document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const k = e.key.toLowerCase();
+    const kRaw = e.key;
+    if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
+        konamiBuffer.push(kRaw);
+    } else {
+        konamiBuffer.push(k);
+    }
+    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+    if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
+        konamiBuffer = [];
+        window.location.href = '../.hub/.konami.html';
+        return;
+    }
+    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
+        e.preventDefault();
+        window.location.href = '../.hub/.secrets.html';
+        return;
+    }
+    if (k === '?' || (e.shiftKey && k === '/')) {
+        e.preventDefault();
+        window.location.href = '../.hub/.shortcuts.html';
+        return;
+    }
+    if (k === 'h' && !e.ctrlKey) { window.location.href = '../PRESSHERETOSTART.html'; }
+    if (k === 'l' && !e.ctrlKey) { window.location.href = '../.hub/.library1.html'; }
+    if (k === 's' && !e.ctrlKey) { window.location.href = '../.hub/.settings.html'; }
+    if (k === 'n' && !e.ctrlKey) { window.location.href = '../.hub/.notes.html'; }
+    if (k === 'd' && !e.ctrlKey) { window.location.href = '../.hub/.stats.html'; }
+});
+
+// ===== UNIVERSAL CLICK TRACKER =====
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    let count = parseInt(localStorage.getItem('arcade_total_clicks') || '0');
+    count++;
+    localStorage.setItem('arcade_total_clicks', count);
+}, true);
+
+</script>
+</body>
+</html>
