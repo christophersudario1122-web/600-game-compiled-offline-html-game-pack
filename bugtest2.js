@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const HUB = path.join(__dirname, '.hub');
-const files = ['.library1.html', '.settings.html', '.stats.html', '.konami.html', '.secrets.html', '.login.html', '.notes.html', '.snake.html', '.shortcuts.html'];
+const files = ['.library1.html', '.settings.html', '.stats.html', '.konami.html', '.secrets.html', '.login.html', '.notes.html', '.snake.html', '.shortcuts.html', '.soundboard.html'];
 
 let totalIssues = 0;
 
