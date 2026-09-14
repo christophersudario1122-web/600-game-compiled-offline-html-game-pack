@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Terminal_Arcade_Hub</title>
+<style>
+    :root {
+        --neon-green: #00ff88;
+        --dark-bg: #050508;
+        --box-bg: rgba(10, 10, 15, 0.85);
+    }
+
+    body {
+        background: var(--dark-bg);
+        color: var(--neon-green);
+        font-family: 'Courier New', Courier, monospace;
+        padding: 30px;
+        margin: 0;
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow-x: hidden;
+        overflow-y: auto;
+        transition: background 0.3s, color 0.3s;
+    }
+
+    #matrix-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        opacity: 0.25;
+        pointer-events: none;
+    }
+
+    .crt-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+        background-size: 100% 4px;
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    .top-controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        right: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 2;
+    }
+
+    .audio-toggle-btn {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--neon-green);
+        border: 2px solid var(--neon-green);
+        padding: 8px 18px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 700;
+        font-family: monospace;
+        font-size: 0.9rem;
+        box-shadow: 0 0 10px rgba(0,255,136,0.2);
+        transition: 0.2s;
+    }
+
+    .audio-toggle-btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 20px var(--neon-green);
+        transform: scale(1.05);
+    }
+
+    .theme-selector {
+        background: var(--box-bg);
+        border: 2px solid var(--neon-green);
+        color: var(--neon-green);
+        padding: 8px 14px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-weight: bold;
+        cursor: pointer;
+        outline: none;
+        box-shadow: 0 0 10px rgba(0,255,136,0.1);
+    }
+
+    .theme-selector option {
+        background: #0a0a0f;
+        color: var(--neon-green);
+    }
+
+    .hub-container {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 750px;
+        width: 100%;
+        padding: 35px;
+        background: var(--box-bg);
+        border: 2px solid var(--neon-green);
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0,255,136,0.15), inset 0 0 15px rgba(0,255,136,0.05);
+        backdrop-filter: blur(8px);
+        margin: 80px 0;
+        box-sizing: border-box;
+    }
+
+    h1 {
+        font-size: 2.8rem;
+        letter-spacing: 4px;
+        margin-bottom: 10px;
+        text-shadow: 0 0 15px rgba(0,255,136,0.5);
+    }
+
+    p {
+        opacity: 0.75;
+        font-size: 1.05rem;
+        margin-bottom: 25px;
+        letter-spacing: 1px;
+    }
+
+    .menu-options {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .menu-btn {
+        background: rgba(0, 255, 136, 0.05);
+        border: 2px solid var(--neon-green);
+        color: var(--neon-green);
+        padding: 14px 25px;
+        font-size: 1.1rem;
+        font-family: monospace;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: 0.25s;
+        box-shadow: 0 0 10px rgba(0,255,136,0.1);
+        display: block;
+        text-align: center;
+    }
+
+    .menu-btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 25px var(--neon-green);
+        transform: scale(1.02);
+    }
+
+    /* Secret / Special Styling */
+    .secret-btn {
+        border-color: #ffd700;
+        color: #ffd700;
+        background: rgba(255, 215, 0, 0.05);
+        box-shadow: 0 0 10px rgba(255,215,0,0.1);
+    }
+
+    .secret-btn:hover {
+        background: #ffd700;
+        color: var(--dark-bg);
+        box-shadow: 0 0 25px #ffd700;
+    }
+
+    /* Library 2 Tile Styling */
+    .library2-btn {
+        border-color: #00d2ff;
+        color: #00d2ff;
+        background: rgba(0, 210, 255, 0.05);
+        box-shadow: 0 0 10px rgba(0,210,255,0.1);
+    }
+
+    .library2-btn:hover {
+        background: #00d2ff;
+        color: var(--dark-bg);
+        box-shadow: 0 0 25px #00d2ff;
+    }
+
+    .minecraft-section {
+        margin-top: 5px;
+        border: 2px dashed var(--neon-green);
+        padding: 15px;
+        border-radius: 6px;
+        background: rgba(0, 255, 136, 0.02);
+    }
+
+    .minecraft-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .mc-btn {
+        padding: 10px;
+        font-size: 0.95rem;
+        background: rgba(0, 255, 136, 0.05);
+        border: 2px solid var(--neon-green);
+        color: var(--neon-green);
+        border-radius: 4px;
+        text-decoration: none;
+        font-family: monospace;
+        font-weight: bold;
+        transition: 0.2s;
+        display: block;
+        text-align: center;
+    }
+
+    .mc-btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 15px var(--neon-green);
+        transform: scale(1.03);
+    }
+
+    .section-label {
+        font-size: 0.95rem;
+        letter-spacing: 2px;
+        margin-bottom: 5px;
+        opacity: 0.85;
+    }
+</style>
+</head>
+<body>
+
+<div class="crt-overlay"></div>
+<canvas id="matrix-canvas"></canvas>
+
+<div class="top-controls">
+    <button id="ambient-toggle" class="audio-toggle-btn" onclick="toggleAmbientMusic(); playClickSound();" onmouseenter="playHoverSound()">🔊 HACKER AMBIENT: OFF</button>
+    <select id="theme-select" class="theme-selector" onchange="changeTheme(this.value); playClickSound();" onmouseenter="playHoverSound()">
+        <option value="matrix">🟢 Matrix Green</option>
+        <option value="amber">🟠 Cyberpunk Amber</option>
+        <option value="blue">🔵 Neon Blue</option>
+        <option value="red">🔴 Blood Red</option>
+    </select>
+</div>
+
+<div class="hub-container">
+    <h1>[ TERMINAL_ARCADE ]</h1>
+    <p>> SECURE SYSTEM INITIALIZED. SELECT ACCESS POINT.</p>
+    
+    <div class="menu-options">
+        <a href=".hub/.library1.html" class="menu-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">📁 ENTER GAME DATABASE (LIBRARY 1)</a>
+        
+        <a href=".library2/pressHERE.html" class="menu-btn library2-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">🗂️ ENTER GAME LIBRARY 2</a>
+        
+        <a href=".hub/.login.html" class="menu-btn secret-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">⭐ [SECRET] SECURE LOGIN CLIENT</a>
+        
+        <div class="minecraft-section">
+            <div class="section-label">⛏️ MINECRAFT CLIENT SECTORS</div>
+            <div class="minecraft-grid">
+                <a href=".minecraft clients/1.5.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.5</a>
+                <a href=".minecraft clients/1.8.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.8</a>
+                <a href=".minecraft clients/1.12.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.12</a>
+            </div>
+        </div>
+
+        <div class="minecraft-section">
+            <div class="section-label">🛠️ HUB TOOLS</div>
+            <div class="minecraft-grid">
+                <a href=".hub/.settings.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">⚙️ Settings</a>
+                <a href=".hub/.notes.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">📝 Notes</a>
+                <a href=".hub/.stats.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">📊 Stats</a>
+                <a href=".hub/.shortcuts.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">⌨️ Shortcuts</a>
+                <a href=".hub/.secrets.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">🔒 Secrets</a>
+                <a href=".hub/.konami.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">🎮 Konami</a>
+                <a href=".hub/.snake.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">🐍 Snake</a>
+                <a href=".hub/.soundboard.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">🔊 Soundboard</a>
+            </div>
+        </div>
+
+        <button class="menu-btn" onclick="launchRandomGame(); playClickSound();" onmouseenter="playHoverSound()">🎲 QUICK-LAUNCH RANDOM GAME</button>
+    </div>
+</div>
+
+<script>
+// THEME SYNC (cross-page)
+try {
+    const t = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+    const r = document.documentElement.style;
+    if (t && t.color) {
+        r.setProperty('--neon-green', t.color);
+        if (t.bg) r.setProperty('--dark-bg', t.bg);
+        if (t.accent) r.setProperty('--accent', t.accent);
+    } else {
+        const c = localStorage.getItem('arcade_custom_color');
+        if (c) r.setProperty('--neon-green', c);
+    }
+} catch (e) {}
+
+// --- AUDIO SYSTEM (WEB AUDIO API & HACKER AMBIENT ENGINE) ---
+let audioCtx = null;
+let ambientRunning = false;
+let ambientInterval = null;
+let droneOsc = null;
+let droneGain = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+}
+
+function playHoverSound() {
+    try {
+        initAudio();
+        if(!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+    } catch(e) {}
+}
+
+function playClickSound() {
+    try {
+        initAudio();
+        if(!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+    } catch(e) {}
+}
+
+// Procedural Cryptic Hacker Ambient Generator
+function toggleAmbientMusic() {
+    initAudio();
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
+    const btn = document.getElementById('ambient-toggle');
+    if (!ambientRunning) {
+        ambientRunning = true;
+        btn.innerText = "🔊 HACKER AMBIENT: ON";
+
+        // Low pulsing drone
+        droneOsc = audioCtx.createOscillator();
+        droneGain = audioCtx.createGain();
+        droneOsc.type = 'sawtooth';
+        droneOsc.frequency.setValueAtTime(55, audioCtx.currentTime);
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(180, audioCtx.currentTime);
+
+        droneGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+
+        droneOsc.connect(filter);
+        filter.connect(droneGain);
+        droneGain.connect(audioCtx.destination);
+        droneOsc.start();
+
+        // Data stream bleep loop
+        const notes = [220, 246.94, 277.18, 329.63, 392, 440, 523.25, 659.25];
+        ambientInterval = setInterval(() => {
+            if (!ambientRunning) return;
+            try {
+                const bleep = audioCtx.createOscillator();
+                const bleepGain = audioCtx.createGain();
+                bleep.type = Math.random() > 0.5 ? 'sine' : 'square';
+                const randomNote = notes[Math.floor(Math.random() * notes.length)];
+                bleep.frequency.setValueAtTime(randomNote * 2, audioCtx.currentTime);
+                
+                bleepGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+                bleepGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
+
+                bleep.connect(bleepGain);
+                bleepGain.connect(audioCtx.destination);
+                bleep.start();
+                bleep.stop(audioCtx.currentTime + 0.12);
+            } catch(e) {}
+        }, 300);
+
+    } else {
+        ambientRunning = false;
+        btn.innerText = "🔊 HACKER AMBIENT: OFF";
+        if (droneOsc) {
+            try { droneOsc.stop(); droneOsc.disconnect(); } catch(e) {}
+            droneOsc = null;
+        }
+        if (ambientInterval) {
+            clearInterval(ambientInterval);
+            ambientInterval = null;
+        }
+    }
+}
+
+// --- THEME SYSTEM ---
+const themes = {
+    matrix: { green: "#00ff88", bg: "#050508" },
+    amber: { green: "#ffb700", bg: "#0c0802" },
+    blue: { green: "#00d2ff", bg: "#02060c" },
+    red: { green: "#ff3333", bg: "#0c0202" }
+};
+
+let matrixColor = "#00ff88";
+let matrixBg = "#050508";
+
+function changeTheme(themeName) {
+    const t = themes[themeName] || themes.matrix;
+    document.documentElement.style.setProperty('--neon-green', t.green);
+    document.documentElement.style.setProperty('--dark-bg', t.bg);
+    localStorage.setItem('arcade_theme', themeName);
+    matrixColor = t.green;
+    matrixBg = t.bg;
+}
+
+const savedTheme = localStorage.getItem('arcade_theme') || 'matrix';
+document.getElementById('theme-select').value = savedTheme;
+changeTheme(savedTheme);
+
+// --- QUICK LAUNCH RANDOM GAME ---
+const sampleGames = ["1v1.lol", "2048", "ageofwar", "basketrandom", "cookieclicker", "crossyroad", "doodlejump", "flappybird", "geometrydash", "pacman", "retrobowl", "slope", "subwaysurfersbeijing", "templerun2", "vex4"];
+const dir = ".Offline-HTML-Games-Pack-master/offline/";
+
+function launchRandomGame() {
+    const randomGame = sampleGames[Math.floor(Math.random() * sampleGames.length)];
+    let ext = ".html";
+    if (["paperio2", "rooftopsnipers", "snowrider", "snowroad", "soccerrandom", "tombofthemask", "vex6", "vex7", "vex8"].includes(randomGame)) ext = ".htm";
+    window.location.href = dir + randomGame + ext;
+}
+
+// --- MATRIX RAIN ---
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const alphabet = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレゲゼデベペオォコソトノホモヨョロゴゾドボポヴッンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+const drops = Array.from({length: columns}, () => 1);
+
+function drawMatrix() {
+    ctx.fillStyle = matrixBg;
+    ctx.globalAlpha = 0.08;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1.0;
+    
+    ctx.fillStyle = matrixColor;
+    ctx.font = fontSize + 'px monospace';
+    
+    for (let i = 0; i < drops.length; i++) {
+        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+    }
+}
+setInterval(drawMatrix, 30);
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
