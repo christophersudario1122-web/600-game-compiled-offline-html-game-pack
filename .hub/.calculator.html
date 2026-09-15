@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Scientific Calculator - Arcade Hub</title>
+<style>
+:root{--neon:#00ff88;--bg:#050508;--box:rgba(10,10,15,0.92);--dim:rgba(0,255,136,0.25)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--neon);font-family:'Courier New',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;overflow-x:hidden}
+canvas#matrix-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;opacity:.25;pointer-events:none}
+.crt-overlay{position:fixed;inset:0;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,.25) 50%);background-size:100% 4px;z-index:10;pointer-events:none}
+.wrap{position:relative;z-index:5;width:100%;max-width:480px}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.top a,.top button{background:rgba(0,255,136,.1);color:var(--neon);border:1px solid var(--neon);padding:6px 14px;border-radius:4px;text-decoration:none;font-family:monospace;font-size:.82rem;cursor:pointer}
+.top a:hover,.top button:hover{background:rgba(0,255,136,.25)}
+#gamepad-badge{display:none;background:rgba(0,255,136,.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:.8rem;color:#00ff88}
+
+/* Calculator Shell */
+.calc{background:var(--box);border:2px solid var(--neon);border-radius:12px;padding:18px;box-shadow:0 0 30px rgba(0,255,136,.15);backdrop-filter:blur(6px)}
+
+/* Display */
+.disp{background:#000;border:1px solid rgba(0,255,136,.4);border-radius:8px;padding:14px 16px;margin-bottom:14px;min-height:100px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden}
+.disp-expr{font-size:.82rem;color:rgba(0,255,136,.5);text-align:right;word-break:break-all;min-height:1.2em;max-height:3.2em;overflow:hidden}
+.disp-main{font-size:2.2rem;font-weight:700;text-align:right;word-break:break-all;color:var(--neon);text-shadow:0 0 8px rgba(0,255,136,.5);line-height:1.2;max-height:1.8em;overflow:hidden;transition:font-size .15s}
+.disp-main.small{font-size:1.4rem}
+.disp-mode{position:absolute;top:6px;left:10px;font-size:.6rem;color:rgba(0,255,136,.4);letter-spacing:1px}
+.disp-mem{position:absolute;top:6px;right:10px;font-size:.65rem;color:rgba(255,204,0,.6)}
+
+/* Angle mode toggle */
+.mode-bar{display:flex;gap:6px;margin-bottom:10px;justify-content:center}
+.mode-btn{background:transparent;color:rgba(0,255,136,.4);border:1px solid rgba(0,255,136,.2);padding:4px 12px;border-radius:4px;font-family:monospace;font-size:.75rem;cursor:pointer}
+.mode-btn.active{color:var(--neon);border-color:var(--neon);background:rgba(0,255,136,.12)}
+
+/* Button grid */
+.btns{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.btn{border:none;border-radius:6px;padding:14px 4px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .12s;position:relative;overflow:hidden}
+.btn:active{transform:scale(.93);filter:brightness(.8)}
+.btn-fn{background:rgba(0,255,136,.08);color:var(--neon);border:1px solid rgba(0,255,136,.25)}
+.btn-fn:hover{background:rgba(0,255,136,.2)}
+.btn-op{background:rgba(0,100,255,.12);color:#66ccff;border:1px solid rgba(100,200,255,.25)}
+.btn-op:hover{background:rgba(0,100,255,.25)}
+.btn-eq{background:rgba(0,255,136,.25);color:#000;border:1px solid var(--neon);font-size:1.1rem}
+.btn-eq:hover{background:rgba(0,255,136,.45)}
+.btn-num{background:rgba(255,255,255,.06);color:#ddd;border:1px solid rgba(255,255,255,.1)}
+.btn-num:hover{background:rgba(255,255,255,.12)}
+.btn-danger{background:rgba(255,60,60,.12);color:#ff6666;border:1px solid rgba(255,60,60,.3)}
+.btn-danger:hover{background:rgba(255,60,60,.25)}
+.btn span.sub{font-size:.55rem;display:block;color:rgba(0,255,136,.5);margin-top:1px}
+.btn-eq span.sub{color:rgba(0,100,0,.5)}
+
+/* History panel */
+.hist-toggle{display:flex;justify-content:flex-end;margin-top:8px}
+.hist-toggle button{background:transparent;color:rgba(0,255,136,.4);border:1px solid rgba(0,255,136,.15);padding:4px 10px;border-radius:4px;font-family:monospace;font-size:.7rem;cursor:pointer}
+.hist-toggle button:hover{color:var(--neon)}
+.history{display:none;margin-top:10px;background:rgba(0,0,0,.5);border:1px solid rgba(0,255,136,.15);border-radius:8px;padding:10px 12px;max-height:180px;overflow-y:auto}
+.history.open{display:block}
+.history-item{font-size:.75rem;color:rgba(0,255,136,.5);padding:3px 0;border-bottom:1px solid rgba(0,255,136,.06)}
+.history-item .h-expr{color:rgba(0,255,136,.35)}
+.history-item .h-result{color:var(--neon)}
+</style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+<div class="crt-overlay"></div>
+
+<div class="wrap">
+    <div class="top">
+        <a href="../PRESSHERETOSTART.html"><< RETURN_HUB</a>
+        <span id="gamepad-badge"></span>
+        <a href="./.library1.html">📚 Library</a>
+    </div>
+
+    <div class="calc">
+        <!-- Display -->
+        <div class="disp">
+            <div class="disp-mode" id="disp-mode">DEG</div>
+            <div class="disp-mem" id="disp-mem"></div>
+            <div class="disp-expr" id="disp-expr"></div>
+            <div class="disp-main" id="disp-main">0</div>
+        </div>
+
+        <!-- Angle Mode -->
+        <div class="mode-bar">
+            <button class="mode-btn active" data-mode="deg" onclick="setAngleMode('deg')">DEG</button>
+            <button class="mode-btn" data-mode="rad" onclick="setAngleMode('rad')">RAD</button>
+            <button class="mode-btn" data-mode="grad" onclick="setAngleMode('grad')">GRAD</button>
+        </div>
+
+        <!-- Buttons -->
+        <div class="btns" id="btns"></div>
+
+        <!-- History -->
+        <div class="hist-toggle"><button onclick="toggleHistory()">📜 History</button></div>
+        <div class="history" id="history"></div>
+    </div>
+</div>
+
+<script src="./shared-features.js"></script>
+<script src="./shared-features.js"></script>
+<script>
+// ===== MATRIX RAIN =====
+const canvas=document.getElementById('matrix-canvas'),ctx=canvas.getContext('2d');
+let cols,cols2=[];
+function resizeMatrix(){canvas.width=innerWidth;canvas.height=innerHeight;cols=Math.floor(canvas.width/14);cols2=Array(cols).fill(0)}
+resizeMatrix();addEventListener('resize',resizeMatrix);
+const abc='01アイウエオカキクケコサシスセソ0ABCDEFαβγδ∞∫∑√πθ';
+function drawMatrix(){ctx.fillStyle='rgba(5,5,8,0.06)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#00ff88';ctx.font='14px monospace';for(let i=0;i<cols;i++){const ch=abc[Math.floor(Math.random()*abc.length)];ctx.fillText(ch,i*14,cols2[i]*14);if(cols2[i]*14>canvas.height&&Math.random()>.975)cols2[i]=0;cols2[i]++}}
+setInterval(drawMatrix,35);
+
+// ===== CALCULATOR ENGINE =====
+let angleMode = 'deg'; // deg | rad | grad
+let current = '0';
+let expression = '';
+let history = [];
+let justEvaluated = false;
+let memory = 0;
+let hasMemory = false;
+let parenthesesOpen = 0;
+let usedToRad = false;
+
+const $main = document.getElementById('disp-main');
+const $expr = document.getElementById('disp-expr');
+const $mode = document.getElementById('disp-mode');
+const $mem = document.getElementById('disp-mem');
+const $hist = document.getElementById('history');
+
+// Button layout: [label, action, type, subtitle]
+const BUTTONS = [
+  ['MC', 'mc', 'fn'], ['MR', 'mr', 'fn'], ['M+', 'm+', 'fn'], ['M-', 'm-', 'fn'], ['MS', 'ms', 'fn'],
+  ['sin', 'sin', 'fn', ''], ['cos', 'cos', 'fn'], ['tan', 'tan', 'fn'], ['π', 'pi', 'fn'], ['e', 'euler', 'fn'],
+  ['sin⁻¹', 'asin', 'fn'], ['cos⁻¹', 'acos', 'fn'], ['tan⁻¹', 'atan', 'fn'], ['ln', 'ln', 'fn'], ['log', 'log', 'fn'],
+  ['x²', 'sqr', 'fn', 'x²'], ['x³', 'cube', 'fn', 'x³'], ['√', 'sqrt', 'fn', '√x'], ['∛', 'cbrt', 'fn', '∛x'], ['x!', 'fact', 'fn'],
+  ['1/x', 'inv', 'fn'], ['|x|', 'abs', 'fn'], ['n!', 'nfact', 'fn'], ['mod', 'mod', 'op'], ['^', 'pow', 'op', 'xʸ'],
+  ['7', '7', 'num'], ['8', '8', 'num'], ['9', '9', 'num'], ['DEL', 'del', 'danger'], ['AC', 'ac', 'danger'],
+  ['4', '4', 'num'], ['5', '5', 'num'], ['6', '6', 'num'], ['×', '*', 'op'], ['÷', '/', 'op'],
+  ['1', '1', 'num'], ['2', '2', 'num'], ['3', '3', 'num'], ['+', '+', 'op'], ['-', '-', 'op'],
+  ['0', '0', 'num'], ['.', '.', 'num'], ['(', '(', 'op'], [')', ')', 'op'], ['=', '=', 'eq'],
+  ['±', 'negate', 'fn'], ['EXP', 'exp', 'fn'], ['EE', 'ee', 'fn'], ['%', 'pct', 'fn'], ['RAND', 'rand', 'fn'],
+];
+
+function renderButtons() {
+  const grid = document.getElementById('btns');
+  grid.innerHTML = '';
+  BUTTONS.forEach(([label, action, type, sub]) => {
+    const b = document.createElement('button');
+    b.className = 'btn btn-' + type;
+    b.dataset.action = action;
+    b.innerHTML = label + (sub ? '<span class="sub">' + sub + '</span>' : '');
+    b.addEventListener('click', () => { playClickSound(); handleButton(action); });
+    b.addEventListener('mouseenter', () => { playHoverSound(); });
+    grid.appendChild(b);
+  });
+}
+
+function toRad(x) {
+  if (angleMode === 'rad') return x;
+  if (angleMode === 'deg') return x * Math.PI / 180;
+  return x * Math.PI / 200; // grad
+}
+function fromRad(x) {
+  if (angleMode === 'rad') return x;
+  if (angleMode === 'deg') return x * 180 / Math.PI;
+  return x * 200 / Math.PI;
+}
+
+function factorial(n) {
+  if (n < 0 || n > 170 || n !== Math.floor(n)) return NaN;
+  if (n === 0 || n === 1) return 1;
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+function processExpression(expr) {
+  // Replace display symbols with JS operators
+  let e = expr
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/π/g, '(' + Math.PI + ')')
+    .replace(/(?<![a-z])e(?![a-z(])/g, '(' + Math.E + ')')
+    .replace(/\^/g, '**')
+    .replace(/(?<!\w)mod(?!\w)/g, '%');
+
+  // Auto-close parentheses
+  while ((e.match(/\(/g) || []).length > (e.match(/\)/g) || []).length) e += ')';
+  return e;
+}
+
+function safeEval(expr) {
+  const processed = processExpression(expr);
+  // Block dangerous patterns
+  if (/import|require|fetch|XMLHttp|eval|Function|prototype/i.test(processed)) return NaN;
+  try {
+    const result = new Function('"use strict"; return (' + processed + ')')();
+    return result;
+  } catch { return NaN; }
+}
+
+function formatResult(num) {
+  if (num === undefined || num === null) return 'Error';
+  if (typeof num === 'string') return num;
+  if (isNaN(num)) return 'Error';
+  if (!isFinite(num)) return num > 0 ? '∞' : '-∞';
+  // Check if it's an integer-like float
+  if (Number.isInteger(num) && Math.abs(num) < 1e15) return num.toString();
+  // For very large or very small, use exponential
+  if (Math.abs(num) >= 1e15 || (Math.abs(num) < 1e-10 && num !== 0)) return num.toExponential(10).replace(/\.?0+e/, 'e');
+  // Decimal with smart precision
+  const s = parseFloat(num.toPrecision(12)).toString();
+  return s;
+}
+
+function updateDisplay() {
+  $main.textContent = current;
+  $expr.textContent = expression || '';
+  $mode.textContent = angleMode.toUpperCase();
+  $mem.textContent = hasMemory ? 'M: ' + formatResult(memory) : '';
+
+  // Adjust font size
+  $main.classList.toggle('small', current.length > 12);
+}
+
+function setAngleMode(mode) {
+  angleMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  updateDisplay();
+}
+
+function toggleHistory() {
+  $hist.classList.toggle('open');
+}
+
+function renderHistory() {
+  if (history.length === 0) { $hist.innerHTML = '<div class="history-item" style="color:rgba(0,255,136,.2)">No history yet</div>'; return; }
+  $hist.innerHTML = history.slice().reverse().map(h =>
+    `<div class="history-item"><span class="h-expr">${escHtml(h.expr)}</span> = <span class="h-result">${escHtml(h.result)}</span></div>`
+  ).join('');
+}
+
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function addHistory(expr, result) {
+  history.push({ expr, result: formatResult(result) });
+  if (history.length > 50) history.shift();
+  renderHistory();
+}
+
+function handleButton(action) {
+  // If just evaluated and user types a number, start fresh
+  if (justEvaluated && /^[0-9.]$/.test(action)) {
+    current = '0';
+    expression = '';
+    justEvaluated = false;
+  } else if (justEvaluated && action !== '=' && action !== 'ac') {
+    justEvaluated = false;
+  }
+
+  switch (action) {
+    // Numbers
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
+      current = (current === '0') ? action : current + action;
+      break;
+    case '.':
+      if (!current.includes('.')) current += '.';
+      break;
+
+    // Operators
+    case '+': case '-': case '*': case '/':
+    case 'mod': case 'pow':
+      const opSym = { '+': '+', '-': '-', '*': '×', '/': '÷', 'mod': ' mod ', 'pow': '^' }[action];
+      expression += current + ' ' + opSym + ' ';
+      current = '0';
+      break;
+
+    // Parentheses
+    case '(':
+      expression += '(';
+      parenthesesOpen++;
+      break;
+    case ')':
+      if (parenthesesOpen > 0) {
+        expression += current + ')';
+        current = '0';
+        parenthesesOpen--;
+      }
+      break;
+
+    // Equals
+    case '=':
+      const fullExpr = expression + current;
+      if (!fullExpr.trim()) break;
+      const result = safeEval(fullExpr);
+      const formatted = formatResult(result);
+      addHistory(fullExpr, result);
+      expression = '';
+      current = formatted;
+      justEvaluated = true;
+      break;
+
+    // Clear / Delete
+    case 'ac':
+      current = '0';
+      expression = '';
+      justEvaluated = false;
+      break;
+    case 'del':
+      if (current.length > 1) current = current.slice(0, -1);
+      else current = '0';
+      break;
+
+    // Negate
+    case 'negate':
+      if (current !== '0') {
+        current = current.startsWith('-') ? current.slice(1) : '-' + current;
+      }
+      break;
+
+    // Percent
+    case 'pct':
+      current = formatResult(parseFloat(current) / 100);
+      break;
+
+    // Scientific functions
+    case 'sin':
+      expression += 'sin(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'cos':
+      expression += 'cos(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'tan':
+      expression += 'tan(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'asin':
+      expression += 'asin(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'acos':
+      expression += 'acos(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'atan':
+      expression += 'atan(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'ln':
+      expression += 'ln(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'log':
+      expression += 'log(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'sqrt':
+      expression += '√(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'cbrt':
+      expression += 'cbrt(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'sqr':
+      current = formatResult(Math.pow(parseFloat(current), 2));
+      break;
+    case 'cube':
+      current = formatResult(Math.pow(parseFloat(current), 3));
+      break;
+    case 'fact':
+      current = formatResult(factorial(parseInt(current)));
+      break;
+    case 'nfact':
+      expression += 'fact(';
+      current = '0';
+      parenthesesOpen++;
+      break;
+    case 'inv':
+      if (parseFloat(current) === 0) { current = 'Error'; break; }
+      current = formatResult(1 / parseFloat(current));
+      break;
+    case 'abs':
+      current = formatResult(Math.abs(parseFloat(current)));
+      break;
+    case 'pi':
+      current = formatResult(Math.PI);
+      break;
+    case 'euler':
+      current = formatResult(Math.E);
+      break;
+
+    // Constants & extras
+    case 'exp':
+      current = formatResult(Math.exp(parseFloat(current)));
+      break;
+    case 'ee':
+      current += 'e';
+      break;
+    case 'rand':
+      current = formatResult(Math.random());
+      break;
+
+    // Memory
+    case 'ms': memory = parseFloat(current); hasMemory = true; break;
+    case 'mr': if (hasMemory) current = formatResult(memory); break;
+    case 'm+': memory += parseFloat(current); hasMemory = true; break;
+    case 'm-': memory -= parseFloat(current); hasMemory = true; break;
+    case 'mc': memory = 0; hasMemory = false; break;
+  }
+
+  updateDisplay();
+}
+
+// Override safeEval to handle our custom functions
+const _origEval = safeEval;
+function processExpression(expr) {
+  let e = expr
+    .replace(/×/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/\^/g, '**')
+    .replace(/(?<![a-z])mod(?!\w)/g, '%')
+    // Trig with angle conversion
+    .replace(/sin\(/g, '(function(x){return Math.sin(' + (angleMode==='deg'?'x*Math.PI/180':angleMode==='grad'?'x*Math.PI/200':'x') + ')})(')
+    .replace(/cos\(/g, '(function(x){return Math.cos(' + (angleMode==='deg'?'x*Math.PI/180':angleMode==='grad'?'x*Math.PI/200':'x') + ')})(')
+    .replace(/tan\(/g, '(function(x){return Math.tan(' + (angleMode==='deg'?'x*Math.PI/180':angleMode==='grad'?'x*Math.PI/200':'x') + ')})(')
+    // Inverse trig
+    .replace(/asin\(/g, '(function(x){return ' + (angleMode==='deg'?'Math.asin(x)*180/Math.PI':angleMode==='grad'?'Math.asin(x)*200/Math.PI':'Math.asin(x)') + '})(')
+    .replace(/acos\(/g, '(function(x){return ' + (angleMode==='deg'?'Math.acos(x)*180/Math.PI':angleMode==='grad'?'Math.acos(x)*200/Math.PI':'Math.acos(x)') + '})(')
+    .replace(/atan\(/g, '(function(x){return ' + (angleMode==='deg'?'Math.atan(x)*180/Math.PI':angleMode==='grad'?'Math.atan(x)*200/Math.PI':'Math.atan(x)') + '})(')
+    // Logarithms
+    .replace(/ln\(/g, 'Math.log(')
+    .replace(/log\(/g, 'Math.log10(')
+    // Roots
+    .replace(/√\(/g, 'Math.sqrt(')
+    .replace(/cbrt\(/g, 'Math.cbrt(')
+    // Factorial
+    .replace(/fact\(/g, '__factorial(');
+
+  // π and e constants (careful not to match inside words)
+  e = e.replace(/π/g, '(' + Math.PI + ')');
+
+  // Auto-close parentheses
+  while ((e.match(/\(/g) || []).length > (e.match(/\)/g) || []).length) e += ')';
+  return e;
+}
+
+function safeEval(expr) {
+  const processed = processExpression(expr);
+  if (/import|require|fetch|XMLHttp|eval|Function|prototype/i.test(processed)) return NaN;
+  try {
+    const result = new Function('"use strict"; var __factorial = ' + factorial.toString() + '; return (' + processed + ')')();
+    return result;
+  } catch { return NaN; }
+}
+
+// ===== KEYBOARD INPUT =====
+document.addEventListener('keydown', (e) => {
+  const k = e.key;
+  if (/^[0-9.]$/.test(k)) handleButton(k);
+  else if (k === '+') handleButton('+');
+  else if (k === '-') handleButton('-');
+  else if (k === '*') handleButton('*');
+  else if (k === '/') { e.preventDefault(); handleButton('/'); }
+  else if (k === '(' || k === ')') handleButton(k);
+  else if (k === 'Enter' || k === '=') { e.preventDefault(); handleButton('='); }
+  else if (k === 'Backspace') handleButton('del');
+  else if (k === 'Escape' || k === 'Delete') handleButton('ac');
+  else if (k === '%') handleButton('pct');
+  else if (k === '^') handleButton('pow');
+  else if (k === '!') handleButton('fact');
+  else if (k === 'p' || k === 'P') handleButton('pi');
+  else if (k === 's') handleButton('sin');
+  else if (k === 'c') handleButton('cos');
+  else if (k === 't') handleButton('tan');
+  else if (k === 'l') handleButton('log');
+  else if (k === 'n') handleButton('ln');
+  else if (k === 'r') handleButton('sqrt');
+});
+
+// ===== INIT =====
+renderButtons();
+renderHistory();
+updateDisplay();
+<script src="./shared-features.js"></script>
+</script>
+</body>
+</html>
