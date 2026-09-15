@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Terminal Arcade Settings</title>
 <style>
     :root {
@@ -354,6 +358,7 @@
         <a href="../PRESSHERETOSTART.html" class="back-btn">&lt;&lt; RETURN HUB</a>
         <a href="./.soundboard.html" class="back-btn" style="margin-left: 16px; opacity: 0.8;">🎵 SOUNDBOARD</a>
         <span style="font-size: 0.85rem; opacity: 0.7;" id="storage-quota-display"></span>
+        <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;margin:0 8px;"></span>
     </div>
 
     <!-- AUDIO SETTINGS -->
@@ -1231,5 +1236,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+<script src="./shared-features.js"></script>
 </script>
 </body>

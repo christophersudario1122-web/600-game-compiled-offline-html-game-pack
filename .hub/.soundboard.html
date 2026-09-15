@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Soundboard - Arcade Hub</title>
+            <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;margin:0 8px;"></span>
 <style>
     :root {
         --neon-green: #00ff88;
@@ -155,6 +160,8 @@
     .cat-hacker { background: rgba(0, 255, 136, 0.2); border: 1px solid var(--neon-green); color: var(--neon-green); }
     .cat-synth { background: rgba(255, 204, 0, 0.2); border: 1px solid var(--warn); color: var(--warn); }
     .cat-game { background: rgba(255, 77, 77, 0.2); border: 1px solid var(--danger); color: var(--danger); }
+    .cat-meme { background: rgba(255, 0, 255, 0.2); border: 1px solid #ff00ff; color: #ff00ff; }
+    .cat-cod { background: rgba(255, 140, 0, 0.2); border: 1px solid #ff8c00; color: #ff8c00; }
     .controls-row {
         display: flex;
         gap: 10px;
@@ -231,6 +238,18 @@
     <div class="section">
         <h2>🎮 GAME SOUNDS</h2>
         <div class="sound-grid" id="game-sounds"></div>
+    </div>
+
+    <!-- MEME SOUNDS -->
+    <div class="section">
+        <h2>😂 MEME SOUNDS</h2>
+        <div class="sound-grid" id="meme-sounds"></div>
+    </div>
+
+    <!-- COD SOUNDS -->
+    <div class="section">
+        <h2>🔫 COD / FPS SOUNDS</h2>
+        <div class="sound-grid" id="cod-sounds"></div>
     </div>
 
 </div>
@@ -438,29 +457,132 @@ const gameSounds = [
         play: () => { initAudio(); [330, 294, 262, 220].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); activeOscillators.push({osc:o,gain:g}); }, i*200); }); }},
 ];
 
+const memeSounds = [
+    { id:'vine_boom', label:'VINE BOOM', desc:'The boom', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(60, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime+0.5); g.gain.setValueAtTime(0.3*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.6); }},
+    { id:'bruh', label:'BRUH', desc:'Bruh moment', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [180,160].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.12*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.35); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.35); }, i*200); }); }},
+    { id:'oof', label:'OOF', desc:'Roblox death', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(600, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime+0.15); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); }},
+    { id:'airhorn', label:'AIRHORN', desc:'MLG horn', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [520,620,520,620].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.25); }, i*250); }); }},
+    { id:'sad_trombone', label:'WAH WAH', desc:'Sad trombone', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [349,330,311,294].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); }, i*350); }); }},
+    { id:'wow', label:'WOW', desc:'Eddy Wally wow', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, audioCtx.currentTime); o.frequency.linearRampToValueAtTime(500, audioCtx.currentTime+0.15); o.frequency.linearRampToValueAtTime(400, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); }},
+    { id:'punch', label:'PUNCH', desc:'Cartoon punch', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.15,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.15)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'bonk', label:'BONK', desc:'Metal pipe fall', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [800,1200,600,1400].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.1); }, i*60); }); }},
+    { id:'windows_error', label:'WIN ERROR', desc:'Windows XP error', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [700,600,700].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); }, i*300); }); }},
+    { id:'windows_shutdown', label:'WIN SHUT', desc:'Windows shutdown', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [523,440,349,392].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.5); }, i*400); }); }},
+    { id:'among_us', label:'AMONG US', desc:'Role reveal', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const o2=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o2.type='sine'; o.frequency.setValueAtTime(110, audioCtx.currentTime); o2.frequency.setValueAtTime(55, audioCtx.currentTime); o2.frequency.exponentialRampToValueAtTime(550, audioCtx.currentTime+0.3); o.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); o2.connect(g); g.connect(masterGain); o.start(); o2.start(); o.stop(audioCtx.currentTime+0.4); o2.stop(audioCtx.currentTime+0.4); }},
+    { id:'fart', label:'FART', desc:'Classic fart', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(80, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.35); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.35); }},
+    { id:'reverb_fart', label:'REVERB F', desc:'Fart w/ reverb', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); const d=audioCtx.createDelay(1); d.delayTime.setValueAtTime(0.1, audioCtx.currentTime); const fb=audioCtx.createGain(); fb.gain.setValueAtTime(0.4, audioCtx.currentTime); o.type='sawtooth'; o.frequency.setValueAtTime(90, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(55, audioCtx.currentTime+0.4); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.8); o.connect(g); g.connect(masterGain); g.connect(d); d.connect(fb); fb.connect(d); d.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.8); }},
+    { id:'suspense', label:'DUN DUN', desc:'Dramatic reveal', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [165,165,196].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); }, i*400); }); }},
+    { id:'metal_gear', label:'! ALERT', desc:'Metal Gear Solid', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime+0.08); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); }},
+    { id:'minecraft_hit', label:'MC HIT', desc:'Minecraft damage', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.12,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.1))*Math.sin(i*0.5); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.15*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.12); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'minecraft_xp', label:'MC XP', desc:'XP pickup', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [1318,1568,2093].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*80); }); }},
+    { id:'nani', label:'NANI?!', desc:'What the- (anime)', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const o2=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o2.type='sawtooth'; o.frequency.setValueAtTime(400, audioCtx.currentTime); o2.frequency.setValueAtTime(404, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime+0.15); o2.frequency.exponentialRampToValueAtTime(1608, audioCtx.currentTime+0.15); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); o.connect(g); o2.connect(g); g.connect(masterGain); o.start(); o2.start(); o.stop(audioCtx.currentTime+0.25); o2.stop(audioCtx.currentTime+0.25); }},
+    { id:'prowler', label:'PROWLER', desc:'Spider-Verse sting', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(100, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime+0.1); o.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime+0.4); g.gain.setValueAtTime(0.12*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.5); }},
+    { id:'thud', label:'THUD', desc:'Body fall', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.08)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'slap', label:'SLAP', desc:'Face slap', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.08,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.05)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.18*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.08); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'crickets', label:'CRICKETS', desc:'Awkward silence', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; for(let i=0;i<6;i++){ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(4000+Math.random()*500, audioCtx.currentTime); g.gain.setValueAtTime(0.02*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.05); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.05); }, i*150); }}},
+    { id:'nope', label:'NOPE', desc:'Walk away', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(500, audioCtx.currentTime); o.frequency.linearRampToValueAtTime(200, audioCtx.currentTime+0.25); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); }},
+    { id:'sheesh', label:'SHEESH', desc:'Ice cold', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime+0.15); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); }},
+    { id:'to_be', label:'TO BE', desc:'Or not to be', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [440,440,440,349].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); }, i*200); }); }},
+    { id:'discord_join', label:'DC JOIN', desc:'Discord join', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [880,1100].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*100); }); }},
+    { id:'discord_leave', label:'DC LEAVE', desc:'Discord leave', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [1100,880].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*100); }); }},
+    { id:'fbi_open', label:'FBI OPEN', desc:'FBI open up', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.3,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.15)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); b.connect(g); g.connect(masterGain); b.start(); }},
+];
+
+const codSounds = [
+    { id:'hitmarker', label:'HITMARKER', desc:'COD hitmarker', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [1200,1500].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.04); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.04); }, i*30); }); }},
+    { id:'kill_confirm', label:'KILL', desc:'Kill confirmed', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [800,1200].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.08); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.08); }, i*50); }); }},
+    { id:'headshot', label:'HEADSHOT', desc:'Headshot ping', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [1000,1500,2000].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.06); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.06); }, i*30); }); }},
+    { id:'multi_kill', label:'MULTI KILL', desc:'Double kill', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [660,880,1100,1320].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.1); }, i*60); }); }},
+    { id:'ultra_kill', label:'ULTRA KILL', desc:'Kill streak', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [440,554,659,880,1100,1318,1760].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.05*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.1); }, i*50); }); }},
+    { id:'uav_online', label:'UAV ONLINE', desc:'UAV ready', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); }},
+    { id:'care_package', label:'CARE PKG', desc:'Care package inbound', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [800,600,400].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); }, i*300); }); }},
+    { id:'predator', label:'PREDATOR', desc:'Predator missile', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(1200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime+0.8); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+1); }},
+    { id:'nuke_countdown', label:'NUKE', desc:'Tactical nuke', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [800,800,800,600].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*800); }); }},
+    { id:'explosion_cod', label:'EXPLODE', desc:'Explosion', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.6,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.2)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.15*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'sniper_shot', label:'SNIPER', desc:'Sniper rifle', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.4,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.12))*Math.cos(i*0.02); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.15*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'shotgun', label:'SHOTGUN', desc:'Shotgun blast', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.25,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.06)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'ak47_burst', label:'AK-47', desc:'AK burst fire', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; for(let i=0;i<3;i++){ setTimeout(()=>{ const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.06,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.exp(-j/(d.length*0.3)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.12*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.06); b.connect(g); g.connect(masterGain); b.start(); }, i*80); }}},
+    { id:'reload', label:'RELOAD', desc:'Weapon reload', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [600,800,1000].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.06); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.06); }, i*80); }); }},
+    { id:'deagle', label:'DEAGLE', desc:'Desert Eagle', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.15,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.08)); b.buffer=buf; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime+0.1); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); b.connect(g); o.connect(g); g.connect(masterGain); b.start(); o.start(); o.stop(audioCtx.currentTime+0.15); }},
+    { id:'scorestreak', label:'STREAK!', desc:'Scorestreak earned', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [523,659,784,1047].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.07*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*80); }); }},
+    { id:'flashbang', label:'FLASHBANG', desc:'Flashbang out', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(3000, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(8000, audioCtx.currentTime+0.1); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }},
+    { id:'grenade_bounce', label:'GRNDE BNC', desc:'Grenade bounce', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [600,500,400,350].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.05*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.05); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.05); }, i*80); }); }},
+    { id:'tactical_insert', label:'TAC INSERT', desc:'Tac insertion', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(600, audioCtx.currentTime); o.frequency.setValueAtTime(800, audioCtx.currentTime+0.05); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.12); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.12); }},
+];
+
 // =====================================================
 // RENDER SOUND BUTTONS
 // =====================================================
 function renderSounds(containerId, sounds, categoryClass) {
     const container = document.getElementById(containerId);
-    container.innerHTML = sounds.map(s => `
+    container.innerHTML = sounds.map(s => {
+        const cat = (s.category || s.cat || 'unknown').toUpperCase();
+        const key = s.keyHint || '';
+        return `
         <button class="sound-btn" data-id="${s.id}" onclick="playSound('${s.id}'); flashButton(this); playClickSound()" onmouseenter="playHoverSound()">
-            <span class="category-tag ${categoryClass}">${s.category.toUpperCase()}</span>
+            <span class="category-tag ${categoryClass}">${cat}</span>
             <span class="label">${s.label}</span>
             <span class="desc">${s.desc}</span>
-            <span class="key-hint">[${s.keyHint}]</span>
-        </button>
-    `).join('');
+            <span class="key-hint">[${key}]</span>
+        </button>`;
+    }).join('');
 }
 
 function playSound(id) {
-    const allSounds = [...uiSounds, ...hackerSounds, ...synthSounds, ...gameSounds];
+    const allSounds = [...uiSounds, ...hackerSounds, ...synthSounds, ...gameSounds, ...memeSounds, ...codSounds];
     const sound = allSounds.find(s => s.id === id);
     if (sound) sound.play();
 }
 
 function testAllSounds() {
-    const allSounds = [...uiSounds, ...hackerSounds, ...synthSounds, ...gameSounds];
+    const allSounds = [...uiSounds, ...hackerSounds, ...synthSounds, ...gameSounds, ...memeSounds, ...codSounds];
     allSounds.forEach((s, i) => setTimeout(() => { s.play(); flashButton(document.querySelector(`[data-id="${s.id}"]`)); }, i * 80));
 }
 
@@ -482,8 +604,11 @@ renderSounds('ui-sounds', uiSounds, 'cat-ui');
 renderSounds('hacker-sounds', hackerSounds, 'cat-hacker');
 renderSounds('synth-sounds', synthSounds, 'cat-synth');
 renderSounds('game-sounds', gameSounds, 'cat-game');
+renderSounds('meme-sounds', memeSounds, 'cat-meme');
+renderSounds('cod-sounds', codSounds, 'cat-cod');
 
 document.getElementById('master-volume').value = '100';
+<script src="./shared-features.js"></script>
 </script>
 </body>
 </html>

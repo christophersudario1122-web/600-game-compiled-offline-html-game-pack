@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Stats - Arcade Hub</title>
 <style>
     :root {
@@ -200,6 +204,7 @@
         <h1>📊 Statistics Dashboard</h1>
         <div>
             <button class="btn" onclick="window.location='../.hub/.library1.html'">← Library</button>
+            <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;margin:0 8px;"></span>
             <button class="btn" onclick="window.location='../PRESSHERETOSTART.html'">⌂ Home</button>
             <button class="btn" onclick="window.location='./.soundboard.html'" style="margin-left: 8px;">🎵 Soundboard</button>
         </div>
@@ -214,12 +219,17 @@
         <div class="card">
             <div class="card-label">Games Played</div>
             <div class="card-value" id="stat-played">0</div>
-            <div class="card-sub">Unique games oyened</div>
+            <div class="card-sub">Unique games opened</div>
         </div>
         <div class="card">
             <div class="card-label">Total Plays</div>
             <div class="card-value" id="stat-total">0</div>
-            <div class="card-sub">All oyens combined</div>
+            <div class="card-sub">All opens combined</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Total Playtime</div>
+            <div class="card-value" id="stat-playtime">0s</div>
+            <div class="card-sub">Across all games</div>
         </div>
         <div class="card">
             <div class="card-label">Favorites</div>
@@ -344,6 +354,14 @@ const ACHIEVEMENTS = [
     { id: 'konamiMaster', icon: '👑', name: 'Konami Master', desc: 'Play all 9 secret minigames' }
 ];
 
+function fmtTime(sec) {
+  if (sec < 60) return sec + 's';
+  if (sec < 3600) return Math.floor(sec/60) + 'm ' + (sec%60) + 's';
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  return h + 'h ' + m + 'm';
+}
+
 function loadStats() {
     // Clicks
     document.getElementById('stat-clicks').textContent = parseInt(localStorage.getItem('arcade_total_clicks') || '0').toLocaleString();
@@ -363,6 +381,16 @@ function loadStats() {
     const totalPlays = entries.reduce((sum, [k, v]) => sum + (v.count || 0), 0);
     document.getElementById('stat-played').textContent = uniquePlayed;
     document.getElementById('stat-total').textContent = totalPlays;
+
+    // Total playtime
+    let totalPlaytime = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('arcade_playtime_')) {
+            totalPlaytime += parseInt(localStorage.getItem(key) || '0', 10);
+        }
+    }
+    document.getElementById('stat-playtime').textContent = fmtTime(totalPlaytime);
 
     // Achievements (library stores an array of earned ids; legacy object format also supported)
     let ach = [];
@@ -528,6 +556,7 @@ document.addEventListener('click', function(e) {
     localStorage.setItem('arcade_total_clicks', count);
 }, true);
 
+<script src="./shared-features.js"></script>
 </script>
 </body>
 </html>

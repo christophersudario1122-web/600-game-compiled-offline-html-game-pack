@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Terminal_Arcade_Pro</title>
 <style>
     :root {
@@ -352,6 +356,7 @@
             <a href="../PRESSHERETOSTART.html" class="hub-btn back-hub-btn" onmouseenter="playHoverSound()" onclick="playClickSound()"><< RETURN_HUB</a>
             <button id="ambient-toggle" class="audio-toggle-btn" onclick="toggleAmbientMusic(); playClickSound();" onmouseenter="playHoverSound()">🔊 HACKER AMBIENT: OFF</button>
             <a href="./.soundboard.html" class="hub-btn" onmouseenter="playHoverSound()" onclick="playClickSound()" style="margin-left: 8px; padding: 8px 14px; font-size: 0.85rem;">🎵 SOUNDBOARD</a>
+            <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;margin:0 8px;"></span>
         </div>
         <select id="theme-select" class="theme-selector" onchange="changeTheme(this.value); playClickSound();" onmouseenter="playHoverSound()">
             <option value="matrix">🟢 Matrix Green</option>
@@ -762,6 +767,45 @@ function updateGameOfTheDay() {
 const HTM_GAMES = new Set(["paperio2","rooftopsnipers","snowrider","snowroad","soccerrandom","tombofthemask","vex6","vex7","vex8","bitplanes","boxingrandom","cookieclicker","crossyroad","dreadheadparkour","driftboss","drivemad","elasticface","getawayshootout","monkeymart","motox3m","ragdollarchers","templerun2","timeshooter3"]);
 function getExt(g) { return HTM_GAMES.has(g) ? ".htm" : ".html"; }
 
+function fmtTime(sec) {
+  if (sec < 60) return sec + 's';
+  if (sec < 3600) return Math.floor(sec/60) + 'm ' + (sec%60) + 's';
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  return h + 'h ' + m + 'm';
+}
+
+// Rating system
+function setRating(game, stars) {
+  localStorage.setItem('arcade_rating_' + game, stars);
+  displayGames();
+}
+
+function showRatingModal(game) {
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;'; 
+  modal.innerHTML = `
+    <div style="background:#0a0a0f;border:2px solid #00ff88;border-radius:10px;padding:30px;text-align:center;max-width:400px;">
+      <h3 style="color:#00ff88;margin:0 0 10px;">Rate: ${game}</h3>
+      <div id="rating-stars" style="font-size:2rem;cursor:pointer;margin:15px 0;">${'★☆☆☆☆'}</div>
+      <button onclick="this.closest('[style*=\"z-index:9999\"]').remove()" style="padding:8px 20px;background:#00ff88;color:#000;border:none;border-radius:4px;font-weight:bold;cursor:pointer;">SUBMIT</button>
+    </div>`;
+  document.body.appendChild(modal);
+  let selected = 0;
+  const starsEl = modal.querySelector('#rating-stars');
+  starsEl.addEventListener('click', (e) => {
+    const rect = starsEl.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    selected = Math.min(5, Math.max(1, Math.ceil(x / (rect.width / 5))));
+    starsEl.textContent = '★'.repeat(selected) + '☆'.repeat(5 - selected);
+  });
+  modal.querySelector('button').onclick = () => {
+    setRating(game, selected);
+    modal.remove();
+  };
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+}
+
 function playGameOfTheDay() {
     const game = getGameOfTheDay();
     try {
@@ -868,6 +912,8 @@ function displayGames() {
 
         const plays = (typeof playCounts !== 'undefined' ? playCounts : {})[g] || 0;
         const isFav = favorites.includes(g);
+        const playtime = parseInt(localStorage.getItem('arcade_playtime_' + g) || '0', 10);
+        const rating = parseFloat(localStorage.getItem('arcade_rating_' + g) || '0');
         const a = document.createElement("a");
         a.className = "card";
         a.href = dir + g + ext;
@@ -876,6 +922,8 @@ function displayGames() {
         a.innerHTML = `
             <button class="fav-btn" onclick="toggleFavorite('${g}', event)" title="Toggle Favorite" onmouseenter="playHoverSound()">${isFav ? '⭐' : '☆'}</button>
             ${plays > 0 ? '<span class="play-badge">' + plays + (plays === 1 ? ' play' : ' plays') + '</span>' : ''}
+            ${playtime > 0 ? '<span class="playtime-badge" title="Playtime">⏱️ ' + fmtTime(playtime) + '</span>' : ''}
+            ${rating > 0 ? '<span class="rating-badge" onclick="showRatingModal(\'' + g + '\')" title="Click to rate" style="cursor:pointer;">' + '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating)) + '</span>' : '<span class="rating-badge" onclick="showRatingModal(\'' + g + '\')" title="Rate this game" style="cursor:pointer;opacity:0.4;">☆☆☆☆☆</span>'}
             <div class="icon">${getI(g)}</div>
             <b>${n}</b>
         `;
@@ -1509,6 +1557,15 @@ function openGame(g, ext) {
     try { window.open(dir + g + ext, '_blank'); } catch (e) {}
     if (typeof recordRecent === 'function') recordRecent(g);
     if (typeof recordPlay === 'function') recordPlay(g);
+    // Playtime tracking
+    const key = 'arcade_playtime_' + g;
+    const start = Date.now();
+    const prev = parseInt(localStorage.getItem(key) || '0', 10);
+    const interval = setInterval(() => {
+      const elapsed = prev + Math.floor((Date.now() - start) / 1000);
+      localStorage.setItem(key, elapsed);
+    }, 1000);
+    window.addEventListener('beforeunload', () => clearInterval(interval), { once: true });
     playClickSound();
 }
 
@@ -1521,6 +1578,76 @@ window.addEventListener('load', () => {
     if (typeof showRecommendations === 'function') showRecommendations();
     if (typeof updateFavBadge === 'function') updateFavBadge();
 });
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('../sw.js').catch(() => {});
+}
+
+// Auto theme by time (6am-6pm lighter, 6pm-6am darker)
+function autoThemeSchedule() {
+  const hour = new Date().getHours();
+  const isDay = hour >= 6 && hour < 18;
+  const saved = localStorage.getItem('arcade_theme');
+  if (!saved || saved === 'auto') {
+    document.documentElement.style.setProperty('--neon-green', isDay ? '#00cc66' : '#00ff88');
+  }
+}
+autoThemeSchedule();
+setInterval(autoThemeSchedule, 60000);
+
+// Gamepad detection
+function updateGamepadStatus() {
+  const gps = navigator.getGamepads();
+  const connected = Array.from(gps).filter(g => g);
+  const badge = document.getElementById('gamepad-badge');
+  if (badge) {
+    badge.textContent = connected.length ? `🎮 ${connected.length} controller${connected.length>1?'s':''} connected` : '';
+    badge.style.display = connected.length ? 'inline' : 'none';
+  }
+}
+setInterval(updateGamepadStatus, 1000);
+window.addEventListener('gamepadconnected', updateGamepadStatus);
+window.addEventListener('gamepaddisconnected', updateGamepadStatus);
+
+// Cheatsheet modal
+function showCheatsheet() {
+  const modal = document.createElement('div');
+  modal.id = 'cheatsheet-modal';
+  modal.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div style="background:#0a0a0f;border:2px solid #00ff88;border-radius:10px;padding:30px;max-width:600px;max-height:80vh;overflow:auto;">
+        <h2 style="color:#00ff88;margin:0 0 20px;text-shadow:0 0 10px #00ff88;">⌨️ KEYBOARD SHORTCUTS</h2>
+        <table style="width:100%;color:#00ff88;font-family:monospace;font-size:0.9rem;border-collapse:collapse;">
+          <tr><td style="padding:8px;width:120px;"><kbd>R</kbd></td><td>Random game (library)</td></tr>
+          <tr><td style="padding:8px;"><kbd>Space</kbd></td><td>Stop all sounds</td></tr>
+          <tr><td style="padding:8px;"><kbd>F</kbd></td><td>Toggle fullscreen</td></tr>
+          <tr><td style="padding:8px;"><kbd>?</kbd></td><td>Show this cheatsheet</td></tr>
+          <tr><td style="padding:8px;"><kbd>H</kbd></td><td>Home</td></tr>
+          <tr><td style="padding:8px;"><kbd>1-9</kbd></td><td>Soundboard hotkeys</td></tr>
+          <tr><td style="padding:8px;"><kbd>Q-P</kbd></td><td>Meme sounds</td></tr>
+          <tr><td style="padding:8px;"><kbd>A-L</kbd></td><td>COD sounds</td></tr>
+          <tr><td style="padding:8px;"><kbd>Z-B</kbd></td><td>Retro sounds</td></tr>
+        </table>
+        <button onclick="document.getElementById('cheatsheet-modal').remove()" style="margin-top:20px;padding:10px 20px;background:#00ff88;color:#000;border:none;border-radius:4px;font-weight:bold;cursor:pointer;">CLOSE</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === '?' || (e.key === '/' && e.shiftKey)) { e.preventDefault(); showCheatsheet(); }
+  if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
+});
+
+// Fullscreen helper
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+<script src="./shared-features.js"></script>
 </script>
 <div id="launcher-overlay" class="launcher-overlay">
     <div class="launcher-box">

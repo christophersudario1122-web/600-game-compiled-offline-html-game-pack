@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Keyboard Shortcuts - Arcade Hub</title>
 <style>
     :root {
@@ -112,6 +116,7 @@
         <h1>⌨️ Keyboard Shortcuts</h1>
         <div>
             <button class="btn" onclick="window.location='../.hub/.library1.html'">← Library</button>
+            <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;margin:0 8px;"></span>
             <button class="btn" onclick="window.location='../PRESSHERETOSTART.html'">⌂ Home</button>
             <button class="btn" onclick="window.location='./.soundboard.html'" style="margin-left: 8px;">🎵 Soundboard</button>
         </div>
@@ -254,6 +259,7 @@ document.addEventListener('click', function(e) {
     localStorage.setItem('arcade_total_clicks', count);
 }, true);
 
+<script src="./shared-features.js"></script>
 </script>
 </body>
 </html>

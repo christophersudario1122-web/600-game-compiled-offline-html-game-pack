@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Soundboard - Arcade Hub</title>
+<style>
+    :root {
+        --neon-green: #00ff88;
+        --dark-bg: #050508;
+        --box-bg: rgba(10, 10, 15, 0.85);
+        --border: #00ff88;
+        --accent: #00ccff;
+        --warn: #ffcc00;
+        --danger: #ff4d4d;
+    }
+    body {
+        background: var(--dark-bg);
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+    }
+    #matrix-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
+        opacity: 0.12;
+        pointer-events: none;
+    }
+    .container {
+        position: relative;
+        z-index: 2;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border);
+    }
+    h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        text-shadow: 0 0 10px var(--neon-green);
+    }
+    .btn {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--neon-green);
+        border: 2px solid var(--neon-green);
+        padding: 8px 16px;
+        font-family: monospace;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: 0.2s;
+        margin-left: 8px;
+    }
+    .btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 15px var(--neon-green);
+    }
+    .section {
+        background: var(--box-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .section h2 {
+        margin: 0 0 15px;
+        font-size: 1.2rem;
+        color: var(--accent);
+        text-shadow: 0 0 5px var(--accent);
+    }
+    .sound-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+    }
+    .sound-btn {
+        background: rgba(0, 255, 136, 0.08);
+        border: 1px solid var(--border);
+        color: var(--neon-green);
+        padding: 16px 12px;
+        font-family: monospace;
+        font-size: 0.85rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: center;
+        min-height: 70px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+    }
+    .sound-btn:hover {
+        background: rgba(0, 255, 136, 0.25);
+        box-shadow: 0 0 12px var(--neon-green);
+        transform: translateY(-2px);
+    }
+    .sound-btn:active {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        transform: translateY(0);
+        box-shadow: 0 0 20px var(--neon-green);
+    }
+    .sound-btn.playing {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 25px var(--neon-green);
+        animation: pulse 0.15s ease-out;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    .sound-btn .label {
+        font-weight: 700;
+    }
+    .sound-btn .desc {
+        font-size: 0.7rem;
+        color: var(--accent);
+        opacity: 0.8;
+    }
+    .sound-btn .key-hint {
+        font-size: 0.65rem;
+        color: #888;
+        margin-top: 2px;
+    }
+    kbd {
+        background: rgba(0, 255, 136, 0.15);
+        border: 1px solid var(--border);
+        padding: 1px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+        font-size: 0.75em;
+    }
+    .category-tag {
+        display: inline-block;
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 3px;
+        margin-bottom: 4px;
+        font-weight: 700;
+    }
+    .cat-ui { background: rgba(0, 204, 255, 0.2); border: 1px solid var(--accent); color: var(--accent); }
+    .cat-hacker { background: rgba(0, 255, 136, 0.2); border: 1px solid var(--neon-green); color: var(--neon-green); }
+    .cat-synth { background: rgba(255, 204, 0, 0.2); border: 1px solid var(--warn); color: var(--warn); }
+    .cat-game { background: rgba(255, 77, 77, 0.2); border: 1px solid var(--danger); color: var(--danger); }
+    .cat-meme { background: rgba(255, 0, 255, 0.2); border: 1px solid #ff00ff; color: #ff00ff; }
+    .cat-cod { background: rgba(255, 140, 0, 0.2); border: 1px solid #ff8c00; color: #ff8c00; }
+    .controls-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .volume-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
+    }
+    .volume-control label { font-size: 0.85rem; }
+    .volume-control input[type=range] { width: 120px; }
+    .info-bar {
+        background: rgba(0, 204, 255, 0.1);
+        border: 1px solid var(--accent);
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+    }
+    .info-bar kbd { background: var(--accent); color: var(--dark-bg); }
+</style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+
+<div class="container">
+    <div class="header">
+        <h1>🔊 SOUNDBOARD</h1>
+        <div>
+            <button class="btn" onclick="window.location='../.hub/.library1.html'">← Library</button>
+            <button class="btn" onclick="window.location='../PRESSHERETOSTART.html'">⌂ Home</button>
+        </div>
+    </div>
+
+    <div class="info-bar">
+        Click any button to play a sound. <kbd>Space</kbd> stops all. <kbd>1-9</kbd> quick-play first row.
+        <span style="float:right">Master Volume: <span id="vol-label">100%</span></span>
+    </div>
+
+    <div class="controls-row">
+        <button class="btn" id="stop-all" onclick="stopAllSounds(); playClickSound()">⏹ STOP ALL</button>
+        <button class="btn" id="test-all" onclick="testAllSounds(); playClickSound()">▶ TEST ROW</button>
+        <div class="volume-control">
+            <label>Volume:</label>
+            <input type="range" id="master-volume" min="0" max="100" value="100" oninput="setMasterVolume(this.value)">
+            <span id="vol-display">100%</span>
+        </div>
+    </div>
+
+    <!-- UI SOUNDS -->
+    <div class="section">
+        <h2>🖱️ UI SOUNDS</h2>
+        <div class="sound-grid" id="ui-sounds"></div>
+    </div>
+
+    <!-- HACKER SOUNDS -->
+    <div class="section">
+        <h2>💻 HACKER SOUNDS</h2>
+        <div class="sound-grid" id="hacker-sounds"></div>
+    </div>
+
+    <!-- SYNTH SOUNDS -->
+    <div class="section">
+        <h2>🎹 SYNTH SOUNDS</h2>
+        <div class="sound-grid" id="synth-sounds"></div>
+    </div>
+
+    <!-- GAME SOUNDS -->
+    <div class="section">
+        <h2>🎮 GAME SOUNDS</h2>
+        <div class="sound-grid" id="game-sounds"></div>
+    </div>
+
+    <!-- MEME SOUNDS -->
+    <div class="section">
+        <h2>😂 MEME SOUNDS</h2>
+        <div class="sound-grid" id="meme-sounds"></div>
+    </div>
+
+    <!-- COD SOUNDS -->
+    <div class="section">
+        <h2>🔫 COD / FPS SOUNDS</h2>
+        <div class="sound-grid" id="cod-sounds"></div>
+    </div>
+
+</div>
+
+<script>
+// =====================================================
+// MATRIX RAIN BACKGROUND
+// =====================================================
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+let mw, mh;
+function resize() { mw = canvas.width = innerWidth; mh = canvas.height = innerHeight; }
+resize();
+addEventListener('resize', resize);
+
+const droys = [], chars = '01アイウエオカキクケコサシスセソ';
+let matrixBrightness = 1.0;
+function initDroys() { droys.length = 0; for (let i = 0; i < Math.floor(mw/14); i++) droys[i] = Math.random()*mh; }
+initDroys();
+addEventListener('resize', initDroys);
+
+const MATRIX_BRIGHTNESS_KEY = 'arcade_matrix_brightness';
+function getMatrixBrightness() {
+    try { const v = parseInt(localStorage.getItem(MATRIX_BRIGHTNESS_KEY) || '100', 10); return (isNaN(v)) ? 1.0 : Math.max(0, Math.min(100, v)) / 100; } catch (e) { return 1.0; }
+}
+function applyMatrixBrightness() { matrixBrightness = getMatrixBrightness(); }
+applyMatrixBrightness();
+window.addEventListener('storage', (e) => { if (e.key === MATRIX_BRIGHTNESS_KEY || e.key === null) applyMatrixBrightness(); });
+
+setInterval(() => {
+    ctx.globalAlpha = matrixBrightness;
+    ctx.fillStyle = 'rgba(5,5,8,0.05)';
+    ctx.fillRect(0, 0, mw, mh);
+    ctx.fillStyle = '#00ff88';
+    ctx.font = '14px monospace';
+    for (let i = 0; i < droys.length; i++) {
+        ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, droys[i]);
+        if (droys[i] > mh && Math.random() > 0.975) droys[i] = 0;
+        droys[i] += 14;
+    }
+}, 50);
+
+// =====================================================
+// AUDIO SYSTEM (shared with library1)
+// =====================================================
+let audioCtx = null;
+let masterGain = null;
+let masterVolume = 1.0;
+let activeOscillators = [];
+
+function isMasterMuted() {
+    try { return window._masterMuted === true || localStorage.getItem('arcade_master_mute') === 'on'; } catch (e) { return false; }
+}
+
+function updateMasterGain() {
+    try { if (audioCtx && masterGain) masterGain.gain.setValueAtTime(isMasterMuted() ? 0 : masterVolume, audioCtx.currentTime); } catch (e) {}
+}
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(isMasterMuted() ? 0 : masterVolume, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function setMasterVolume(v) {
+    masterVolume = Math.max(0, Math.min(1, v / 100));
+    updateMasterGain();
+    document.getElementById('vol-display').textContent = v + '%';
+    document.getElementById('vol-label').textContent = v + '%';
+}
+
+function playHoverSound() {
+    try {
+        initAudio();
+        if(!audioCtx || isMasterMuted()) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.03 * masterVolume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(masterGain || audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+    } catch(e) {}
+}
+
+function playClickSound() {
+    try {
+        initAudio();
+        if(!audioCtx || isMasterMuted()) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.05 * masterVolume, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(masterGain || audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+    } catch(e) {}
+}
+
+function stopAllSounds() {
+    activeOscillators.forEach(({osc, gain}) => {
+        try { osc.stop(); gain.disconnect(); } catch(e) {}
+    });
+    activeOscillators = [];
+}
+
+// Visual feedback helper
+function flashButton(btn) {
+    btn.classList.add('playing');
+    setTimeout(() => btn.classList.remove('playing'), 150);
+}
+
+// =====================================================
+// SOUND DEFINITIONS
+// Each sound: { id, label, desc, keyHint, category, playFn }
+// =====================================================
+
+const uiSounds = [
+    { id: 'hover', label: 'HOVER', desc: 'Button hover', keyHint: 'H', category: 'ui',
+        play: () => playHoverSound() },
+    { id: 'click', label: 'CLICK', desc: 'Button click', keyHint: 'C', category: 'ui',
+        play: () => playClickSound() },
+    { id: 'success', label: 'SUCCESS', desc: 'Task complete', keyHint: 'S', category: 'ui',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(523, audioCtx.currentTime); o.frequency.setValueAtTime(659, audioCtx.currentTime+0.1); o.frequency.setValueAtTime(784, audioCtx.currentTime+0.2); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.5); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'error', label: 'ERROR', desc: 'Failure/alert', keyHint: 'E', category: 'ui',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'notification', label: 'NOTIFY', desc: 'New message', keyHint: 'N', category: 'ui',
+        play: () => { initAudio(); [660, 880].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); activeOscillators.push({osc:o,gain:g}); }, i*100); }); }},
+    { id: 'switch', label: 'SWITCH', desc: 'Toggle on/off', keyHint: 'T', category: 'ui',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(400, audioCtx.currentTime); o.frequency.setValueAtTime(800, audioCtx.currentTime+0.05); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'pop', label: 'POP', desc: 'Light pop', keyHint: 'P', category: 'ui',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime+0.03); g.gain.setValueAtTime(0.04*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.05); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.05); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'whoosh', label: 'WHOOSH', desc: 'Fast swipe', keyHint: 'W', category: 'ui',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime+0.1); g.gain.setValueAtTime(0.05*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'blip', label: 'BLIP', desc: 'Tiny blip', keyHint: 'B', category: 'ui',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(1200, audioCtx.currentTime); g.gain.setValueAtTime(0.03*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.03); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.03); activeOscillators.push({osc:o,gain:g}); }},
+];
+
+const hackerSounds = [
+    { id: 'terminal', label: 'TERMINAL', desc: 'Keyboard typing', keyHint: '1', category: 'hacker',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; [200,400,300,500].forEach((f,i)=>{ o.frequency.setValueAtTime(f, audioCtx.currentTime+i*0.05); }); g.gain.setValueAtTime(0.04*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.25); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'access_granted', label: 'ACCESS', desc: 'Access granted', keyHint: '2', category: 'hacker',
+        play: () => { initAudio(); [440, 554, 659, 880].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); activeOscillators.push({osc:o,gain:g}); }, i*80); }); }},
+    { id: 'access_denied', label: 'DENIED', desc: 'Access denied', keyHint: '3', category: 'hacker',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(300, audioCtx.currentTime); o.frequency.setValueAtTime(150, audioCtx.currentTime+0.1); o.frequency.setValueAtTime(300, audioCtx.currentTime+0.2); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'data_transfer', label: 'XFER', desc: 'Data streaming', keyHint: '4', category: 'hacker',
+        play: () => { initAudio(); for(let i=0;i<8;i++){ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type=Math.random()>0.5?'square':'sawtooth'; o.frequency.setValueAtTime(200+Math.random()*800, audioCtx.currentTime); g.gain.setValueAtTime(0.03*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.08); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.08); activeOscillators.push({osc:o,gain:g}); }, i*40); }},
+    { id: 'decrypt', label: 'DECRYPT', desc: 'Decryption beep', keyHint: '5', category: 'hacker',
+        play: () => { initAudio(); [523, 587, 659, 698, 784].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.05*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); activeOscillators.push({osc:o,gain:g}); }, i*60); }); }},
+    { id: 'scan', label: 'SCAN', desc: 'Port scanner', keyHint: '6', category: 'hacker',
+        play: () => { initAudio(); for(let i=0;i<12;i++){ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(1000+i*50, audioCtx.currentTime); g.gain.setValueAtTime(0.02*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.04); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.04); activeOscillators.push({osc:o,gain:g}); }, i*30); }},
+    { id: 'glitch', label: 'GLITCH', desc: 'Digital glitch', keyHint: '7', category: 'hacker',
+        play: () => { initAudio(); for(let i=0;i<6;i++){ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(100+Math.random()*1500, audioCtx.currentTime); g.gain.setValueAtTime(0.04*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.05); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.05); activeOscillators.push({osc:o,gain:g}); }, i*25); }},
+    { id: 'alarm', label: 'ALARM', desc: 'Intrusion alert', keyHint: '8', category: 'hacker',
+        play: () => { initAudio(); for(let i=0;i<4;i++){ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(880, audioCtx.currentTime); o.frequency.setValueAtTime(660, audioCtx.currentTime+0.15); g.gain.setValueAtTime(0.07*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); activeOscillators.push({osc:o,gain:g}); }, i*300); }},
+];
+
+const synthSounds = [
+    { id: 'bass', label: 'BASS', desc: 'Deep bass hit', keyHint: 'Q', category: 'synth',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(60, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.15*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'lead', label: 'LEAD', desc: 'Synth lead', keyHint: 'A', category: 'synth',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(440, audioCtx.currentTime); const filter=audioCtx.createBiquadFilter(); filter.type='lowpass'; filter.frequency.setValueAtTime(2000, audioCtx.currentTime); filter.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(filter); filter.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'arp', label: 'ARP', desc: 'Arpeggio', keyHint: 'Z', category: 'synth',
+        play: () => { initAudio(); [220, 330, 440, 554, 659].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.05*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); activeOscillators.push({osc:o,gain:g}); }, i*80); }); }},
+    { id: 'pad', label: 'PAD', desc: 'Ambient pad', keyHint: 'X', category: 'synth',
+        play: () => { initAudio(); [220, 277, 330, 440].forEach((f,i)=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.03*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+2); activeOscillators.push({osc:o,gain:g}); }); }},
+    { id: 'pluck', label: 'PLUCK', desc: 'Plucky synth', keyHint: 'V', category: 'synth',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(880, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.25); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'fm', label: 'FM TONE', desc: 'FM synthesis', keyHint: 'Y', category: 'synth',
+        play: () => { initAudio(); const carrier=audioCtx.createOscillator(); const mod=audioCtx.createOscillator(); const modGain=audioCtx.createGain(); const outGain=audioCtx.createGain(); carrier.type='sine'; carrier.frequency.setValueAtTime(440, audioCtx.currentTime); mod.type='sine'; mod.frequency.setValueAtTime(440, audioCtx.currentTime); modGain.gain.setValueAtTime(100, audioCtx.currentTime); modGain.gain.exponentialRampToValueAtTime(10, audioCtx.currentTime+0.3); mod.connect(modGain); modGain.connect(carrier.frequency); outGain.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); outGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); carrier.connect(outGain); outGain.connect(masterGain); carrier.start(); mod.start(); carrier.stop(audioCtx.currentTime+0.4); mod.stop(audioCtx.currentTime+0.4); activeOscillators.push({osc:carrier,gain:outGain}, {osc:mod,gain:modGain}); }},
+    { id: 'noise', label: 'NOISE', desc: 'White noise burst', keyHint: 'R', category: 'synth',
+        play: () => { initAudio(); const buffer=audioCtx.createBuffer(1, audioCtx.sampleRate*0.1, audioCtx.sampleRate); const data=buffer.getChannelData(0); for(let i=0;i<data.length;i++) data[i]=Math.random()*2-1; const src=audioCtx.createBufferSource(); const g=audioCtx.createGain(); src.buffer=buffer; g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); src.connect(g); g.connect(masterGain); src.start(); src.stop(audioCtx.currentTime+0.15); activeOscillators.push({osc:src,gain:g}); }},
+    { id: 'kick', label: 'KICK', desc: 'Kick drum', keyHint: 'F', category: 'synth',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(150, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime+0.05); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); activeOscillators.push({osc:o,gain:g}); }},
+];
+
+const gameSounds = [
+    { id: 'coin', label: 'COIN', desc: 'Coin collect', keyHint: '1', category: 'game',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime+0.05); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.1); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'jump', label: 'JUMP', desc: 'Jump sfx', keyHint: '2', category: 'game',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(300, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime+0.05); o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime+0.15); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'powerup', label: 'POWERUP', desc: 'Power up', keyHint: '3', category: 'game',
+        play: () => { initAudio(); [440, 554, 659, 880, 1318].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.05*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); activeOscillators.push({osc:o,gain:g}); }, i*40); }); }},
+    { id: 'explosion', label: 'BOOM', desc: 'Explosion', keyHint: '4', category: 'game',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime+0.5); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.6); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'laser', label: 'LASER', desc: 'Laser shot', keyHint: '5', category: 'game',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime+0.08); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.1); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'hit', label: 'HIT', desc: 'Impact/hit', keyHint: '6', category: 'game',
+        play: () => { initAudio(); const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(150, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.08); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.08); activeOscillators.push({osc:o,gain:g}); }},
+    { id: 'levelup', label: 'LEVEL UP', desc: 'Level complete', keyHint: '7', category: 'game',
+        play: () => { initAudio(); [262, 330, 392, 523, 659, 784, 1046].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); activeOscillators.push({osc:o,gain:g}); }, i*60); }); }},
+    { id: 'gameover', label: 'GAME OVER', desc: 'Game over', keyHint: '8', category: 'game',
+        play: () => { initAudio(); [330, 294, 262, 220].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); activeOscillators.push({osc:o,gain:g}); }, i*200); }); }},
+];
+
+const memeSounds = [
+    { id:'vine_boom', label:'VINE BOOM', desc:'The boom', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(60, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime+0.5); g.gain.setValueAtTime(0.3*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.6); }},
+    { id:'bruh', label:'BRUH', desc:'Bruh moment', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [180,160].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.12*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.35); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.35); }, i*200); }); }},
+    { id:'oof', label:'OOF', desc:'Roblox death', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(600, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime+0.15); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); }},
+    { id:'airhorn', label:'AIRHORN', desc:'MLG horn', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [520,620,520,620].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.25); }, i*250); }); }},
+    { id:'sad_trombone', label:'WAH WAH', desc:'Sad trombone', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [349,330,311,294].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); }, i*350); }); }},
+    { id:'wow', label:'WOW', desc:'Eddy Wally wow', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, audioCtx.currentTime); o.frequency.linearRampToValueAtTime(500, audioCtx.currentTime+0.15); o.frequency.linearRampToValueAtTime(400, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); }},
+    { id:'punch', label:'PUNCH', desc:'Cartoon punch', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.15,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.15)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'bonk', label:'BONK', desc:'Metal pipe fall', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [800,1200,600,1400].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.1); }, i*60); }); }},
+    { id:'windows_error', label:'WIN ERROR', desc:'Windows XP error', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [700,600,700].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); }, i*300); }); }},
+    { id:'windows_shutdown', label:'WIN SHUT', desc:'Windows shutdown', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [523,440,349,392].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.5); }, i*400); }); }},
+    { id:'among_us', label:'AMONG US', desc:'Role reveal', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const o2=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o2.type='sine'; o.frequency.setValueAtTime(110, audioCtx.currentTime); o2.frequency.setValueAtTime(55, audioCtx.currentTime); o2.frequency.exponentialRampToValueAtTime(550, audioCtx.currentTime+0.3); o.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); o2.connect(g); g.connect(masterGain); o.start(); o2.start(); o.stop(audioCtx.currentTime+0.4); o2.stop(audioCtx.currentTime+0.4); }},
+    { id:'fart', label:'FART', desc:'Classic fart', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(80, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.35); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.35); }},
+    { id:'reverb_fart', label:'REVERB F', desc:'Fart w/ reverb', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); const d=audioCtx.createDelay(1); d.delayTime.setValueAtTime(0.1, audioCtx.currentTime); const fb=audioCtx.createGain(); fb.gain.setValueAtTime(0.4, audioCtx.currentTime); o.type='sawtooth'; o.frequency.setValueAtTime(90, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(55, audioCtx.currentTime+0.4); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.8); o.connect(g); g.connect(masterGain); g.connect(d); d.connect(fb); fb.connect(d); d.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.8); }},
+    { id:'suspense', label:'DUN DUN', desc:'Dramatic reveal', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [165,165,196].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); }, i*400); }); }},
+    { id:'metal_gear', label:'! ALERT', desc:'Metal Gear Solid', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime+0.08); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); }},
+    { id:'minecraft_hit', label:'MC HIT', desc:'Minecraft damage', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.12,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.1))*Math.sin(i*0.5); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.15*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.12); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'minecraft_xp', label:'MC XP', desc:'XP pickup', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [1318,1568,2093].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*80); }); }},
+    { id:'nani', label:'NANI?!', desc:'What the- (anime)', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const o2=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o2.type='sawtooth'; o.frequency.setValueAtTime(400, audioCtx.currentTime); o2.frequency.setValueAtTime(404, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime+0.15); o2.frequency.exponentialRampToValueAtTime(1608, audioCtx.currentTime+0.15); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); o.connect(g); o2.connect(g); g.connect(masterGain); o.start(); o2.start(); o.stop(audioCtx.currentTime+0.25); o2.stop(audioCtx.currentTime+0.25); }},
+    { id:'prowler', label:'PROWLER', desc:'Spider-Verse sting', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(100, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime+0.1); o.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime+0.4); g.gain.setValueAtTime(0.12*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.5); }},
+    { id:'thud', label:'THUD', desc:'Body fall', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.08)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'slap', label:'SLAP', desc:'Face slap', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.08,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.05)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.18*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.08); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'crickets', label:'CRICKETS', desc:'Awkward silence', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; for(let i=0;i<6;i++){ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(4000+Math.random()*500, audioCtx.currentTime); g.gain.setValueAtTime(0.02*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.05); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.05); }, i*150); }}},
+    { id:'nope', label:'NOPE', desc:'Walk away', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(500, audioCtx.currentTime); o.frequency.linearRampToValueAtTime(200, audioCtx.currentTime+0.25); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); }},
+    { id:'sheesh', label:'SHEESH', desc:'Ice cold', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(2000, audioCtx.currentTime+0.15); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); }},
+    { id:'to_be', label:'TO BE', desc:'Or not to be', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [440,440,440,349].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.2); }, i*200); }); }},
+    { id:'discord_join', label:'DC JOIN', desc:'Discord join', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [880,1100].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*100); }); }},
+    { id:'discord_leave', label:'DC LEAVE', desc:'Discord leave', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; [1100,880].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*100); }); }},
+    { id:'fbi_open', label:'FBI OPEN', desc:'FBI open up', cat:'meme',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.3,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.15)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); b.connect(g); g.connect(masterGain); b.start(); }},
+];
+
+const codSounds = [
+    { id:'hitmarker', label:'HITMARKER', desc:'COD hitmarker', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [1200,1500].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.04); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.04); }, i*30); }); }},
+    { id:'kill_confirm', label:'KILL', desc:'Kill confirmed', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [800,1200].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.08); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.08); }, i*50); }); }},
+    { id:'headshot', label:'HEADSHOT', desc:'Headshot ping', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [1000,1500,2000].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.06); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.06); }, i*30); }); }},
+    { id:'multi_kill', label:'MULTI KILL', desc:'Double kill', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [660,880,1100,1320].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.1); }, i*60); }); }},
+    { id:'ultra_kill', label:'ULTRA KILL', desc:'Kill streak', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [440,554,659,880,1100,1318,1760].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='square'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.05*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.1); }, i*50); }); }},
+    { id:'uav_online', label:'UAV ONLINE', desc:'UAV ready', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(400, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime+0.3); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.4); }},
+    { id:'care_package', label:'CARE PKG', desc:'Care package inbound', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [800,600,400].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.08*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.3); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.3); }, i*300); }); }},
+    { id:'predator', label:'PREDATOR', desc:'Predator missile', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(1200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime+0.8); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+1); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+1); }},
+    { id:'nuke_countdown', label:'NUKE', desc:'Tactical nuke', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [800,800,800,600].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*800); }); }},
+    { id:'explosion_cod', label:'EXPLODE', desc:'Explosion', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.6,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.2)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.15*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'sniper_shot', label:'SNIPER', desc:'Sniper rifle', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.4,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.12))*Math.cos(i*0.02); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.15*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.4); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'shotgun', label:'SHOTGUN', desc:'Shotgun blast', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.25,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.06)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.2*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.25); b.connect(g); g.connect(masterGain); b.start(); }},
+    { id:'ak47_burst', label:'AK-47', desc:'AK burst fire', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; for(let i=0;i<3;i++){ setTimeout(()=>{ const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.06,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.exp(-j/(d.length*0.3)); b.buffer=buf; const g=audioCtx.createGain(); g.gain.setValueAtTime(0.12*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.06); b.connect(g); g.connect(masterGain); b.start(); }, i*80); }}},
+    { id:'reload', label:'RELOAD', desc:'Weapon reload', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [600,800,1000].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.06); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.06); }, i*80); }); }},
+    { id:'deagle', label:'DEAGLE', desc:'Desert Eagle', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const b=audioCtx.createBufferSource(); const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.15,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*0.08)); b.buffer=buf; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sawtooth'; o.frequency.setValueAtTime(200, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime+0.1); g.gain.setValueAtTime(0.1*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); b.connect(g); o.connect(g); g.connect(masterGain); b.start(); o.start(); o.stop(audioCtx.currentTime+0.15); }},
+    { id:'scorestreak', label:'STREAK!', desc:'Scorestreak earned', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [523,659,784,1047].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.07*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }, i*80); }); }},
+    { id:'flashbang', label:'FLASHBANG', desc:'Flashbang out', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(3000, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(8000, audioCtx.currentTime+0.1); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.15); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.15); }},
+    { id:'grenade_bounce', label:'GRNDE BNC', desc:'Grenade bounce', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; [600,500,400,350].forEach((f,i)=>{ setTimeout(()=>{ const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(f, audioCtx.currentTime); g.gain.setValueAtTime(0.05*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.05); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.05); }, i*80); }); }},
+    { id:'tactical_insert', label:'TAC INSERT', desc:'Tac insertion', cat:'cod',
+      play:()=>{ initAudio(); if(!audioCtx) return; const o=audioCtx.createOscillator(); const g=audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(600, audioCtx.currentTime); o.frequency.setValueAtTime(800, audioCtx.currentTime+0.05); g.gain.setValueAtTime(0.06*masterVolume, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.12); o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+0.12); }},
+];
+
+// =====================================================
+// RENDER SOUND BUTTONS
+// =====================================================
+function renderSounds(containerId, sounds, categoryClass) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = sounds.map(s => {
+        const cat = (s.category || s.cat || 'unknown').toUpperCase();
+        const key = s.keyHint || '';
+        return `
+        <button class="sound-btn" data-id="${s.id}" onclick="playSound('${s.id}'); flashButton(this); playClickSound()" onmouseenter="playHoverSound()">
+            <span class="category-tag ${categoryClass}">${cat}</span>
+            <span class="label">${s.label}</span>
+            <span class="desc">${s.desc}</span>
+            <span class="key-hint">[${key}]</span>
+        </button>`;
+    }).join('');
+}
+
+function playSound(id) {
+    const allSounds = [...uiSounds, ...hackerSounds, ...synthSounds, ...gameSounds, ...memeSounds, ...codSounds];
+    const sound = allSounds.find(s => s.id === id);
+    if (sound) sound.play();
+}
+
+function testAllSounds() {
+    const allSounds = [...uiSounds, ...hackerSounds, ...synthSounds, ...gameSounds, ...memeSounds, ...codSounds];
+    allSounds.forEach((s, i) => setTimeout(() => { s.play(); flashButton(document.querySelector(`[data-id="${s.id}"]`)); }, i * 80));
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.code === 'Space') { e.preventDefault(); stopAllSounds(); return; }
+    
+    const keyMap = { 'Digit1':'hover', 'Digit2':'click', 'Digit3':'success', 'Digit4':'error', 'Digit5':'notification', 'Digit6':'switch', 'Digit7':'pop', 'Digit8':'whoosh', 'Digit9':'blip',
+        'KeyH':'terminal', 'KeyJ':'access_granted', 'KeyK':'access_denied', 'KeyL':'data_transfer', 'KeyZ':'decrypt', 'KeyX':'scan', 'KeyC':'glitch', 'KeyV':'alarm',
+        'KeyQ':'bass', 'KeyW':'lead', 'KeyE':'arp', 'KeyR':'pad', 'KeyT':'pluck', 'KeyY':'fm', 'KeyU':'noise', 'KeyI':'kick',
+        'Numpad1':'coin', 'Numpad2':'jump', 'Numpad3':'powerup', 'Numpad4':'explosion', 'Numpad5':'laser', 'Numpad6':'hit', 'Numpad7':'levelup', 'Numpad8':'gameover'
+    };
+    if (keyMap[e.code]) { e.preventDefault(); playSound(keyMap[e.code]); flashButton(document.querySelector(`[data-id="${keyMap[e.code]}"]`)); }
+});
+
+// Init
+renderSounds('ui-sounds', uiSounds, 'cat-ui');
+renderSounds('hacker-sounds', hackerSounds, 'cat-hacker');
+renderSounds('synth-sounds', synthSounds, 'cat-synth');
+renderSounds('game-sounds', gameSounds, 'cat-game');
+renderSounds('meme-sounds', memeSounds, 'cat-meme');
+renderSounds('cod-sounds', codSounds, 'cat-cod');
+
+document.getElementById('master-volume').value = '100';
+</script>
+</body>
+</html>

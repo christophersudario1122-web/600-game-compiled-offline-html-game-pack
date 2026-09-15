@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Secure Login Client</title>
 <style>
     :root {
@@ -138,6 +142,7 @@
     <button onclick="checkPassword(); playClickSound();" onmouseenter="playHoverSound()">AUTHORIZE</button>
     <div id="error-msg" class="error"></div>
     <button onclick="window.location='./.soundboard.html'" class="btn" style="margin-top: 10px; font-size: 0.8rem; padding: 6px 12px;">🎵 Soundboard</button>
+            <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;margin:0 8px;"></span>
 </div>
 
 <script>
@@ -305,6 +310,7 @@ window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 });
+<script src="./shared-features.js"></script>
 </script>
 </body>
 </html>
