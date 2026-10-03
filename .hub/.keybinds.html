@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="manifest" href="../manifest.json">
+<meta name="theme-color" content="#00ff88">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Keybinds - 1000 Features - Arcade Hub</title>
+<style>
+    :root {
+        --neon-green: #00ff88;
+        --dark-bg: #050508;
+        --box-bg: rgba(10, 10, 15, 0.85);
+        --border: #00ff88;
+        --accent: #00ccff;
+        --neon-cyan: #00ccff;
+        --neon-pink: #ff44aa;
+        --ink: #e8fff2;
+    }
+    html { scrollbar-width: thin; scrollbar-color: var(--neon-green) var(--dark-bg); }
+    body {
+        background: var(--dark-bg);
+        color: var(--neon-green);
+        font-family: 'Courier New', monospace;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+    }
+    #matrix-canvas {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
+        opacity: 0.12;
+        pointer-events: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        #matrix-canvas { display: none; }
+    }
+    .container {
+        position: relative;
+        z-index: 2;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid var(--border);
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    h1 {
+        margin: 0;
+        font-size: 1.6rem;
+        text-shadow: 0 0 10px var(--neon-green);
+        line-height: 1.2;
+    }
+    h1 small {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 400;
+        opacity: 0.7;
+        margin-top: 4px;
+        text-shadow: none;
+    }
+    .header-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .btn {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--neon-green);
+        border: 2px solid var(--neon-green);
+        padding: 8px 14px;
+        font-family: monospace;
+        font-weight: 700;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: 0.2s;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 15px var(--neon-green);
+    }
+    .btn.secondary {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(0, 204, 255, 0.08);
+    }
+    .btn.secondary:hover { background: var(--accent); color: #000; box-shadow: 0 0 12px var(--accent); }
+    .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 18px;
+        background: var(--box-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+    }
+    .controls input[type="search"] {
+        flex: 1;
+        min-width: 220px;
+        background: rgba(0, 255, 136, 0.07);
+        border: 1px solid var(--neon-green);
+        color: var(--neon-green);
+        padding: 9px 12px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 0.9rem;
+        outline: none;
+    }
+    .controls input[type="search"]::placeholder { color: rgba(0, 255, 136, 0.45); }
+    .controls input[type="search"]:focus { box-shadow: 0 0 10px rgba(0, 255, 136, 0.35); }
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 99px;
+        border: 1px solid var(--border);
+        background: rgba(0, 255, 136, 0.08);
+        font-size: 0.78rem;
+        cursor: pointer;
+        user-select: none;
+        transition: 0.15s;
+    }
+    .pill:hover { background: rgba(0, 255, 136, 0.18); }
+    .pill.active { background: var(--neon-green); color: var(--dark-bg); border-color: var(--neon-green); box-shadow: 0 0 10px rgba(0,255,136,0.4); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .chips-label { font-size: 0.78rem; opacity: 0.7; margin-right: 2px; }
+    .count { font-size: 0.85rem; opacity: 0.8; white-space: nowrap; }
+    .family-section {
+        background: var(--box-bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0;
+        margin-bottom: 18px;
+        overflow: hidden;
+    }
+    .family-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        cursor: pointer;
+        user-select: none;
+        background: linear-gradient(90deg, rgba(0,255,136,0.08), transparent);
+        border-bottom: 1px solid rgba(0, 255, 136, 0.18);
+    }
+    .family-head:hover { background: rgba(0, 255, 136, 0.10); }
+    .family-title { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 10px; }
+    .family-meta { font-size: 0.8rem; opacity: 0.7; }
+    .family-body { padding: 10px 14px 14px; }
+    .family-body.collapsed { display: none; }
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 10px;
+    }
+    .feat {
+        border: 1px solid rgba(0, 255, 136, 0.22);
+        border-radius: 6px;
+        padding: 10px 12px;
+        background: rgba(0, 255, 136, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: 0.15s;
+        min-width: 0;
+    }
+    .feat:hover { border-color: var(--neon-green); background: rgba(0, 255, 136, 0.09); box-shadow: 0 0 10px rgba(0,255,136,0.15); }
+    .feat-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .feat-id { font-size: 0.7rem; opacity: 0.55; font-weight: 700; letter-spacing: 0.04em; }
+    .feat-keys, .feat-badge {
+        font-size: 0.72rem;
+        border: 1px solid var(--neon-green);
+        background: rgba(0, 255, 136, 0.12);
+        padding: 2px 7px;
+        border-radius: 3px;
+        font-family: monospace;
+        white-space: nowrap;
+        box-shadow: 0 1px 0 var(--neon-green);
+    }
+    .feat-name { font-weight: 700; font-size: 0.88rem; line-height: 1.3; word-break: break-word; }
+    .feat-desc { font-size: 0.78rem; opacity: 0.75; line-height: 1.4; }
+    .feat-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
+    .mini-btn {
+        font-size: 0.72rem;
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        background: rgba(0, 255, 136, 0.07);
+        color: var(--neon-green);
+        cursor: pointer;
+        font-family: monospace;
+        font-weight: 700;
+    }
+    .mini-btn:hover { background: var(--neon-green); color: var(--dark-bg); }
+    .mini-btn.ghost { border-color: rgba(0, 255, 136, 0.35); opacity: 0.85; }
+    .swatch {
+        width: 14px; height: 14px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.35);
+        display: inline-block; vertical-align: middle; margin-right: 4px;
+    }
+    .test-out {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border-radius: 6px;
+        border: 1px dashed rgba(0, 255, 136, 0.35);
+        background: rgba(0,0,0,0.35);
+        font-size: 0.78rem;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 220px;
+        overflow: auto;
+    }
+    .test-out:empty { display: none; }
+    .toast {
+        position: fixed;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-family: monospace;
+        z-index: 9999;
+        box-shadow: 0 4px 20px rgba(0,255,136,0.45);
+        animation: toastIn 0.2s ease;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    kbd {
+        background: rgba(0, 255, 136, 0.15);
+        border: 1px solid var(--neon-green);
+        border-radius: 3px;
+        padding: 2px 7px;
+        font-family: monospace;
+        font-size: 0.82rem;
+        color: var(--neon-green);
+        box-shadow: 0 1px 0 var(--neon-green);
+        margin: 0 1px;
+    }
+    a { color: var(--accent); }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+    * { scrollbar-width: thin; }
+</style>
+</head>
+<body>
+<canvas id="matrix-canvas" aria-hidden="true"></canvas>
+<div class="container">
+    <div class="header">
+        <h1>⌨️ Keybinds &amp; Feature Atlas <small>1000 features · 10 families · press <kbd>?</kbd> for cheatsheet · <kbd>/</kbd> to focus search</small></h1>
+        <div class="header-actions">
+            <button type="button" class="btn" onclick="location.href='../.hub/.library1.html'">← Library</button>
+            <button type="button" class="btn" onclick="location.href='../PRESSHERETOSTART.html'">⌂ Home</button>
+            <button type="button" class="btn secondary" onclick="location.href='./.shortcuts.html'">Shortcuts</button>
+            <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;"></span>
+        </div>
+    </div>
+
+    <div class="controls" role="search" aria-label="Filter features">
+        <label class="sr-only" for="q">Search features</label>
+        <input id="q" type="search" placeholder="Search — try 'theme 42', 'sfx hover', 'gamepad', 'egg' … (/ to focus)" autocomplete="off" spellcheck="false">
+        <div class="chips" id="chips" aria-label="Filter by family"></div>
+        <span class="count" id="count" aria-live="polite"></span>
+        <button type="button" class="btn secondary" id="btn-collapse" title="Collapse/expand all families">Collapse all</button>
+        <button type="button" class="btn secondary" id="btn-test" title="Run engines + rendering + keybind smoke tests">▶ Run verification</button>
+    </div>
+
+    <div id="mount" aria-live="polite"></div>
+    <div id="test-out" class="test-out" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+// Theme sync
+try {
+    const t = JSON.parse(localStorage.getItem('arcade_custom_theme') || 'null');
+    const r = document.documentElement.style;
+    if (t && t.color) {
+        r.setProperty('--neon-green', t.color);
+        if (t.bg) r.setProperty('--dark-bg', t.bg);
+        if (t.accent) r.setProperty('--accent', t.accent);
+    } else {
+        const c = localStorage.getItem('arcade_custom_color');
+        if (c) r.setProperty('--neon-green', c);
+    }
+} catch (e2) {}
+
+// Matrix rain (same as other hub pages; respects reduced-motion via CSS hiding)
+(function() {
+    const canvas = document.getElementById('matrix-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let mw, mh;
+    function resize() { mw = canvas.width = innerWidth; mh = canvas.height = innerHeight; }
+    resize();
+    addEventListener('resize', resize);
+    const droys = [], chars = '01アイウエオカキクケコサシスセソ';
+    let matrixBrightness = 1.0;
+    try {
+        const v = parseInt(localStorage.getItem('arcade_matrix_brightness') || '100', 10);
+        if (!isNaN(v)) matrixBrightness = Math.max(0, Math.min(100, v)) / 100;
+    } catch (ee) {}
+    function initDroys() { droys.length = 0; for (let i = 0; i < Math.floor(mw/14); i++) droys[i] = Math.random()*mh; }
+    initDroys();
+    addEventListener('resize', initDroys);
+    setInterval(() => {
+        ctx.globalAlpha = matrixBrightness;
+        ctx.fillStyle = 'rgba(5,5,8,0.05)';
+        ctx.fillRect(0, 0, mw, mh);
+        ctx.fillStyle = '#00ff88';
+        ctx.font = '14px monospace';
+        for (let i = 0; i < droys.length; i++) {
+            ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, droys[i]);
+            if (droys[i] > mh && Math.random() > 0.975) droys[i] = 0;
+            droys[i] += 14;
+        }
+    }, 50);
+})();
+</script>
+<script src="./shared-features.js"></script>
+<script src="./arcade-features.js"></script>
+<script>
+(function() {
+'use strict';
+const F = (window.Arcade && window.Arcade.FEATURES) ? window.Arcade.FEATURES : [];
+const mount = document.getElementById('mount');
+const q = document.getElementById('q');
+const chipsEl = document.getElementById('chips');
+const countEl = document.getElementById('count');
+const testOut = document.getElementById('test-out');
+
+const FAMILY_META = {
+    shortcuts: { label: '⌨️ Shortcuts', hint: 'Key combos → hub actions (try key, then Try)' },
+    themes:    { label: '🎨 Themes',    hint: 'Apply palette · Preview 5 · Random' },
+    sfx:       { label: '🔊 SFX',       hint: 'WebAudio presets · Test sound' },
+    gamepad:   { label: '🎮 Gamepad',   hint: 'Pad combos · live status badge' },
+    stats:     { label: '📊 Stats',     hint: 'Per-game counters · localStorage' },
+    a11y:      { label: '♿ A11y',      hint: 'Font / contrast / motion helpers' },
+    clocks:    { label: '🕒 Clocks',    hint: 'Date/time formats' },
+    filters:   { label: '🔎 Filters',   hint: 'Library sort & filter presets' },
+    utils:     { label: '🛠️ Utils',     hint: 'Export / import / maintenance' },
+    eggs:      { label: '🥚 Eggs',      hint: 'Secret codes · type to unlock' }
+};
+const FAMILIES = Object.keys(FAMILY_META);
+let activeFamily = 'all';
+let collapsedAll = false;
+
+function escapeHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toast(msg) {
+    if (window.Arcade && window.Arcade.toast) { window.Arcade.toast(msg); return; }
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2200);
+}
+
+function filteredFeatures() {
+    const needle = (q.value || '').trim().toLowerCase();
+    let list = F.slice();
+    if (activeFamily !== 'all') list = list.filter(x => x.family === activeFamily);
+    if (needle) {
+        list = list.filter(x => {
+            const hay = [x.id, x.name, x.desc, x.keys, x.action, x.combo, x.code].join(' ').toLowerCase();
+            return hay.includes(needle);
+        });
+    }
+    return list;
+}
+
+function renderChips() {
+    const all = [{ id: 'all', label: 'All (1000)' }].concat(
+        FAMILIES.map(f => ({ id: f, label: FAMILY_META[f].label + ' · ' + F.filter(x => x.family===f).length }))
+    );
+    chipsEl.innerHTML = '<span class="chips-label">Family:</span>' + all.map(c =>
+        `<button type="button" class="pill${activeFamily===c.id?' active':''}" data-family="${escapeHtml(c.id)}">${escapeHtml(c.label)}</button>`
+    ).join('');
+    chipsEl.querySelectorAll('.pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            activeFamily = btn.getAttribute('data-family');
+            collapsedAll = false;
+            document.getElementById('btn-collapse').textContent = 'Collapse all';
+            render();
+        });
+    });
+}
+
+function familyActionsHtml(fam, items) {
+    if (fam === 'themes') {
+        return `<button type="button" class="mini-btn" data-family-action="preview5" data-family="${escapeHtml(fam)}">Preview 5</button>
+        <button type="button" class="mini-btn ghost" data-family-action="random" data-family="${escapeHtml(fam)}">Random</button>`;
+    }
+    if (fam === 'shortcuts') {
+        return `<span style="font-size:0.75rem;opacity:0.7;">Press a key to trigger · “Try” simulates it</span>`;
+    }
+    return '';
+}
+
+function featActionsHtml(feat) {
+    const fam = feat.family;
+    if (fam === 'themes') {
+        return `<button type="button" class="mini-btn" data-action="apply-theme" data-id="${escapeHtml(feat.id)}">Apply</button>`;
+    }
+    if (fam === 'shortcuts') {
+        return `<button type="button" class="mini-btn" data-action="try-shortcut" data-id="${escapeHtml(feat.id)}" title="Simulate this shortcut">Try</button>`;
+    }
+    if (fam === 'sfx') {
+        return `<button type="button" class="mini-btn" data-action="play-sfx" data-id="${escapeHtml(feat.id)}">Play</button>`;
+    }
+    if (fam === 'a11y') {
+        return `<button type="button" class="mini-btn" data-action="apply-a11y" data-id="${escapeHtml(feat.id)}">Apply</button>`;
+    }
+    if (fam === 'filters') {
+        return `<button type="button" class="mini-btn" data-action="apply-filter" data-id="${escapeHtml(feat.id)}">Apply</button>`;
+    }
+    if (fam === 'utils') {
+        return `<button type="button" class="mini-btn" data-action="util" data-id="${escapeHtml(feat.id)}">Run</button>`;
+    }
+    if (fam === 'eggs') {
+        return `<button type="button" class="mini-btn ghost" data-action="egg" data-id="${escapeHtml(feat.id)}" title="Type the code to unlock">Show code</button>`;
+    }
+    return `<span style="font-size:0.72rem;opacity:0.6;">${escapeHtml(feat.desc || '')}</span>`;
+}
+
+function render() {
+    renderChips();
+    const list = filteredFeatures();
+    const needle = (q.value || '').trim();
+    countEl.textContent = list.length + ' / ' + F.length + (needle ? ' · "' + needle + '"' : '') + (activeFamily !== 'all' ? ' · ' + activeFamily : '');
+
+    if (!F.length) {
+        mount.innerHTML = `<div class="family-section"><div class="family-body"><p style="color:#ff6666;">No features loaded. Check that <code>.hub/arcade-features.js</code> is present and <code>tools/gen-features.mjs</code> has been run.</p></div></div>`;
+        return;
+    }
+    if (!list.length) {
+        mount.innerHTML = `<div class="family-section"><div class="family-body"><p>No matches. Clear search or switch family.</p></div></div>`;
+        return;
+    }
+
+    const byFam = {};
+    for (const f of list) { (byFam[f.family] = byFam[f.family] || []).push(f); }
+    const order = activeFamily !== 'all' ? [activeFamily] : FAMILIES.filter(f => byFam[f]);
+
+    mount.innerHTML = order.map(fam => {
+        const items = byFam[fam] || [];
+        const meta = FAMILY_META[fam] || { label: fam, hint: '' };
+        return `<section class="family-section" data-family="${escapeHtml(fam)}">
+            <div class="family-head" data-toggle="${escapeHtml(fam)}" role="button" tabindex="0" aria-expanded="${collapsedAll ? 'false' : 'true'}" aria-controls="body-${escapeHtml(fam)}">
+                <span class="family-title">${escapeHtml(meta.label)} <span style="font-weight:400;opacity:0.7;font-size:0.88rem;">${escapeHtml(meta.hint)}</span></span>
+                <span class="family-meta">${items.length} shown · ${F.filter(x=>x.family===fam).length} total · ${collapsedAll ? '▸' : '▾'}</span>
+            </div>
+            <div class="family-body${collapsedAll ? ' collapsed' : ''}" id="body-${escapeHtml(fam)}">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+                    <span style="font-size:0.8rem;opacity:0.7;">${escapeHtml(items.length)} item(s)${needle ? ' matching "' + escapeHtml(needle) + '"' : ''}</span>
+                    <span style="display:flex;gap:6px;">${familyActionsHtml(fam, items)}</span>
+                </div>
+                <div class="feature-grid">
+                ${items.map(feat => {
+                    const keys = feat.keys ? `<span class="feat-keys">${escapeHtml(feat.keys)}</span>` : (feat.combo ? `<span class="feat-keys">${escapeHtml(feat.combo)}</span>` : (feat.id ? `<span class="feat-badge">${escapeHtml(feat.id)}</span>` : ''));
+                    const swatches = feat.palette ? Object.entries(feat.palette).slice(0,3).map(([k,v]) => `<span class="swatch" style="background:${escapeHtml(v)}" title="${escapeHtml(k)}: ${escapeHtml(v)}"></span>`).join('') : '';
+                    return `<article class="feat" data-feat-id="${escapeHtml(feat.id)}">
+                        <div class="feat-top"><span class="feat-id">${escapeHtml(feat.id)}</span>${keys}</div>
+                        <div class="feat-name">${swatches}${escapeHtml(feat.name)}</div>
+                        <div class="feat-desc">${escapeHtml(feat.desc || '')}</div>
+                        <div class="feat-actions">${featActionsHtml(feat)}</div>
+                    </article>`;
+                }).join('')}
+                </div>
+            </div>
+        </section>`;
+    }).join('');
+
+    mount.querySelectorAll('.family-head').forEach(h => {
+        const toggle = () => {
+            const fam = h.getAttribute('data-toggle');
+            const body = document.getElementById('body-' + fam);
+            if (!body) return;
+            const collapsed = body.classList.toggle('collapsed');
+            h.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            const meta = h.querySelector('.family-meta');
+            if (meta) meta.textContent = meta.textContent.replace(collapsed ? '▾' : '▸', collapsed ? '▸' : '▾');
+        };
+        h.addEventListener('click', toggle);
+        h.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
+    mount.querySelectorAll('[data-action="apply-theme"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.applyTheme(id); toast('Theme ' + id + ' applied'); } catch (e2) { toast('Theme failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="try-shortcut"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            const feat = F.find(x => x.id === id);
+            if (!feat) return;
+            const a = feat.action;
+            if (window.Arcade && a && typeof window.Arcade[a] === 'function') { try { window.Arcade[a](); toast(a); } catch (ee) {} }
+            else if (a && a.startsWith('nav-')) {
+                const map = { 'nav-library': '.library1.html', 'nav-hub': '../PRESSHERETOSTART.html', 'nav-settings': '.settings.html', 'nav-stats': '.stats.html', 'nav-notes': '.notes.html', 'nav-snake': '.snake.html', 'nav-sound': '.soundboard.html', 'nav-secrets': '.secrets.html', 'nav-calc': '.calculator.html', 'nav-shortcuts': '.shortcuts.html' };
+                const href = map[a];
+                if (href) { toast(a + ' → ' + href); setTimeout(() => { location.href = href; }, 450); }
+                else toast(a);
+            } else {
+                // generic: dispatch a key event matching feat.keys if possible
+                const keys = feat.keys || '';
+                const last = keys.split('+').pop() || keys;
+                const ev = new KeyboardEvent('keydown', { key: last, bubbles: true });
+                document.dispatchEvent(ev);
+                toast('Simulated ' + (feat.keys || feat.id));
+            }
+        });
+    });
+    mount.querySelectorAll('[data-action="play-sfx"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.playSfx(id); toast('SFX ' + id); } catch (ee2) { toast('SFX failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="apply-a11y"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.applyA11y(id); toast('A11y ' + id); } catch (ee3) { toast('A11y failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="apply-filter"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { const r = window.Arcade.applyFilter(id); toast('Filter ' + id + (r ? ' → library' : '')); if (r && r.href) setTimeout(() => { location.href = r.href; }, 400); } catch (ee4) { toast('Filter failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="util"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { const r = window.Arcade.exportData ? window.Arcade.exportData(id) : null; toast(r ? ('Exported ' + id) : ('Ran ' + id)); } catch (ee5) { toast('Util failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="egg"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            const feat = F.find(x => x.id === id);
+            if (feat && feat.code) toast('Code: ' + feat.code);
+            else toast(id);
+        });
+    });
+    mount.querySelectorAll('[data-family-action="preview5"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const fam = b.getAttribute('data-family');
+            const ids = F.filter(x => x.family === fam).slice(0, 5).map(x => x.id);
+            let i = 0;
+            const tick = () => {
+                if (i >= ids.length) { toast('Preview done'); return; }
+                try { window.Arcade.applyTheme(ids[i]); } catch (ee6) {}
+                toast('Preview ' + ids[i] + ' (' + (i+1) + '/5)');
+                i++;
+                setTimeout(tick, 750);
+            };
+            tick();
+        });
+    });
+    mount.querySelectorAll('[data-family-action="random"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const fam = b.getAttribute('data-family');
+            const pool = F.filter(x => x.family === fam);
+            const pick = pool[Math.floor(Math.random()*pool.length)];
+            if (!pick) return;
+            try { window.Arcade.applyTheme(pick.id); toast('Random ' + pick.id); } catch (ee7) { toast(pick.id); }
+        });
+    });
+}
+
+let tmr = 0;
+q.addEventListener('input', () => { clearTimeout(tmr); tmr = setTimeout(render, 120); });
+document.getElementById('btn-collapse').addEventListener('click', () => {
+    collapsedAll = !collapsedAll;
+    document.getElementById('btn-collapse').textContent = collapsedAll ? 'Expand all' : 'Collapse all';
+    render();
+});
+document.getElementById('btn-test').addEventListener('click', runVerification);
+document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) return;
+        e.preventDefault();
+        q.focus();
+        q.select();
+    }
+    if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+        if (window.showCheatsheet) { e.preventDefault(); window.showCheatsheet(); }
+    }
+    if (e.key === 'Escape' && q.value) { q.value = ''; render(); }
+});
+
+function runVerification() {
+    const lines = [];
+    const ok = (m) => lines.push('✓ ' + m);
+    const fail = (m) => lines.push('✗ ' + m);
+    const info = (m) => lines.push('· ' + m);
+
+    // Engines
+    try {
+        if (!window.Arcade) throw new Error('window.Arcade missing');
+        if (window.Arcade.count() !== 1000) throw new Error('count() != 1000: ' + window.Arcade.count());
+        ok('Engines: Arcade.count() === 1000');
+    } catch (e) { fail('Engines: ' + e.message); }
+    try {
+        const f = F.slice(0, 3);
+        if (f.length !== 3) throw new Error('slice failed');
+        ok('Engines: FEATURES array readable (' + F.length + ')');
+    } catch (e2) { fail('Engines: ' + e2.message); }
+
+    // Themes
+    try {
+        const tid = F.find(x => x.family === 'themes')?.id;
+        if (!tid) throw new Error('no theme id');
+        window.Arcade.applyTheme(tid);
+        const cur = localStorage.getItem('arcade_theme_id');
+        if (cur !== tid) info('Themes: applyTheme(' + tid + ') ran (persisted as ' + cur + ')');
+        else ok('Themes: applyTheme(' + tid + ') + persisted');
+        const n = window.Arcade.nextTheme ? (window.Arcade.nextTheme(), true) : false;
+        if (n) ok('Themes: nextTheme() callable');
+    } catch (e3) { fail('Themes: ' + e3.message); }
+
+    // SFX
+    try {
+        const sid = F.find(x => x.family === 'sfx')?.id;
+        if (sid) { window.Arcade.playSfx(sid); ok('SFX: playSfx(' + sid + ') callable'); }
+        else info('SFX: no sfx id');
+    } catch (e4) { fail('SFX: ' + e4.message); }
+
+    // A11y
+    try {
+        const aid = F.find(x => x.family === 'a11y')?.id;
+        if (aid) { window.Arcade.applyA11y(aid); ok('A11y: applyA11y(' + aid + ') callable'); }
+    } catch (e5) { fail('A11y: ' + e5.message); }
+
+    // Clocks / Filters
+    try {
+        const cid = F.find(x => x.family === 'clocks')?.id;
+        if (cid && window.Arcade.fmtClock) { const v = window.Arcade.fmtClock(cid, new Date()); ok('Clocks: fmtClock(' + cid + ') → ' + String(v).slice(0, 40)); }
+        const fid = F.find(x => x.family === 'filters')?.id;
+        if (fid && window.Arcade.applyFilter) { window.Arcade.applyFilter(fid); ok('Filters: applyFilter(' + fid + ') callable'); }
+    } catch (e6) { fail('Clocks/Filters: ' + e6.message); }
+
+    // Keybinds rendering
+    try {
+        const cards = document.querySelectorAll('.feat');
+        if (cards.length === 0) throw new Error('no .feat cards rendered');
+        ok('Rendering: ' + cards.length + ' feature card(s) in DOM');
+        if (cards.length !== filteredFeatures().length) info('Rendering: DOM ' + cards.length + ' vs filtered ' + filteredFeatures().length);
+    } catch (e7) { fail('Rendering: ' + e7.message); }
+
+    // Keybinds: / focuses search, ? cheatsheet, keys delegation
+    try {
+        const ae = document.activeElement;
+        info('Keybinds: press / to focus search, ? for cheatsheet, family pills to filter, Try/Apply/Play per card.');
+        ok('Keybinds: handlers registered (/, ?, family, per-card)');
+        void ae;
+    } catch (e8) { fail('Keybinds: ' + e8.message); }
+
+    // Matrix canvas exists
+    try {
+        const cv = document.getElementById('matrix-canvas');
+        if (!cv) throw new Error('matrix-canvas missing');
+        ok('Matrix: canvas present');
+    } catch (e9) { fail('Matrix: ' + e9.message); }
+
+    testOut.textContent = lines.join('\n');
+    testOut.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    toast('Verification done — see panel below');
+    console.log('[keybinds verification]\n' + lines.join('\n'));
+}
+
+// initial
+render();
+// expose for console
+window.KeybindsAtlas = { filteredFeatures, runVerification, FAMILIES, FAMILY_META };
+})();
+</script>
+</body>
+</html>

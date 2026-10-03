@@ -50,7 +50,7 @@
         font-size: 1.8rem;
         text-shadow: 0 0 10px var(--neon-green);
     }
-    btn {
+    .btn {
         background: rgba(0, 255, 136, 0.1);
         color: var(--neon-green);
         border: 2px solid var(--neon-green);
@@ -80,15 +80,15 @@
         border-bottom: 1px solid var(--border);
         padding-bottom: 8px;
     }
-    hshortcut {
+    .shortcut {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 10px 0;
         border-bottom: 1px dashed rgba(0, 255, 136, 0.15);
     }
-    hshortcut:last-child { border-bottom: none; }
-    desc { flex: 1; }
+    .shortcut:last-child { border-bottom: none; }
+    .desc { flex: 1; }
     kbd {
         background: rgba(0, 255, 136, 0.15);
         border: 1px solid var(--neon-green);
@@ -100,7 +100,7 @@
         box-shadow: 0 2px 0 var(--neon-green);
         margin: 0 2px;
     }
-    hkeys { white-space: nowrap; }
+    .keys { white-space: nowrap; }
 
     /* Custom Pixel Cursor */
     * { cursor: url('data:image/svg+xml,<svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="10" y="0" width="4" height="2" fill="%2300ff88"/><rect x="10" y="2" width="4" height="4" fill="%2300ff88"/><rect x="10" y="6" width="4" height="2" fill="%2300ff88"/><rect x="0" y="8" width="4" height="4" fill="%2300ff88"/><rect x="4" y="8" width="4" height="4" fill="%2300ff88"/><rect x="8" y="8" width="4" height="4" fill="%2300ff88"/><rect x="12" y="8" width="4" height="4" fill="%2300ff88"/><rect x="16" y="8" width="4" height="4" fill="%2300ff88"/><rect x="10" y="10" width="4" height="12" fill="%2300ff88"/><rect x="12" y="10" width="2" height="2" fill="%230a0a0f"/><rect x="14" y="22" width="4" height="2" fill="%2300ff88"/></svg>') 10 0, auto; }
@@ -124,7 +124,7 @@
 
     <div class="section">
         <h2>Global (anywhere in the hub)</h2>
-        <div class="shortcut"><span class="desc">Show this shortcuts page</span><span class="keys"><kbd>?</kbd> or <kbd>Sift</kbd>+<kbd>/</kbd></span></div>
+        <div class="shortcut"><span class="desc">Show this shortcuts page</span><span class="keys"><kbd>?</kbd> or <kbd>Shift</kbd>+<kbd>/</kbd></span></div>
         <div class="shortcut"><span class="desc">Toggle audio on/off</span><span class="keys"><kbd>M</kbd></span></div>
         <div class="shortcut"><span class="desc">Cycle theme (matrix → amber → blue → red)</span><span class="keys"><kbd>T</kbd></span></div>
         <div class="shortcut"><span class="desc">Go to home page</span><span class="keys"><kbd>H</kbd></span></div>
@@ -135,7 +135,7 @@
         <div class="shortcut"><span class="desc">Open stats dashboard</span><span class="keys"><kbd>D</kbd></span></div>
         <div class="shortcut"><span class="desc">Surprise me (random game)</span><span class="keys"><kbd>R</kbd></span></div>
         <div class="shortcut"><span class="desc">Focus search (in library)</span><span class="keys"><kbd>/</kbd></span></div>
-        <div class="shortcut"><span class="desc">Open secret dev page</span><span class="keys"><kbd>Ctrl</kbd>+<kbd>Sift</kbd>+<kbd>A</kbd></span></div>
+        <div class="shortcut"><span class="desc">Open secret dev page</span><span class="keys"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd></span></div>
     </div>
 
     <div class="section">
@@ -146,7 +146,7 @@
     <div class="section">
         <h2>In-Game Toys</h2>
         <div class="shortcut"><span class="desc">Press <kbd>Esc</kbd> in any game to close it and return to the library</span></div>
-        <div class="shortcut"><span class="desc">Hold <kbd>Sift</kbd> while clicking a game to add it to favorites without oyening it</span></div>
+        <div class="shortcut"><span class="desc">Hold <kbd>Shift</kbd> while clicking a game to add it to favorites without opening it</span></div>
     </div>
 </div>
 
