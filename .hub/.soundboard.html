@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="manifest" href="../manifest.json">
+<link rel="manifest" href="../.manifest.json">
 <meta name="theme-color" content="#00ff88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -301,29 +301,39 @@ document.getElementById('vol-label').textContent = val + '%';
 updateMasterGain();
 }
 
-function playSound(type, freq, duration, when, params) {
+function playSound(type, freq, duration, params) {
 try {
 initAudio();
 if (!audioCtx || isMasterMuted()) return;
+duration = duration || 0.2;
+if (Array.isArray(freq)) {
+// ascending arpeggio: schedule each note inside the total duration
+const step = duration / freq.length;
+let last;
+freq.forEach((f, i) => { last = playToneAt(type, f, step * 0.95, audioCtx.currentTime + i * step, params); });
+return last;
+}
+return playToneAt(type, freq, duration, audioCtx.currentTime, params);
+} catch (e) { console.error(e); }
+}
+function playToneAt(type, freq, duration, startTime, params) {
 const osc = audioCtx.createOscillator();
 const gain = audioCtx.createGain();
 osc.type = type || 'sine';
-osc.frequency.value = freq || 440;
-gain.gain.setValueAtTime(0.1 * masterVolume, audioCtx.currentTime);
-gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (duration || 0.2));
+osc.frequency.setValueAtTime(freq || 440, startTime);
+gain.gain.setValueAtTime(0.1 * masterVolume, startTime);
+gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 osc.connect(gain);
 gain.connect(masterGain);
-const startTime = when || audioCtx.currentTime;
 osc.start(startTime);
-osc.stop(startTime + (duration || 0.2));
+osc.stop(startTime + duration);
 activeOscillators.push(osc);
 osc.onended = () => { const idx = activeOscillators.indexOf(osc); if (idx > -1) activeOscillators.splice(idx, 1); };
 if (params) {
-if (params.freqEnd !== undefined) osc.frequency.exponentialRampToValueAtTime(params.freqEnd, audioCtx.currentTime + (duration || 0.2));
-if (params.volume !== undefined) gain.gain.setValueAtTime(params.volume * masterVolume, audioCtx.currentTime);
+if (params.freqEnd !== undefined) osc.frequency.exponentialRampToValueAtTime(params.freqEnd, startTime + duration);
+if (params.volume !== undefined) gain.gain.setValueAtTime(params.volume * masterVolume, startTime);
 }
 return osc;
-} catch (e) { console.error(e); }
 }
 
 function playClickSound() { playSound('square', 800, 0.05); }
@@ -438,7 +448,8 @@ setTimeout(() => { s.fn(); }, i * 80);
 // Init
 document.addEventListener('DOMContentLoaded', () => { initAudio(); });
 </script>
-<script src="./shared-features.js"></script>
-<script src="./arcade-features.js"></script>
+<script src="./.shared-features.js"></script>
+<script src="./.arcade-features.js"></script>
+<script src="./.boot-transition.js"></script>
 </body>
 </html>

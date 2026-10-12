@@ -12,6 +12,9 @@
 /.Offline-HTML-Games-Pack-master/
 /.library2/
 
+# Game corpus (7.8 GB / 14k files - large binaries, kept out of git)
+/.games/
+
 # Test artifacts
 test-*.png
 _tmp_*.js

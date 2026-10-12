@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="manifest" href="../manifest.json">
+<link rel="manifest" href="../.manifest.json">
 <meta name="theme-color" content="#00ff88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Scientific Calculator - Arcade Hub</title>
@@ -98,8 +98,8 @@ canvas#matrix-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:
     </div>
 </div>
 
-<script src="./shared-features.js"></script>
-<script src="./arcade-features.js"></script>
+<script src="./.shared-features.js"></script>
+<script src="./.arcade-features.js"></script>
 <script>
 // ===== MATRIX RAIN =====
 const canvas=document.getElementById('matrix-canvas'),ctx=canvas.getContext('2d');
@@ -109,6 +109,31 @@ resizeMatrix();addEventListener('resize',resizeMatrix);
 const abc='01アイウエオカキクケコサシスセソ0ABCDEFαβγδ∞∫∑√πθ';
 function drawMatrix(){ctx.fillStyle='rgba(5,5,8,0.06)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#00ff88';ctx.font='14px monospace';for(let i=0;i<cols;i++){const ch=abc[Math.floor(Math.random()*abc.length)];ctx.fillText(ch,i*14,cols2[i]*14);if(cols2[i]*14>canvas.height&&Math.random()>.975)cols2[i]=0;cols2[i]++}}
 setInterval(drawMatrix,35);
+
+// ===== UI SFX (self-contained; this page has no shared audio context) =====
+let __calcAudioCtx = null;
+function __calcAudio() {
+  try {
+    if (!__calcAudioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; __calcAudioCtx = new AC(); }
+    if (__calcAudioCtx.state === 'suspended') __calcAudioCtx.resume();
+    return __calcAudioCtx;
+  } catch (e) { return null; }
+}
+function __calcBeep(type, from, to, dur, vol) {
+  const ac = __calcAudio(); if (!ac) return;
+  try {
+    const osc = ac.createOscillator(), gain = ac.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(from, ac.currentTime);
+    if (to) osc.frequency.exponentialRampToValueAtTime(to, ac.currentTime + dur);
+    gain.gain.setValueAtTime(vol, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + dur);
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.start(); osc.stop(ac.currentTime + dur);
+  } catch (e) {}
+}
+function playClickSound() { __calcBeep('square', 300, 150, 0.08, 0.05); }
+function playHoverSound() { __calcBeep('sine', 1200, null, 0.03, 0.02); }
 
 // ===== CALCULATOR ENGINE =====
 let angleMode = 'deg'; // deg | rad | grad
@@ -496,5 +521,6 @@ renderButtons();
 renderHistory();
 updateDisplay();
 </script>
+<script src="./.boot-transition.js"></script>
 </body>
 </html>

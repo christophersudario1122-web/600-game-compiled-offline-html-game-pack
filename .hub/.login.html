@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="manifest" href="../manifest.json">
+<link rel="manifest" href="../.manifest.json">
 <meta name="theme-color" content="#00ff88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -210,7 +210,7 @@ function checkPassword() {
     const pass = document.getElementById('password-input').value;
     
     if (pass === "Chrsiischeeks") {
-        window.location.href = "../.Offline-HTML-Games-Pack-master/offline/tisrealyaint.html";
+        window.location.href = "./.boot-launch.html?g=tisrealyaint.html";
     } else {
         document.getElementById('error-msg').innerText = "> ACCESS DENIED: INVALid KEY";
     }
@@ -311,7 +311,8 @@ window.addEventListener('resize', () => {
     canvas.height = window.innerHeight;
 });
 </script>
-<script src="./shared-features.js"></script>
-<script src="./arcade-features.js"></script>
+<script src="./.shared-features.js"></script>
+<script src="./.arcade-features.js"></script>
+<script src="./.boot-transition.js"></script>
 </body>
 </html>

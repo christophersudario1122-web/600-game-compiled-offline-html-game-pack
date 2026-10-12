@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="manifest" href="../manifest.json">
+<link rel="manifest" href="../.manifest.json">
 <meta name="theme-color" content="#00ff88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -390,6 +390,12 @@
 <div class="action-bar">
     <input type="text" id="search-input" class="search-input" placeholder=">> SEARCH DATABASE BY GAME NAME..." oninput="displayGames()" onmouseenter="playHoverSound()">
     <button class="dice-btn" onclick="rollDice(); playClickSound();" onmouseenter="playHoverSound()" title="Pick a random game">🎲 ROLL DICE</button>
+    <button class="dice-btn" id="shelves-btn" onclick="toggleShelves(); playClickSound();" onmouseenter="playHoverSound()" title="Curated collections">📁 SHELVES</button>
+</div>
+
+<div id="shelves-panel" style="display:none;padding:8px 12px;background:#001;border-bottom:1px solid #0f0;font-family:monospace;font-size:0.8rem;">
+    <div style="color:#0f0;margin-bottom:6px;">📁 COLLECTIONS — APPLY A CURATED SHELF:</div>
+    <div id="shelves-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
 </div>
 
 <div class="tabs-container" id="tabs-container">
@@ -405,6 +411,7 @@
     <button class="tab-btn" data-filter="strategy" onmouseenter="playHoverSound()" onclick="playClickSound()">🗺️ Strategy</button>
     <button class="tab-btn" data-filter="puzzle" onmouseenter="playHoverSound()" onclick="playClickSound()">🧩 Puzzle</button>
     <button class="tab-btn" data-filter="horror" onmouseenter="playHoverSound()" onclick="playClickSound()">👻 Horror</button>
+    <button class="tab-btn" data-filter="classic" onmouseenter="playHoverSound()" onclick="playClickSound()">🏛️ Classic</button>
     <button class="tab-btn series" data-filter="papa" onmouseenter="playHoverSound()" onclick="playClickSound()">🍔 Papa's</button>
     <button class="tab-btn series" data-filter="bloons" onmouseenter="playHoverSound()" onclick="playClickSound()">🎈 Bloons</button>
     <button class="tab-btn series" data-filter="duck" onmouseenter="playHoverSound()" onclick="playClickSound()">🦆 Duck Life</button>
@@ -603,8 +610,8 @@ document.getElementById('theme-select').value = effectiveTheme;
 changeTheme(effectiveTheme);
 
 // --- GAME DATABASE & RECENTLY PLAYED ---
-const dir = "../.Offline-HTML-Games-Pack-master/offline/";
-const games = ["1.5","1.8","1.12","1on1soccer","1on1tennis","1v1.lol","3Dflightsimulator","8ballclassic","10minutestilldawn","12minibattles","2048","2048cupcakes","agariolite","ageofwar","ageofwar2","agesofconflict","Alpha_1.2.6","amongus","angrybirds","angrybirdsshowdown","angrybirdsspace","awesometanks","awesometanks2","backrooms","baconmaydie","badicecream","badicecream2","badicecream3","badparenting","badpiggies","baldisbasics","baseballbros","basketballlegends","basketballstars","basketbros","basketrandom","Beta_1.3","bitlife","bitplanes","blockysnakes","bloonsTD","bloonsTD2","bloonsTD3","bloonsTD4","bloonsTD5","bloxorz","blumgiracers","blumgirocket","bobtherobber","bobtherobber2","bobtherobber5","bouncymotors","bowmasters","boxingrandom","breakingthebank","bubbleshooter","candycrush","capybaraclicker","cardrawing","carkingarena","chess","choppacorp","circloO","circloO2","clashofvikings","cleanupio","clusterrush","cookieclicker","crazycars","crazycattle3D","crazycrashlanding","crazymotorcycle","crossyroad","cuttherope","dadish","dadish2","dadish3","deathchase","deathrun3D","demolitionderbycrashracing","doodlejump","drawclimber","dreadheadparkour","driftboss","drivemad","ducklife","ducklife2","ducklife3","ducklife4","ducklife5","ducklingsio","eagleride","earntodie","earntodie2","eggycar","elasticface","escaperoad","escaperoad2","escapingtheprison","evilglitch","fancypantsadventure","fancypantsadventure2","fireboyandwatergirl","fireboyandwatergirl2","fireboyandwatergirl3","fireboyandwatergirl4","flappybird","floodrunner2","floodrunner3","floodrunner4","fnaf","fnaf2","fnaf3","fnaf4","footballbros","footballlegends","freerider3","fruitninja","funnybattle","funnybattle2","funnymadracing","funnyshooter2","geometrydash","geometrydashlite","geometryvibes","getawayshootout","getontop","gladihoppers","googlebaseball","googledino","granny","granny2","guesstheiranswer","hanger2","happywheels","helixjump","highwaytraffic","hillclimbracinglite","holeio","houseofhazards","hoverracerdrive","idlebreakout","Indev","ironsnout","jetpackjoyride","johnnytrigger","jumpingshell","karatebros","kartbros","learntofly","learntofly2","learntofly3","learntoflyidle","leveldevil","madalinstuntcars2","melonplayground","mergeroundracers","minesweeper","monkeymart","monstertracks","motox3m","motox3m2","motox3m3","motox3mpoolparty","motox3mspookyland","motox3mwinter","noobminer","oppositeday","ovo","ovo2","ovo3dimensions","pacman","papasbakeria","papasburgeria","papascheeseria","papascupcakeria","papasdonuteria","papasfreezeria","papashotdoggeria","papaspancakeria","papaspastaria","papaspizzeria","papasscooperia","papassushiria","papastacomia","papaswingeria","paperio2","parkingfury","parkingfury2","parkingfury3","picosschool","pingpongchaos","pixelspeedrun","plantsvszombies","plonky","polytrack","poorbunny","pou","ragdollarchers","ragdollhit","ragdollsoccer","redball4vol1","redball4vol2","redball4vol3","retrobowl","retrobowlcollege","retrohighway","retropingpong","riddleschool","riddleschool2","riddleschool3","riddleschool4","riddleschool5","riddletransfer","riddletransfer2","rocketsoccerderby","rooftopsnipers","rooftopsnipers2","run","run2","run3","sandgame","shortlife","slope","slope2player","slope3","slowroads","sm63","sm64","snowballio","snowrider","snowroad","soccerbros","soccerrandom","spacebarclicker","spaceiskey","spaceiskey2","spacewaves","speedstars","sprunki","stack","stacktris","stateio","stickarchersbattle","stickfighter","stickmanhook","stickmerge","subwaysurfersbeijing","subwaysurfershavana","subwaysurferssanfrancisco","superbikethechampion","superhot","superliquidsoccer","superstarcar","tabletennisworldtour","tag","taproad","templeofboom","templerun2","territorialio","theimpossiblequiz","theimpossiblequiz2","thereisnog","theyarecoming","thisistheonlylevel","thisistheonlyleveltoo","timeshooter2","timeshooter3","tinyfishing","tombofthemask","trapthecat","triviacrack","tubejumpers","tunnelrush","unicyclehero","vex4","vex5","vex6","vex7","vex8","vexx3m","vexx3m2","volleyrandom","wartheknights","webecomewhatwebehold","wheeliebike","wheely","wheely2","wheely3","wheely4","wheely5","wheely6","wheely7","wheely8","wordleunlimited","worldshardestgame","worldshardestgame2","worldshardestgame3","wrestlebros","zombierush"];
+const dir = "../.games/.library1/offline/offline/";
+const games = ["1.5","1.8","1.12","1on1soccer","1on1tennis","1v1.lol","3Dflightsimulator","8ballclassic","10minutestilldawn","12minibattles","2048","2048cupcakes","agariolite","ageofwar","ageofwar2","agesofconflict","Alpha_1.2.6","amongus","angrybirds","angrybirdsshowdown","angrybirdsspace","awesometanks","awesometanks2","backrooms","baconmaydie","badicecream","badicecream2","badicecream3","badparenting","badpiggies","baldisbasics","baseballbros","basketballlegends","basketballstars","basketbros","basketrandom","Beta_1.3","bitlife","bitplanes","blockysnakes","bloonsTD","bloonsTD2","bloonsTD3","bloonsTD4","bloonsTD5","bloxorz","blumgiracers","blumgirocket","bobtherobber","bobtherobber2","bobtherobber5","bouncymotors","bowmasters","boxingrandom","breakingthebank","bubbleshooter","candycrush","capybaraclicker","cardrawing","carkingarena","chess","choppyorc","circloO","circloO2","clashofvikings","cleanupio","clusterrush","cookieclicker","crazycars","crazycattle3D","crazycrashlanding","crazymotorcycle","crossyroad","cuttherope","dadish","dadish2","dadish3","deathchase","deathrun3D","demolitionderbycrashracing","doodlejump","drawclimber","dreadheadparkour","driftboss","drivemad","ducklife","ducklife2","ducklife3","ducklife4","ducklife5","ducklingsio","eagleride","earntodie","earntodie2","eggycar","elasticface","escaperoad","escaperoad2","escapingtheprison","evilglitch","fancypantsadventure","fancypantsadventure2","fireboyandwatergirl","fireboyandwatergirl2","fireboyandwatergirl3","fireboyandwatergirl4","flappybird","floodrunner2","floodrunner3","floodrunner4","fnaf","fnaf2","fnaf3","fnaf4","footballbros","footballlegends","freerider3","fruitninja","funnybattle","funnybattle2","funnymadracing","funnyshooter2","geometrydash","geometrydashlite","geometryvibes","getawayshootout","getontop","gladihoppers","googlebaseball","googledino","granny","granny2","guesstheiranswer","hanger2","happywheels","helixjump","highwaytraffic","hillclimbracinglite","holeio","houseofhazards","hoverracerdrive","idlebreakout","Indev","ironsnout","jetpackjoyride","johnnytrigger","jumpingshell","karatebros","kartbros","learntofly","learntofly2","learntofly3","learntoflyidle","leveldevil","madalinstuntcars2","melonplayground","mergeroundracers","minesweeper","monkeymart","monstertracks","motox3m","motox3m2","motox3m3","motox3mpoolparty","motox3mspookyland","motox3mwinter","noobminer","oppositeday","ovo","ovo2","ovo3dimensions","pacman","papasbakeria","papasburgeria","papascheeseria","papascupcakeria","papasdonuteria","papasfreezeria","papashotdoggeria","papaspancakeria","papaspastaria","papaspizzeria","papasscooperia","papassushiria","papastacomia","papaswingeria","paperio2","parkingfury","parkingfury2","parkingfury3","picosschool","pingpongchaos","pixelspeedrun","plantsvszombies","plonky","polytrack","poorbunny","pou","ragdollarchers","ragdollhit","ragdollsoccer","redball4vol1","redball4vol2","redball4vol3","retrobowl","retrobowlcollege","retrohighway","retropingpong","riddleschool","riddleschool2","riddleschool3","riddleschool4","riddleschool5","riddletransfer","riddletransfer2","rocketsoccerderby","rooftopsnipers","rooftopsnipers2","run","run2","run3","sandgame","shortlife","slope","slope2player","slope3","slowroads","sm63","sm64","snowballio","snowrider","snowroad","soccerbros","soccerrandom","spacebarclicker","spaceiskey","spaceiskey2","spacewaves","speedstars","sprunki","stack","stacktris","stateio","stickarchersbattle","stickfighter","stickmanhook","stickmerge","subwaysurfersbeijing","subwaysurfershavana","subwaysurferssanfrancisco","superbikethechampion","superhot","superliquidsoccer","superstarcar","tabletennisworldtour","tag","taproad","templeofboom","templerun2","territorialio","theimpossiblequiz","theimpossiblequiz2","thereisnog","theyarecoming","thisistheonlylevel","thisistheonlyleveltoo","timeshooter2","timeshooter3","tinyfishing","tombofthemask","trapthecat","triviacrack","tubejumpers","tunnelrush","unicyclehero","vex4","vex5","vex6","vex7","vex8","vexx3m","vexx3m2","volleyrandom","wartheknights","webecomewhatwebehold","wheeliebike","wheely","wheely2","wheely3","wheely4","wheely5","wheely6","wheely7","wheely8","wordleunlimited","worldshardestgame","worldshardestgame2","worldshardestgame3","wrestlebros","zombierush","classic_arkanoid","classic_asteroids","classic_breakout","classic_buggy_boy","classic_burgertime","classic_centipede","classic_chase_hq","classic_choplifter","classic_defender","classic_donkey_kong","classic_enduro","classic_excitebike","classic_frogger","classic_galaga","classic_hang_on","classic_ivan_stewart","classic_joust","classic_jr_pacman","classic_kaboom","classic_lode_runner","classic_micro_machines","classic_missile_command","classic_montezuma","classic_ms_pacman","classic_outrun","classic_outrun_3d","classic_pacman","classic_paperboy","classic_pole_position","classic_pitfall","classic_pong","classic_pooyan","classic_power_drift","classic_qbert","classic_rad_mobile","classic_rc_pro_am","classic_river_raid","classic_road_fighter","classic_robotron","classic_seaquest","classic_snake","classic_space_invaders","classic_spy_hunter","classic_super_breakout","classic_tetris","classic_tutankham","classic_venture","classic_virtua_racing","classic_warlords","classic_yars_revenge","adarkroom","asciispace","assessmentexamination","asteroids","astray","backcountry","basketbrosio","blackholesquare","bounceback","breaklock","breakout","btd4","captaincallisto","chromaincident","chromedino","clickerheroes","connect3","csgoclicker","cubefield","cubitomayhem","cuttheropeholiday","cuttheropetimetravel","deepestsword","doom","drawthehill","drift","drifthunters","edgenotfound","factoryballsforever","fireboyandwatergirlforesttemple","flappy2048","flappyplane","flightsimulator","fridaynightfunkin","friendlyfire","getawayshootoutnew","googlesnake","gopherkart","grindcraft","hexgl","hextris","konnekt","letssurf","littlealchemy","motoroadrash3d","ninjavsevilcorp","omnombounce","packabunchas","paperio","particleclicker","pushback","q1k3","r3","racer","radiusraid","redball4","retrohaunt","ritz","roadblocks","scrapmetal3","shuttledeck","sketchbook04","sleepingbeauty","slitherio","slope2","snake","snowbattle","solitaire","spacecompany","spacegarden","spacehuggers","spaceinvaders","stackball","stickmanboost","stickmanclimb","stickmangolf","stickmansurvival","subwaysurfers","subwaysurfersny","subwaysurferssingapore","tanukisunset","tetris","themazeofspacegoblins","timeshooter","topspeedracing3d","towermaster","trimps","vex3","xx142b2exe","zombsroyale","abandoned","abandoned-2","aground","amidst-the-sky","ampler-launcher","another-gentlemans-adventure","babel-tower","brawl-stars-project-laser","clicker-heroes-updated","conways-game-of-life","core-ball","doge-miner","drive-mad-s","dune","evowars","family-feud","five-nights-at-epsteins","flash","geometry-dash-remastered","geometry-vibes-monster","geometry-vibes-x-ball","gons-io","gunspin","incremancer","lion-soldiers-vengeance","maptroid","mario-game","n-gon","n-step-steve-part-1","n-step-steve-part-2","pcraft","planet-life","progress-knight-quest","progress-knight-reborn","pull-of-war","reach-the-core","restless-wing-syndrome","retro-bowl-old","rift-shift","rocket-league-2d","rookie-bowman","run-3-beta","sabercut","sandspiel","scuba-bear","shadow-fight","slice-master","smart-ball","smash-karts","station-saturn","the-final-earth","the-treasure","there-is-no-game","tic-tac-what","trace","two-ball-3d","web-osu","where-is-the-water","x-trench-run","yohoho","abyss-sonar","air-hockey","air-traffic-control","alchemy-workshop","auction-fever","auto-chess-forge","backpack-arena","ball-arena","basin-control","battery-cycle","beat-bento","blackjack-table","block-forge","bomb-grid","branching-tales","bytebot-lab","chalk-billiards","charm-reels","checkpoint-inspector","chromatic-press","chromatography-lab","cipher-relay","claw-carnival","clean-slate","climbing-route","clockwork-escape","comet-weaver","connect-arena","courier-grid","courtroom-clash","cozy-organizer","crossword-cafe","curling-endgame","detective-desk","dice-delver","dojo-duel","drift-racer","drone-survey","dungeon-delver","ecosystem-keeper","elemental-sandbox","ember-tactics","fishing-harbor","flappy-glider","fleet-duel","forest-dash","frequency-bureau","frontier-command","fruit-slice","garden-front","gear-calibrator","gem-garden","glyph-warden","hive-sovereign","island-survival","lantern-memory","lockmaster-shift","mahjong-link","market-pulse","maze-chase","merge-orbit","metro-weaver","midnight-chess","midnight-monitor","mine-matrix","mist-valley-herbarium","moba-frontier","mole-market","monster-horde","monster-tamer","moon-lander","mosaic-jigsaw","museum-climate","neon-2048","noodle-shift","observatory-watch","orbital-pinball","orbital-stowage","pathogen-protocol","penalty-rush","photo-safari","pixel-clues","pocket-companion","pocket-empire","pocket-farm","pocket-golf","prism-breaker","prism-orchard","pulse-studio","radish-guard","relay-coordination","river-holdem","runway-stylist","shadow-post","shan-hai","signal-caravan","silent-rescue","sky-hop","skyline-planner","slingstorm","snake-game","snow-ridge","sokoban-quest","solitaire-classic","spectrum-console","spud-arena","stack-tower","starforge-idle","starline-route","starship-suspects","stratigraphy-lab","sudoku-studio","switchyard-rush","tank-arena","thunder-vanguard","tidal-grid","tide-salvage","time-post","tiny-factory","touchline-manager","truss-workshop","wind-tunnel-contracts","wonder-park","word-grid"];
 
 let favorites = JSON.parse(localStorage.getItem('arcade_favorites') || '[]');
 let recentlyPlayed = JSON.parse(localStorage.getItem('arcade_recent') || '[]');
@@ -665,6 +672,7 @@ const getI = (g) => {
     if (/dadish/i.test(g)) return "🦖";
     if (/ovo/i.test(g)) return "🥷";
     if (/granny|backrooms|badparenting/i.test(g)) return "👻";
+    if (/classic_/i.test(g)) return "🏛️";
     if (/soccer|tennis|ball|bros|random|bowl|star|legend|hit|wrestle|ping|pong|golf|sport/i.test(g)) return "⚽";
     if (/shoot|lol|gun|snip|war|tank|combat|fury|bullet|dead|zombie|bomb/i.test(g)) return "🔫";
     if (/car|race|drive|motor|flight|sim|kart|drift|truck|bike|traffic|speed|crash/i.test(g)) return "🏎️";
@@ -695,6 +703,7 @@ const getT = (g) => {
     if (/run|jump|dash|rush|slope|fly|escape|prison|dread|parkour|bounce|climb|subwaysurfers|geometrydash|crossyroad|doodlejump/i.test(g)) t.push("platformer");
     if (/action|stickmanhook|stickmerge|bowmasters|ragdoll|happywheels/i.test(g)) t.push("action");
     if (/pacman|tetris|2048|snake|minesweeper|chess|puzzle|bubble|wordle|impossiblequiz/i.test(g)) t.push("arcade");
+    if (/classic_/i.test(g)) t.push("classic");
     if (!t.length) t.push("puzzle");
     return t;
 }
@@ -816,7 +825,7 @@ function playGameOfTheDay() {
         renderGotdStreak();
     } catch (e) {}
     const ext = HTM_GAMES.has(game) ? '.htm' : '.html';
-    window.open(dir + game + ext, '_blank');
+    window.open('./.boot-launch.html?g=' + encodeURIComponent(game + ext), '_blank');
     recordRecent(game);
     recordPlay(game);
     playClickSound();
@@ -936,7 +945,7 @@ function rollDice() {
     if (filteredCache.length === 0) return;
     const randomGame = filteredCache[Math.floor(Math.random() * filteredCache.length)];
     recordRecent(randomGame);
-    window.location.href = dir + randomGame + getExt(randomGame);
+    window.location.href = './.boot-launch.html?g=' + encodeURIComponent(randomGame + getExt(randomGame));
 }
 
 document.getElementById("tabs-container").addEventListener("click", e => {
@@ -946,6 +955,58 @@ document.getElementById("tabs-container").addEventListener("click", e => {
         currentFilter = e.target.getAttribute("data-filter");
         displayGames();
     }
+});
+
+// Collections engine (family #14) → drives the real grid filter
+function toggleShelves() {
+    const panel = document.getElementById("shelves-panel");
+    const list = document.getElementById("shelves-list");
+    if (!panel || !list) return;
+    const showing = panel.style.display === "block";
+    if (showing) { panel.style.display = "none"; return; }
+    if (!list.dataset.built && window.Arcade) {
+        const seen = {};
+        const items = window.Arcade.byFamily('collections').filter(c => {
+            if (seen[c.tag]) return false;
+            seen[c.tag] = true;
+            return true;
+        });
+        list.innerHTML = '';
+        items.forEach(c => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'tab-btn';
+            b.textContent = '📁 ' + c.name.split(' #')[0];
+            b.title = c.desc;
+            b.addEventListener('click', function () { window.Arcade.applyCollection(c.id); });
+            list.appendChild(b);
+        });
+        list.dataset.built = '1';
+    }
+    panel.style.display = "block";
+}
+document.addEventListener("arcade:collection", e => {
+    const d = e.detail;
+    if (!d || !d.tag) return;
+    currentFilter = d.tag;
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    displayGames();
+    let banner = document.getElementById("collection-banner");
+    if (!banner) {
+        banner = document.createElement("div");
+        banner.id = "collection-banner";
+        banner.style.cssText = "position:sticky;top:0;z-index:99;background:#001;color:#0f0;border-bottom:1px solid #0f0;padding:6px 12px;font-family:monospace;font-size:0.8rem;display:flex;gap:10px;align-items:center;justify-content:center;";
+        document.body.insertBefore(banner, document.body.firstChild);
+    }
+    banner.innerHTML = '📁 Shelf: <b>' + d.name + '</b> (' + filteredCache.length + ' games) — <button type="button" id="collection-clear" class="tab-btn" style="background:transparent;border:1px solid #0f0;color:#0f0;cursor:pointer;padding:2px 10px;font-family:inherit;">✕ Show all</button>';
+    const clear = document.getElementById("collection-clear");
+    if (clear) clear.addEventListener("click", () => {
+        currentFilter = "all";
+        const allTab = document.querySelector('.tab-btn[data-filter="all"]');
+        if (allTab) allTab.classList.add("active");
+        displayGames();
+        if (banner) banner.remove();
+    });
 });
 
 displayGames();
@@ -1082,7 +1143,7 @@ const Storage = {
 };
 
 // ---------- 2. PLAY COUNT TRACKING ----------
-const playCounts = Storage.getJSON(Storage.KEYS.plays, {});
+var playCounts = Storage.getJSON(Storage.KEYS.plays, {});
 
 function recordPlay(gameName) {
     if (!gameName) return;
@@ -1554,7 +1615,7 @@ function launchGame(g) {
 }
 
 function openGame(g, ext) {
-    try { window.open(dir + g + ext, '_blank'); } catch (e) {}
+    try { window.open('./.boot-launch.html?g=' + encodeURIComponent(g + ext), '_blank'); } catch (e) {}
     if (typeof recordRecent === 'function') recordRecent(g);
     if (typeof recordPlay === 'function') recordPlay(g);
     // Playtime tracking
@@ -1648,8 +1709,8 @@ function toggleFullscreen() {
   }
 }
 </script>
-<script src="./shared-features.js"></script>
-<script src="./arcade-features.js"></script>
+<script src="./.shared-features.js"></script>
+<script src="./.arcade-features.js"></script>
 <div id="launcher-overlay" class="launcher-overlay">
     <div class="launcher-box">
         <div class="launcher-name" id="launcher-name"></div>
@@ -1658,5 +1719,6 @@ function toggleFullscreen() {
         <button class="launcher-cancel" onclick="closeLauncher()" onmouseenter="playHoverSound()">✕ Cancel</button>
     </div>
 </div>
+<script src="./.boot-transition.js"></script>
 </body>
 </html>

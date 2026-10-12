@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="manifest" href="../manifest.json">
+<link rel="manifest" href="../.manifest.json">
 <meta name="theme-color" content="#00ff88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -72,13 +72,13 @@
         flex-direction: column;
         gap: 15px;
     }
-    htoolbar {
+    .toolbar {
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
         align-items: center;
     }
-    htoolbar input, htoolbar select {
+    .toolbar input, .toolbar select {
         background: var(--box-bg);
         color: var(--neon-green);
         border: 1px solid var(--neon-green);
@@ -87,12 +87,12 @@
         border-radius: 3px;
         outline: none;
     }
-    hsave-status {
+    .save-status {
         color: #00ccff;
         font-size: 0.9rem;
         margin-left: auto;
     }
-    ...notes-list {
+    .notes-list {
         max-height: 30vh;
         overflow-y: auto;
         background: var(--box-bg);
@@ -100,7 +100,7 @@
         border-radius: 4px;
         padding: 10px;
     }
-    hnote-item {
+    .note-item {
         padding: 8px;
         margin-bottom: 5px;
         background: rgba(0, 255, 136, 0.05);
@@ -112,26 +112,26 @@
         align-items: center;
         transition: 0.2s;
     }
-    hnote-item:hover {
+    .note-item:hover {
         background: rgba(0, 255, 136, 0.15);
         border-color: var(--neon-green);
     }
-    hnote-item.active {
+    .note-item.active {
         background: rgba(0, 255, 136, 0.2);
         border-color: var(--neon-green);
     }
-    hnote-title {
+    .note-title {
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    hnote-date {
+    .note-date {
         font-size: 0.75rem;
         opacity: 0.6;
         margin: 0 10px;
     }
-    hnote-delete {
+    .note-delete {
         background: rgba(255, 50, 50, 0.2);
         border: 1px solid #ff3232;
         color: #ff3232;
@@ -140,11 +140,11 @@
         border-radius: 3px;
         font-size: 0.8rem;
     }
-    hnote-delete:hover {
+    .note-delete:hover {
         background: #ff3232;
         color: white;
     }
-    heditor-wrap {
+    .editor-wrap {
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -183,7 +183,7 @@
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
     /* Custom Pixel Cursor */
-    * { cursor: url('data:image/svg+xml,<svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="10" y="0" width="4" height="2" fill="%2300ff88"/><rect x="10" y="2" width="4" height="4" fill="%2300ff88"/><rect x="10" y="6" width="4" height="2" fill="%2300ff88"/><rect x="0" y="8" width="4" height="4" fill="%2300ff88"/><rect x="4" y="8" width="4" height="4" fill="%2300ff88"/><rect x="8" y="8" width="4" height="4" fill="%2300ff88"/><rect x="12" y="8" width="4" height="4" fill="%2300ff88"/><rect x="16" y="8" width="4" height="4" fill="%2300ff88"/><rect x="10" y="10" width="4" height="12" fill="%2300ff88"/><rect x="12" y="10" width="2" height="2" fill="%230a0a0f"/><rect x="14" y="22" width="4" height="2" fill="%2300ff88"/></svg>') 10 0, auto; }
+    * { cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><rect x="10" y="0" width="4" height="2" fill="%2300ff88"/><rect x="10" y="2" width="4" height="4" fill="%2300ff88"/><rect x="10" y="6" width="4" height="2" fill="%2300ff88"/><rect x="0" y="8" width="4" height="4" fill="%2300ff88"/><rect x="4" y="8" width="4" height="4" fill="%2300ff88"/><rect x="8" y="8" width="4" height="4" fill="%2300ff88"/><rect x="12" y="8" width="4" height="4" fill="%2300ff88"/><rect x="16" y="8" width="4" height="4" fill="%2300ff88"/><rect x="10" y="10" width="4" height="12" fill="%2300ff88"/><rect x="12" y="10" width="2" height="2" fill="%230a0a0f"/><rect x="14" y="22" width="4" height="2" fill="%2300ff88"/></svg>') 10 0, auto; }
     a, button, [onclick], input, textarea, select { cursor: pointer; }
     a, button { cursor: pointer; }
 
@@ -515,7 +515,8 @@ document.addEventListener('click', function(e) {
 }, true);
 
 </script>
-<script src="./shared-features.js"></script>
-<script src="./arcade-features.js"></script>
+<script src="./.shared-features.js"></script>
+<script src="./.arcade-features.js"></script>
+<script src="./.boot-transition.js"></script>
 </body>
 </html>

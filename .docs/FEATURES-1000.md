@@ -1,7 +1,12 @@
-# ARCADE HUB — 1000 FEATURE MASTER LIST
+# ARCADE HUB - 2000 FEATURE MASTER LIST
 
 Every feature below is implemented in `.hub/arcade-features.js`
 (`window.Arcade`, registry + engine). Status: IMPLEMENTED unless noted.
+
+> **Update 2026-10-07:** registry doubled from 1000 to **2000** features
+> (20 families × 100). `window.Arcade.count() === 2000`. The 10 new families
+> are documented in **Part B** at the end of this file; the source of truth
+> is the generator `tools/gen-features.mjs`.
 
 ## A. Core Hub & Library (1–250)
 
@@ -266,3 +271,41 @@ Every feature below is implemented in `.hub/arcade-features.js`
 248. Corrupt-data recovery guard
 249. Schema version migration
 250. Reset-all with typed confirm
+
+---
+
+# PART B - 2000 FEATURE REGISTRY (update 2026-10-07)
+
+Part A above (families 1-10, 1000 features) was written by hand as the original
+spec. A **second 1000 features** were then generated as 10 new families, each
+with a real, working engine on `window.Arcade`, doubling the registry to 2000.
+Source of truth: `tools/gen-features.mjs` (validates `F.length === 2000` and
+unique ids). Regenerated output: `.hub/arcade-features.js`.
+
+| # | Family | IDs | Engine functions | What it really does |
+|---|--------|-----|------------------|---------------------|
+| 11 | **widgets** | `widget-001..100` | `mountWidget`, `clearWidgets` | Live dashboard tiles (clock, streak, sessions, storage, favorites, notes, highs, plays, GOTD) mounted into a `[data-widgets]` host, 5s refresh. |
+| 12 | **tools** | `tool-001..100` | `launchTool` | Working overlay utilities: coin, d6, d20, random range, timer, stopwatch, countdown, pomodoro, list picker, UUID. |
+| 13 | **presets** | `preset-001..100` | `applyPreset` | UI density + font-scale presets (compact/comfortable/spacious/zen/deck/focus × 92/100/108/116%). |
+| 14 | **collections** | `col-001..100` | `applyCollection` | Curated game shelves. Tags map to the real library1 `getT` vocabulary; fires `arcade:collection`, which library1 handles to filter the live grid. |
+| 15 | **challenges** | `chal-001..100` | `startChallenge`, `challengeDone` | Daily-style play goals persisted in `arcade_challenge`, with a completion reward. |
+| 16 | **badges** | `badge-001..100` | `awardBadge`, `hasBadge` | Earnable achievement badges stored in `arcade_awards`. |
+| 17 | **greetings** | `gr-001..100` | `greet` | Boot/toast greeting lines surfaced via the toast engine. |
+| 18 | **savepoints** | `sv-001..100` | `snapshot` | Named scoped backup profiles (full/favorites/settings/stats/notes/highscores/shortcuts/themes) downloaded as JSON. |
+| 19 | **soundscapes** | `ss-001..100` | `playScape`, `stopScape` | Ambient WebAudio arpeggios across 7 roots × 8 scales with per-entry tempo. |
+| 20 | **magic** | `mag-001..100` | `castMagic` | Canvas particle ceremonies (confetti/rain/stars/fireworks/matrix/bubbles). |
+
+## Surfacing
+
+- **Feature Atlas** (`.hub/.keybinds.html`): all 20 families render with per-feature
+  action buttons (Mount / Open / Apply / Earn / Greet / Snapshot / Play / Cast) and
+  family-level actions (Mount 5, Clear, Stop ambience, Random burst, Show earned).
+  Header/count/verification updated to 2000.
+- **Library** (`.hub/.library1.html`): a **📁 SHELVES** picker lists the 20 unique
+  collections; applying one sets the grid's `currentFilter`, shows a sticky shelf
+  banner with a live count, and a "✕ Show all" reset.
+
+Verification: headless-Chrome `file://` render of `.keybinds.html` shows 20 families
+with 0 console errors; a CDP functional pass drove the shelves flow (panel opens,
+100-item list builds, shelf applies -> "SHOWING 14", Show-all restores 300) and
+clicked every new-family action button with 0 real console errors.

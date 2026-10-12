@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="manifest" href="../manifest.json">
+<link rel="manifest" href="../.manifest.json">
 <meta name="theme-color" content="#00ff88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -400,6 +400,7 @@
                     <option value="amber">🟠 Cyberpunk Amber</option>
                     <option value="blue">🔵 Neon Blue</option>
                     <option value="red">🔴 Blood Red</option>
+                    <option value="custom">🎨 Custom Color</option>
                 </select>
             </div>
         </div>
@@ -410,6 +411,21 @@
             </div>
             <div class="setting-control" id="theme-swatches">
                 <!-- Filled in by JS -->
+            </div>
+        </div>
+        <div class="setting-row" id="color-preview-card" style="border:2px solid #00ff88;border-radius:8px;padding:12px;box-shadow:0 0 20px #00ff8855;">
+            <div class="setting-label">
+                <span class="key">⚡ Custom Color</span>
+                <div class="desc">Pick any neon color and apply it hub-wide (overrides presets)</div>
+            </div>
+            <div class="setting-control">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <input type="color" id="custom-color-picker" value="#00ff88" style="width:44px;height:32px;background:none;border:1px solid #333;border-radius:4px;cursor:pointer;">
+                    <input type="text" id="custom-color-hex" value="#00ff88" maxlength="7" spellcheck="false" style="width:86px;background:#0a0a0f;color:#00ff88;border:1px solid #333;border-radius:4px;padding:6px 8px;font-family:monospace;">
+                    <input type="color" id="preview-color" value="#00ff88" style="width:44px;height:32px;background:none;border:1px solid #333;border-radius:4px;cursor:pointer;">
+                    <button class="btn" id="apply-custom-theme">APPLY</button>
+                    <button class="btn" id="reset-custom-theme">RESET</button>
+                </div>
             </div>
         </div>
     </div>
@@ -527,7 +543,7 @@
     <div class="section" style="text-align: center; opacity: 0.6; font-size: 0.85rem;">
         <div>🔊 🎵 ELEVATOR MUSIC & HACKER AMBIENT</div>
         <div>Available on all pages • Set via per-page toggles</div>
-        <div style="margin-top: 10px;">PressHERETOSTART.html → <a href="../PRESSHERETOSTART.html" style="color: var(--info);">Hub</a> · <a href=".library1.html" style="color: var(--info);">Library 1</a> · <a href="../.library2/pressHERE.html" style="color: var(--info);">Library 2</a></div>
+        <div style="margin-top: 10px;">PressHERETOSTART.html → <a href="../PRESSHERETOSTART.html" style="color: var(--info);">Hub</a> · <a href=".library1.html" style="color: var(--info);">Library 1</a></div>
     </div>
 </div>
 
@@ -675,6 +691,13 @@ function updateMasterMuteBtn() {
 }
 
 // === THEME ===
+function getCustomColor() {
+    try {
+        const t = JSON.parse(getLS('arcade_custom_theme', 'null'));
+        if (t && t.color) return t.color;
+    } catch (e) {}
+    return getLS('arcade_custom_color', null);
+}
 function setTheme(themeid) {
     setLS('arcade_theme', themeid);
     // Udate swatches
@@ -682,6 +705,11 @@ function setTheme(themeid) {
         s.classList.toggle('active', s.dataset.theme === themeid);
     });
     // Apply theme to current page
+    if (themeid === 'custom') {
+        const c = getCustomColor();
+        if (c) document.documentElement.style.setProperty('--neon-green', c);
+        return;
+    }
     const t = THEMES.find(x => x.id === themeid);
     if (t) {
         document.documentElement.style.setProperty('--neon-green', t.color);
@@ -1122,8 +1150,10 @@ document.addEventListener('click', function(e) {
 
 // ===== CUSTOM THEME COLOR =====
 function applyCustomTheme(color) {
-    // Save to localStorage
+    // Save to localStorage (JSON key is what all other pages read)
+    setLS('arcade_custom_theme', JSON.stringify({ color: color }));
     setLS('arcade_custom_color', color);
+    setLS('arcade_theme', 'custom');
     // Apply immediately
     document.documentElement.style.setProperty('--neon-green', color);
     // Udate color preview card border
@@ -1137,7 +1167,7 @@ function applyCustomTheme(color) {
 }
 
 function loadCustomTheme() {
-    const custom = getLS('arcade_custom_color', null);
+    const custom = getCustomColor();
     if (custom) {
         document.documentElement.style.setProperty('--neon-green', custom);
         const picker = document.getElementById('custom-color-picker');
@@ -1159,7 +1189,7 @@ function loadCustomTheme() {
 
 document.addEventListener('DOMContentLoaded', () => {
     // Apply saved preset theme color on load (custom color overrides presets)
-    if (!getLS('arcade_custom_color', null)) {
+    if (!getCustomColor()) {
         setTheme(getLS('arcade_theme', 'matrix'));
     }
     loadCustomTheme();
@@ -1220,6 +1250,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (resetBtn) {
         resetBtn.addEventListener('click', () => {
+            localStorage.removeItem('arcade_custom_theme');
             localStorage.removeItem('arcade_custom_color');
             document.documentElement.style.removeProperty('--neon-green');
             picker.value = '#00ff88';
@@ -1237,7 +1268,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-<script src="./shared-features.js"></script>
-<script src="./arcade-features.js"></script>
+<script src="./.shared-features.js"></script>
+<script src="./.arcade-features.js"></script>
+<script src="./.boot-transition.js"></script>
 </body>
 </html>

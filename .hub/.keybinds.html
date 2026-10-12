@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<link rel="manifest" href="../manifest.json">
+<link rel="manifest" href="../.manifest.json">
 <meta name="theme-color" content="#00ff88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Keybinds - 1000 Features - Arcade Hub</title>
+<title>Keybinds - 2000 Features - Arcade Hub</title>
 <style>
     :root {
         --neon-green: #00ff88;
@@ -261,7 +261,7 @@
 <canvas id="matrix-canvas" aria-hidden="true"></canvas>
 <div class="container">
     <div class="header">
-        <h1>⌨️ Keybinds &amp; Feature Atlas <small>1000 features · 10 families · press <kbd>?</kbd> for cheatsheet · <kbd>/</kbd> to focus search</small></h1>
+        <h1>⌨️ Keybinds &amp; Feature Atlas <small>2000 features · 20 families · press <kbd>?</kbd> for cheatsheet · <kbd>/</kbd> to focus search</small></h1>
         <div class="header-actions">
             <button type="button" class="btn" onclick="location.href='../.hub/.library1.html'">← Library</button>
             <button type="button" class="btn" onclick="location.href='../PRESSHERETOSTART.html'">⌂ Home</button>
@@ -330,8 +330,8 @@ try {
     }, 50);
 })();
 </script>
-<script src="./shared-features.js"></script>
-<script src="./arcade-features.js"></script>
+<script src="./.shared-features.js"></script>
+<script src="./.arcade-features.js"></script>
 <script>
 (function() {
 'use strict';
@@ -352,7 +352,17 @@ const FAMILY_META = {
     clocks:    { label: '🕒 Clocks',    hint: 'Date/time formats' },
     filters:   { label: '🔎 Filters',   hint: 'Library sort & filter presets' },
     utils:     { label: '🛠️ Utils',     hint: 'Export / import / maintenance' },
-    eggs:      { label: '🥚 Eggs',      hint: 'Secret codes · type to unlock' }
+    eggs:      { label: '🥚 Eggs',      hint: 'Secret codes · type to unlock' },
+    widgets:   { label: '🪟 Widgets',   hint: 'Live dashboard widgets · Mount 5' },
+    tools:     { label: '🧰 Tools',     hint: 'Overlay utilities · coin, dice, timers' },
+    presets:   { label: '🎛️ Presets',  hint: 'Layout density & font scale' },
+    collections:{ label: '📁 Collections', hint: 'Curated game shelves' },
+    challenges:{ label: '🎯 Challenges',hint: 'Daily-style play goals' },
+    badges:    { label: '🏅 Badges',    hint: 'Earnable achievement medals' },
+    greetings: { label: '👋 Greetings', hint: 'Boot toasts & MOTD lines' },
+    savepoints:{ label: '💾 Savepoints',hint: 'Named backup downloads' },
+    soundscapes:{label: '🎵 Soundscapes',hint: 'Ambient arpeggios · Start / Stop' },
+    magic:     { label: '✨ Magic',     hint: 'Canvas particle ceremonies' }
 };
 const FAMILIES = Object.keys(FAMILY_META);
 let activeFamily = 'all';
@@ -384,7 +394,7 @@ function filteredFeatures() {
 }
 
 function renderChips() {
-    const all = [{ id: 'all', label: 'All (1000)' }].concat(
+    const all = [{ id: 'all', label: 'All (' + F.length + ')' }].concat(
         FAMILIES.map(f => ({ id: f, label: FAMILY_META[f].label + ' · ' + F.filter(x => x.family===f).length }))
     );
     chipsEl.innerHTML = '<span class="chips-label">Family:</span>' + all.map(c =>
@@ -407,6 +417,19 @@ function familyActionsHtml(fam, items) {
     }
     if (fam === 'shortcuts') {
         return `<span style="font-size:0.75rem;opacity:0.7;">Press a key to trigger · “Try” simulates it</span>`;
+    }
+    if (fam === 'widgets') {
+        return `<button type="button" class="mini-btn" data-family-action="mount5" data-family="${escapeHtml(fam)}">Mount 5</button>
+        <button type="button" class="mini-btn ghost" data-family-action="clear-widgets" data-family="${escapeHtml(fam)}">Clear</button>`;
+    }
+    if (fam === 'soundscapes') {
+        return `<button type="button" class="mini-btn" data-family-action="stop-scape" data-family="${escapeHtml(fam)}">Stop ambience</button>`;
+    }
+    if (fam === 'magic') {
+        return `<button type="button" class="mini-btn" data-family-action="burst" data-family="${escapeHtml(fam)}">Random burst</button>`;
+    }
+    if (fam === 'badges') {
+        return `<button type="button" class="mini-btn" data-family-action="badge-check" data-family="${escapeHtml(fam)}">Show earned</button>`;
     }
     return '';
 }
@@ -433,6 +456,36 @@ function featActionsHtml(feat) {
     }
     if (fam === 'eggs') {
         return `<button type="button" class="mini-btn ghost" data-action="egg" data-id="${escapeHtml(feat.id)}" title="Type the code to unlock">Show code</button>`;
+    }
+    if (fam === 'widgets') {
+        return `<button type="button" class="mini-btn" data-action="widget" data-id="${escapeHtml(feat.id)}">Mount</button>`;
+    }
+    if (fam === 'tools') {
+        return `<button type="button" class="mini-btn" data-action="tool" data-id="${escapeHtml(feat.id)}">Open</button>`;
+    }
+    if (fam === 'presets') {
+        return `<button type="button" class="mini-btn" data-action="preset" data-id="${escapeHtml(feat.id)}">Apply</button>`;
+    }
+    if (fam === 'collections') {
+        return `<button type="button" class="mini-btn" data-action="collection" data-id="${escapeHtml(feat.id)}">Apply</button>`;
+    }
+    if (fam === 'challenges') {
+        return `<button type="button" class="mini-btn" data-action="challenge" data-id="${escapeHtml(feat.id)}">Start</button>`;
+    }
+    if (fam === 'badges') {
+        return `<button type="button" class="mini-btn" data-action="badge" data-id="${escapeHtml(feat.id)}">Earn</button>`;
+    }
+    if (fam === 'greetings') {
+        return `<button type="button" class="mini-btn" data-action="greeting" data-id="${escapeHtml(feat.id)}">Greet</button>`;
+    }
+    if (fam === 'savepoints') {
+        return `<button type="button" class="mini-btn" data-action="savepoint" data-id="${escapeHtml(feat.id)}">Snapshot</button>`;
+    }
+    if (fam === 'soundscapes') {
+        return `<button type="button" class="mini-btn" data-action="soundscape" data-id="${escapeHtml(feat.id)}">Play</button>`;
+    }
+    if (fam === 'magic') {
+        return `<button type="button" class="mini-btn" data-action="magic" data-id="${escapeHtml(feat.id)}">Cast</button>`;
     }
     return `<span style="font-size:0.72rem;opacity:0.6;">${escapeHtml(feat.desc || '')}</span>`;
 }
@@ -558,6 +611,99 @@ function render() {
             else toast(id);
         });
     });
+    mount.querySelectorAll('[data-action="widget"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { const r = window.Arcade.mountWidget(id); if (!r) toast('No widget slot — libraries mount these'); } catch (ee8) { toast('Widget failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="tool"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.launchTool(id); } catch (ee9) { toast('Tool failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="preset"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.applyPreset(id); } catch (ee10) { toast('Preset failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="collection"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.applyCollection(id); } catch (ee11) { toast('Collection failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="challenge"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.startChallenge(id); } catch (ee12) { toast('Challenge failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="badge"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.awardBadge(id); } catch (ee13) { toast('Badge failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="greeting"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.greet(id); } catch (ee14) {}
+        });
+    });
+    mount.querySelectorAll('[data-action="savepoint"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.snapshot(id); } catch (ee15) { toast('Snapshot failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="soundscape"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.playScape(id); } catch (ee16) { toast('Soundscape failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-action="magic"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const id = b.getAttribute('data-id');
+            try { window.Arcade.castMagic(id); } catch (ee17) { toast('Magic failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-family-action="mount5"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const fam = b.getAttribute('data-family');
+            const ids = F.filter(x => x.family === fam).slice(0, 5).map(x => x.id);
+            try { for (const id of ids) window.Arcade.mountWidget(id); toast('Mounted 5 widgets'); }
+            catch (ee18) { toast('Mount failed'); }
+        });
+    });
+    mount.querySelectorAll('[data-family-action="clear-widgets"]').forEach(b => {
+        b.addEventListener('click', () => {
+            try { if (window.Arcade.clearWidgets) window.Arcade.clearWidgets(); toast('Widgets cleared'); } catch (ee19) {}
+        });
+    });
+    mount.querySelectorAll('[data-family-action="stop-scape"]').forEach(b => {
+        b.addEventListener('click', () => {
+            try { window.Arcade.stopScape(); toast('Ambience stopped'); } catch (ee20) {}
+        });
+    });
+    mount.querySelectorAll('[data-family-action="burst"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const fam = b.getAttribute('data-family');
+            const pool = F.filter(x => x.family === fam);
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+            if (pick) { try { window.Arcade.castMagic(pick.id); toast('🎇 ' + pick.name); } catch (ee21) {} }
+        });
+    });
+    mount.querySelectorAll('[data-family-action="badge-check"]').forEach(b => {
+        b.addEventListener('click', () => {
+            const fam = b.getAttribute('data-family');
+            const earned = F.filter(x => x.family === fam && window.Arcade.hasBadge(x.id));
+            toast('Earned: ' + earned.length + '/' + F.filter(x => x.family === fam).length + ' badges');
+        });
+    });
     mount.querySelectorAll('[data-family-action="preview5"]').forEach(b => {
         b.addEventListener('click', () => {
             const fam = b.getAttribute('data-family');
@@ -615,8 +761,8 @@ function runVerification() {
     // Engines
     try {
         if (!window.Arcade) throw new Error('window.Arcade missing');
-        if (window.Arcade.count() !== 1000) throw new Error('count() != 1000: ' + window.Arcade.count());
-        ok('Engines: Arcade.count() === 1000');
+        if (window.Arcade.count() !== 2000) throw new Error('count() != 2000: ' + window.Arcade.count());
+        ok('Engines: Arcade.count() === 2000 (20 families)');
     } catch (e) { fail('Engines: ' + e.message); }
     try {
         const f = F.slice(0, 3);
@@ -692,5 +838,6 @@ render();
 window.KeybindsAtlas = { filteredFeatures, runVerification, FAMILIES, FAMILY_META };
 })();
 </script>
+<script src="./.boot-transition.js"></script>
 </body>
 </html>

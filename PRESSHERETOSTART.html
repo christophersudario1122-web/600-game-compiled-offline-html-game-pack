@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- ARCADE HUB BUILD: arch-boot-2026-10-09b (Arch boot + dense filler, faster scroll, ~5s shorter) -->
+<html lang="en" class="preload">
 <head>
 <meta charset="utf-8">
 <title>Terminal_Arcade_Hub</title>
-<link rel="manifest" href="./manifest.json">
+<script>document.documentElement.classList.add('js');</script>
+<link rel="manifest" href="./.manifest.json">
 <meta name="theme-color" content="#00ff88">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -120,6 +122,7 @@
         backdrop-filter: blur(8px);
         margin: 80px 0;
         box-sizing: border-box;
+        overflow: hidden;
     }
 
     h1 {
@@ -237,6 +240,229 @@
         margin-bottom: 5px;
         opacity: 0.85;
     }
+
+    /* ============================================================
+       CINEMATIC STARTUP SEQUENCE
+       ============================================================ */
+    html.preload.js body { overflow: hidden; }
+    html.preload.js .hub-container,
+    html.preload.js .top-controls { opacity: 0; }
+
+    /* Matrix rain eases in rather than snapping on */
+    #matrix-canvas { opacity: 0; }
+    body.booted #matrix-canvas { animation: canvasIn 2s ease-out 0.1s both; }
+    @keyframes canvasIn {
+        from { opacity: 0; transform: scale(1.06); filter: blur(6px); }
+        to   { opacity: 0.25; transform: scale(1); filter: blur(0); }
+    }
+
+    /* Sweeping light sheen that crosses the panel as it appears */
+    body.booted .hub-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -60%;
+        width: 45%;
+        z-index: 3;
+        pointer-events: none;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,.14) 40%, rgba(0,255,136,.22) 50%, rgba(255,255,255,.08) 60%, transparent);
+        transform: skewX(-18deg);
+        animation: sheenSweep 1.5s cubic-bezier(.16, 1, .3, 1) 1.05s both;
+    }
+    @keyframes sheenSweep {
+        0%   { left: -60%; opacity: 0; }
+        12%  { opacity: 1; }
+        100% { left: 130%; opacity: 0; }
+    }
+
+    /* Main panel: rise from depth + de-blur */
+    body.booted .hub-container {
+        animation: panelIn 1.1s cubic-bezier(.16, 1, .3, 1) 0.05s both;
+    }
+    @keyframes panelIn {
+        0%   { opacity: 0; transform: perspective(1200px) translateY(52px) scale(.92) rotateX(6deg); filter: blur(16px); }
+        55%  { opacity: 1; }
+        100% { opacity: 1; transform: perspective(1200px) translateY(0) scale(1) rotateX(0deg); filter: blur(0); }
+    }
+
+    /* Top controls drift down from above */
+    body.booted .top-controls {
+        animation: dropIn .85s cubic-bezier(.16, 1, .3, 1) 0.42s both;
+    }
+    @keyframes dropIn {
+        0%   { opacity: 0; transform: translateY(-26px); filter: blur(8px); }
+        100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+
+    /* Staggered menu choreography — uses translate (not transform) so hover
+       scale effects keep working after the animation settles */
+    body.booted .menu-options > *,
+    body.booted .menu-options .minecraft-grid > * {
+        opacity: 0;
+        animation: itemIn .72s cubic-bezier(.16, 1, .3, 1) both;
+    }
+    @keyframes itemIn {
+        0%   { opacity: 0; translate: 0 22px; filter: blur(7px); }
+        100% { opacity: 1; translate: 0 0; filter: blur(0); }
+    }
+
+    /* ---- Boot overlay ---- */
+    #boot-screen {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at center, #06100b 0%, #000 74%);
+        font-family: 'Courier New', Courier, monospace;
+        color: var(--neon-green);
+        overflow: hidden;
+        cursor: pointer;
+        transition: opacity .6s cubic-bezier(.4, 0, .2, 1),
+                    transform .6s cubic-bezier(.4, 0, .2, 1),
+                    filter .6s cubic-bezier(.4, 0, .2, 1);
+    }
+    #boot-screen::after {   /* subtle vignette + grain */
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.7) 100%);
+    }
+    #boot-screen.exit {
+        opacity: 0;
+        transform: scale(1.12);
+        filter: blur(12px) brightness(2.4);
+        pointer-events: none;
+    }
+
+    #boot-screen .scan {
+        position: absolute;
+        left: 0; right: 0;
+        height: 170px;
+        z-index: 1;
+        background: linear-gradient(rgba(0,255,136,0), rgba(0,255,136,.10), rgba(0,255,136,0));
+        animation: scanSweep 2.6s linear infinite;
+        pointer-events: none;
+    }
+    @keyframes scanSweep { 0% { top: -170px; } 100% { top: 100%; } }
+
+    #boot-inner {
+        position: relative;
+        z-index: 2;
+        width: min(960px, 94vw);
+        animation: bootFloat 6s ease-in-out infinite;
+    }
+    @keyframes bootFloat {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-5px); }
+    }
+    #boot-head {
+        font-size: clamp(10px, 1.3vw, 13px);
+        letter-spacing: 3px;
+        opacity: .7;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(0,255,136,.25);
+    }
+    #boot-head .dot {
+        display: inline-block;
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: var(--neon-green);
+        box-shadow: 0 0 10px var(--neon-green);
+        margin-right: 8px;
+        animation: pulseDot 1.2s ease-in-out infinite;
+    }
+    @keyframes pulseDot { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+
+    #boot-log {
+        margin: 0 0 14px;
+        height: min(60vh, 470px);
+        overflow: hidden;
+        font-size: clamp(10px, 1.12vw, 13.5px);
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+        text-shadow: 0 0 7px rgba(0,255,136,.42);
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 7%, #000 100%);
+        mask-image: linear-gradient(to bottom, transparent 0, #000 7%, #000 100%);
+    }
+    #boot-log .bl { animation: lineIn .16s ease-out both; }
+    @keyframes lineIn { from { opacity: 0; } to { opacity: 1; } }
+    #boot-log .ok   { color: #a7ffd4; text-shadow: 0 0 9px rgba(0,255,136,.9); }
+    #boot-log .fail { color: #ff6b6b; text-shadow: 0 0 9px rgba(255,60,60,.9); }
+    #boot-log .warn { color: #ffcf5f; text-shadow: 0 0 9px rgba(255,200,90,.6); }
+    #boot-log .ts   { color: #3f9d6f; }
+    #boot-log .cy   { color: #6fe3ff; }
+    #boot-log .arch {
+        color: #7fe9ff;
+        text-shadow: 0 0 10px rgba(111,227,255,.85), 0 0 22px rgba(0,180,255,.5);
+    }
+    #boot-log .dim  { opacity: .45; }
+
+    #boot-progress {
+        width: 100%;
+        height: 8px;
+        border: 1px solid var(--neon-green);
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: inset 0 0 12px rgba(0,255,136,.25);
+    }
+    #boot-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--neon-green), #d8fff0);
+        box-shadow: 0 0 18px var(--neon-green);
+        transition: width .3s cubic-bezier(.16, 1, .3, 1);
+    }
+    #boot-status {
+        margin-top: 10px;
+        text-align: right;
+        font-size: clamp(10px, 1.3vw, 13px);
+        letter-spacing: 2px;
+        opacity: .8;
+    }
+
+    /* White CRT power-on flash */
+    #crt-flash {
+        position: fixed;
+        inset: 0;
+        z-index: 100000;
+        background: #ffffff;
+        opacity: 0;
+        pointer-events: none;
+        animation: crtFlash .55s ease-out forwards;
+    }
+    @keyframes crtFlash {
+        0%   { opacity: 0; }
+        6%   { opacity: .85; }
+        100% { opacity: 0; }
+    }
+
+    /* Title glitch while scrambling into place */
+    .title-glitch { animation: titleShake .18s steps(2) infinite; }
+    @keyframes titleShake {
+        0%   { transform: translate(0, 0);       text-shadow: 2px 0 #ff2d6f, -2px 0 #00d2ff, 0 0 15px rgba(0,255,136,.5); }
+        50%  { transform: translate(-1px, 1px);  text-shadow: -2px 0 #ff2d6f, 2px 0 #00d2ff, 0 0 15px rgba(0,255,136,.5); }
+        100% { transform: translate(1px, -1px);  text-shadow: 2px 0 #ff2d6f, -2px 0 #00d2ff, 0 0 15px rgba(0,255,136,.5); }
+    }
+
+    /* Reduced motion: still play the boot, but drop the perpetual loops */
+    @media (prefers-reduced-motion: reduce) {
+        #boot-screen .scan { animation: none; opacity: .35; }
+        #boot-inner { animation: none; }
+        #boot-head .dot { animation: none; }
+        #crt-flash { animation: none; opacity: 0; }
+        body.booted #matrix-canvas { animation: none; opacity: .25; }
+        body.booted .hub-container { animation: none; opacity: 1; }
+        body.booted .top-controls { animation: none; opacity: 1; }
+        body.booted .menu-options > *,
+        body.booted .menu-options .minecraft-grid > * { animation: none; opacity: 1; translate: 0 0; }
+        body.booted .hub-container::before { animation: none; opacity: 0; }
+    }
 </style>
 </head>
 <body>
@@ -263,16 +489,14 @@
     <div class="menu-options">
         <a href=".hub/.library1.html" class="menu-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">📁 ENTER GAME DATABASE (LIBRARY 1)</a>
         
-        <a href=".library2/pressHERE.html" class="menu-btn library2-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">🗂️ ENTER GAME LIBRARY 2</a>
-        
         <a href=".hub/.login.html" class="menu-btn secret-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">⭐ [SECRET] SECURE LOGIN CLIENT</a>
         
         <div class="minecraft-section">
             <div class="section-label">⛏️ MINECRAFT CLIENT SECTORS</div>
             <div class="minecraft-grid">
-                <a href=".Offline-HTML-Games-Pack-master/offline/1.5.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.5</a>
-                <a href=".Offline-HTML-Games-Pack-master/offline/1.8.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.8</a>
-                <a href=".Offline-HTML-Games-Pack-master/offline/1.12.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.12</a>
+                <a href=".hub/.boot-launch.html?g=1.5.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.5</a>
+                <a href=".hub/.boot-launch.html?g=1.8.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.8</a>
+                <a href=".hub/.boot-launch.html?g=1.12.html" class="mc-btn" onmouseenter="playHoverSound()" onclick="playClickSound()">v1.12</a>
             </div>
         </div>
 
@@ -448,13 +672,13 @@ changeTheme(savedTheme);
 
 // --- QUICK LAUNCH RANDOM GAME ---
 const sampleGames = ["1v1.lol", "2048", "ageofwar", "basketrandom", "cookieclicker", "crossyroad", "doodlejump", "flappybird", "geometrydash", "pacman", "retrobowl", "slope", "subwaysurfersbeijing", "templerun2", "vex4"];
-const dir = ".Offline-HTML-Games-Pack-master/offline/";
+const dir = ".games/.library1/offline/offline/";
 
 function launchRandomGame() {
     const randomGame = sampleGames[Math.floor(Math.random() * sampleGames.length)];
     let ext = ".html";
-    if (["paperio2", "rooftopsnipers", "snowrider", "snowroad", "soccerrandom", "tombofthemask", "vex6", "vex7", "vex8"].includes(randomGame)) ext = ".htm";
-    window.location.href = dir + randomGame + ext;
+    if (["paperio2", "rooftopsnipers", "snowrider", "snowroad", "soccerrandom", "tombofthemask", "vex6", "vex7", "vex8", "cookieclicker", "crossyroad", "templerun2"].includes(randomGame)) ext = ".htm";
+    window.location.href = '.hub/.boot-launch.html?g=' + encodeURIComponent(randomGame + ext);
 }
 
 // --- MATRIX RAIN ---
@@ -491,9 +715,16 @@ window.addEventListener('resize', () => {
     canvas.height = window.innerHeight;
 });
 
-// Register Service Worker
+// Register Service Worker (updateViaCache:'none' so new sw.js versions are picked up)
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  navigator.serviceWorker.register('./.sw.js', { updateViaCache: 'none' }).catch(() => {});
+  // When a new worker takes control, reload once so the fresh page is shown.
+  var __swReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (__swReloaded) return;
+    __swReloaded = true;
+    window.location.reload();
+  });
 }
 
 // Auto theme by time (6am-6pm light, 6pm-6am dark)
@@ -560,7 +791,564 @@ document.addEventListener('keydown', (e) => {
   if (e.key === '?' || (e.key === '/' && e.shiftKey)) { e.preventDefault(); showCheatsheet(); }
   if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
 });
-<script src=".hub/shared-features.js"></script>
 </script>
+<script>
+/* ===== CINEMATIC STARTUP SEQUENCE ===== */
+(function () {
+    "use strict";
+    var docEl = document.documentElement;
+    var bootEl = null, flashEl = null, logEl = null, barEl = null, statusEl = null;
+    var finished = false;
+    var skipRequested = false;
+    var reduceMotion = false;
+    try { reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+    function staggerMenu() {
+        var items = document.querySelectorAll('.menu-options > *');
+        for (var i = 0; i < items.length; i++) {
+            items[i].style.animationDelay = (0.5 + i * 0.085).toFixed(3) + 's';
+        }
+        var subs = document.querySelectorAll('.menu-options .minecraft-grid > *');
+        for (var j = 0; j < subs.length; j++) {
+            subs[j].style.animationDelay = (0.66 + j * 0.03).toFixed(3) + 's';
+        }
+    }
+
+    function runScramble() {
+        var h1 = document.querySelector('h1');
+        if (!h1) return;
+        var finalText = h1.textContent;
+        var glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*<>/\\|=+-';
+        var frame = 0, total = 34;
+        h1.classList.add('title-glitch');
+        var timer = setInterval(function () {
+            frame++;
+            var out = '';
+            for (var i = 0; i < finalText.length; i++) {
+                var ch = finalText.charAt(i);
+                if (ch === ' ') { out += ' '; continue; }
+                var revealAt = Math.floor((i / finalText.length) * total);
+                if (frame > revealAt + 5) out += ch;
+                else out += glyphs.charAt(Math.floor(Math.random() * glyphs.length));
+            }
+            h1.textContent = out;
+            if (frame >= total) {
+                clearInterval(timer);
+                h1.textContent = finalText;
+                h1.classList.remove('title-glitch');
+            }
+        }, 45);
+    }
+
+    function reveal(instant) {
+        if (finished) return;
+        finished = true;
+        docEl.classList.remove('preload');
+        document.body.classList.add('booted');
+        staggerMenu();
+        if (!instant && !reduceMotion) runScramble();
+    }
+
+    function removeOverlay() {
+        scrollRunning = false;
+        if (bootEl && bootEl.parentNode) bootEl.parentNode.removeChild(bootEl);
+        if (flashEl && flashEl.parentNode) flashEl.parentNode.removeChild(flashEl);
+    }
+
+    function exitBoot() {
+        if (bootEl) bootEl.classList.add('exit');
+        reveal(false);
+        setTimeout(removeOverlay, 760);
+    }
+
+    // Only bail if there is no body to attach the overlay to.
+    if (!document.body) { reveal(true); return; }
+
+    // Safety net: never trap the user behind the overlay.
+    setTimeout(function () {
+        if (!finished) { reveal(false); removeOverlay(); }
+    }, 60000);
+
+    // --- build the overlay ---
+    try {
+        flashEl = document.createElement('div');
+        flashEl.id = 'crt-flash';
+        document.body.appendChild(flashEl);
+
+        bootEl = document.createElement('div');
+        bootEl.id = 'boot-screen';
+        bootEl.innerHTML =
+            '<div class="scan"></div>' +
+            '<div id="boot-inner">' +
+                '<div id="boot-head"><span class="dot"></span>terminal@arcade: ~ &#8212; system boot</div>' +
+                '<div id="boot-log"></div>' +
+                '<div id="boot-progress"><div id="boot-bar-fill"></div></div>' +
+                '<div id="boot-status">sysinit &#8226; starting</div>' +
+            '</div>';
+        document.body.appendChild(bootEl);
+        logEl = document.getElementById('boot-log');
+        barEl = document.getElementById('boot-bar-fill');
+        statusEl = document.getElementById('boot-status');
+    } catch (e) {
+        reveal(true);
+        return;
+    }
+
+    // ---------- Arch Linux style boot sequence ----------
+    function esc(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    var SEQ = [];
+    var scrollRunning = true;
+    function add(html, d) { SEQ.push({ html: html, d: (d == null ? 30 : d) }); }
+    function ok(t, d)   { add('<span class="ok">[  OK  ]</span> ' + esc(t), d); }
+    function okc(t, d)  { add('<span class="ok">[  OK  ]</span> <span class="cy">' + esc(t) + '</span>', d); }
+    function warn(t, d) { add('<span class="warn">[ WARN ]</span> ' + esc(t), d); }
+
+    // ---- firmware / POST ----
+    add('TianoCore EDK II (X64)  \u2014  Terminal Systems BIOS v4.2.0', 60);
+    add('Copyright (C) 2026 Terminal Systems Inc.  All rights reserved.', 25);
+    add('CPU: Big Pickle Core i9 @ 4.20GHz \u2022 8 cores / 16 threads', 35);
+    add('Memory Test: 65536 MB ..................... OK', 40);
+    add('Detecting NVMe devices .................... 2 found', 40);
+    add('Initializing firmware display ............. GOP 1920x1080', 40);
+    add('Secure Boot ............................... disabled', 35);
+    add('Handing off to bootloader...', 150);
+    add('', 60);
+
+    // ---- GRUB ----
+    add('GNU GRUB version 2.12', 40);
+    add('Loading Linux linux ...', 60);
+    add('Loading initial ramdisk ...', 80);
+    add('', 110);
+
+    // ---- Linux kernel ----
+    var kernel = [
+        "Linux version 6.6.1-arch1-1 (linux@archlinux) (gcc (GCC) 13.2.1 20230801, GNU ld (GNU Binutils) 2.41.0) #1 SMP PREEMPT_DYNAMIC Wed, 08 Nov 2023 16:02:37 +0000",
+        "Command line: BOOT_IMAGE=/vmlinuz-linux root=UUID=7f3c1c2a-9b1e-4a77-8f2d-1c5e9a0b3d6f rw quiet loglevel=3",
+        "x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'",
+        "x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'",
+        "x86/fpu: Supporting XSAVE feature 0x003: 'AVX registers'",
+        "x86/fpu: xstate_offset[2]: 576, xstate_sizes[2]: 256",
+        "x86/fpu: Enabled xstate features 0x7, context size is 960 bytes, using 'compacted' format.",
+        "signal: max sigframe size: 1776",
+        "BIOS-provided physical RAM map:",
+        "BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable",
+        "BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved",
+        "BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved",
+        "BIOS-e820: [mem 0x0000000000100000-0x00000000bffdffff] usable",
+        "BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved",
+        "NX (Execute Disable) protection: active",
+        "SMBIOS 3.0.0 present.",
+        "DMI: Terminal Systems ArcadeStation/X570-AORUS, BIOS F36c 01/12/2024",
+        "tsc: Detected 4200.000 MHz processor",
+        "clocksource: tsc-early: mask: 0xffffffffffffffff max_cycles: 0x3c8cd4b2c41, max_idle_ns: 440795286384 ns",
+        "Calibrating delay loop (skipped), value calculated using timer frequency.. 8400.00 BogoMIPS (lpj=4200000)",
+        "pid_max: default: 32768 minimum: 301",
+        "LSM: Security Framework initializing",
+        "Mount-cache hash table entries: 32768 (order: 6, 262144 bytes, vmalloc)",
+        "Mountpoint-cache hash table entries: 32768 (order: 6, 262144 bytes, vmalloc)",
+        "CPU0: Thermal monitoring enabled (TM1)",
+        "Spectre V2 : Spectre v2 / SpectreRSB mitigation: Filling RSB on context switch",
+        "MDS: Mitigation: Clear CPU buffers",
+        "smpboot: Allowing 16 CPUs, 0 hotplug CPUs",
+        "clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 19112604462750000 ns",
+        "pci_bus 0000:00: root bus resource [io  0x0000-0x0cf7 window]",
+        "pci_bus 0000:00: root bus resource [mem 0x000a0000-0x000bffff window]",
+        "PCI: Using configuration type 1 for base access",
+        "ACPI: RSDP 0x00000000000F05B0 000024 (v02 BOCHS )",
+        "ACPI: XSDT 0x00000000000F05C4 00004C (v01 BOCHS  BXPC  00000001      01000013)",
+        "ACPI: FACP 0x00000000000F03B0 000074 (v01 BOCHS  BXPC  00000001 BXPC 00000001)",
+        "ACPI: DSDT 0x00000000000F1000 003A6B (v01 BOCHS  BXPC  00000001 BXPC 00000001)",
+        "ACPI: FACS 0x00000000000F0000 000040",
+        "ACPI: APIC 0x00000000000F0420 00006E (v01 BOCHS  BXPC  00000001 BXPC 00000001)",
+        "ACPI: HPET 0x00000000000F0470 000038 (v01 BOCHS  BXPC  00000001 BXPC 00000001)",
+        "ACPI: MCFG 0x00000000000F04A8 00003C (v01 BOCHS  BXPC  00000001 BXPC 00000001)",
+        "ACPI: 5 ACPI AML tables successfully acquired and loaded",
+        "ACPI: Interpreter enabled",
+        "ACPI: PM: (supports S0 S3 S4 S5)",
+        "ACPI: Using IOAPIC for interrupt routing",
+        "PCI: Using host bridge windows from ACPI; if necessary, use pci=nocrs and report a bug",
+        "ACPI: Enabled 16 GPEs in block 00 to 0F",
+        "pci 0000:00:00.0: [8086:1237] type 00 class 0x060000",
+        "pci 0000:00:01.0: [1234:1111] type 00 class 0x030000",
+        "pci 0000:00:1f.2: [8086:2829] type 00 class 0x010601",
+        "ahci 0000:00:1f.2: version 3.0",
+        "ahci 0000:00:1f.2: AHCI 0001.0300 32 slots 6 ports 6 Gbps 0x3f impl SATA mode",
+        "scsi host0: ahci",
+        "scsi host1: ahci",
+        "ata1: SATA max UDMA/133 abar m8192@0xfebd1000 port 0xfebd1100 irq 24",
+        "ata2: SATA max UDMA/133 abar m8192@0xfebd1000 port 0xfebd1180 irq 24",
+        "usbcore: registered new interface driver usbfs",
+        "usbcore: registered new interface driver hub",
+        "usbcore: registered new device driver usb",
+        "usb usb1: New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 6.06",
+        "usb usb1: Product: xHCI Host Controller",
+        "hub 1-0:1.0: USB hub found",
+        "hub 1-0:1.0: 8 ports detected",
+        "nvme nvme0: pci function 0000:03:00.0",
+        "nvme nvme0: 8/0/0 default/read/poll queues",
+        " nvme0n1: p1 p2 p3",
+        "EXT4-fs (nvme0n1p2): mounted filesystem 7f3c1c2a-9b1e-4a77-8f2d-1c5e9a0b3d6f r/w with ordered data mode. Quota mode: none.",
+        "systemd[1]: systemd 254.5-1-arch running in system mode (+PAM +AUDIT +SELINUX +APPARMOR +IMA +SMACK +SECCOMP +GCRYPT +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD -BPF_FRAMEWORK -XKBCOMMON +UTMP +SYSVINIT default-hierarchy=unified)",
+        "systemd[1]: Detected virtualization kvm.",
+        "systemd[1]: Detected architecture x86-64.",
+        "systemd[1]: Hostname set to <arcade>.",
+        "systemd[1]: Initializing machine ID from random generator.",
+        "systemd[1]: Successfully loaded SELinux policy in 87.281ms.",
+        "systemd[1]: Relabelled /dev, /dev/shm, /run, /sys/fs/cgroup in 21.418ms."
+    ];
+    var kt = 0;
+    for (var ki = 0; ki < kernel.length; ki++) {
+        kt += 0.003 + Math.random() * 0.72;
+        add('<span class="ts">[' + kt.toFixed(6) + ']</span> ' + esc(kernel[ki]), 6 + Math.floor(Math.random() * 7));
+    }
+    add('', 60);
+
+    // ---- driver / module bring-up (fast burst) ----
+    var kernel2 = [
+        "usb 1-1: new high-speed USB device number 2 using xhci_hcd",
+        "usb 1-1: New USB device found, idVendor=0627, idProduct=0001, bcdDevice= 0.00",
+        "usb 1-1: Product: QEMU USB Tablet",
+        "input: QEMU QEMU USB Tablet as /devices/pci0000:00/0000:00:01.2/usb1/1-1/1-1:1.0/0003:0627:0001.0001/input/input2",
+        "hid-generic 0003:0627:0001.0001: input,hidraw0: USB HID v0.01 Pointer [QEMU QEMU USB Tablet] on usb-0000:00:01.2-1/input0",
+        "input: AT Translated Set 2 keyboard as /devices/platform/i8042/serio0/input/input0",
+        "input: ImExPS/2 Generic Explorer Mouse as /devices/platform/i8042/serio1/input/input3",
+        "EXT4-fs (nvme0n1p2): re-mounted. Quota mode: none.",
+        "random: crng init done",
+        "random: 7 urandom warning(s) missed due to ratelimiting",
+        "mei_me 0000:00:16.0: hbm: dma setup response: 0x0",
+        "i915 0000:00:02.0: [drm] VT-d active for gfx access",
+        "i915 0000:00:02.0: vgaarb: deactivate vga console",
+        "i915 0000:00:02.0: [drm] Using Transparent Hugepages",
+        "i915 0000:00:02.0: [drm] Finished loading DMC firmware i915/tgl_dmc_ver2_12.bin (v2.12)",
+        "i915 0000:00:02.0: [drm] GuC firmware i915/tgl_guc_70.1.1.bin version 70.1 submission:enabled",
+        "i915 0000:00:02.0: [drm] HuC firmware i915/tgl_huc_7.9.3.bin version 7.9 authenticated:yes",
+        "i915 0000:00:02.0: [drm] GT0: GuC firmware version 70.1.1",
+        "snd_hda_intel 0000:00:1f.3: enabling device (0000 -> 0002)",
+        "snd_hda_intel 0000:00:1f.3: bound 0000:00:02.0 (ops i915_audio_component_bind_ops)",
+        "input: HDA Intel PCH Headphone as /devices/pci0000:00/0000:00:1f.3/sound/card0/input5",
+        "input: HDA Intel PCH HDMI/DP,pcm=3 as /devices/pci0000:00/0000:00:1f.3/sound/card0/input6",
+        "e1000 0000:00:03.0: enabling device (0000 -> 0002)",
+        "e1000 0000:00:03.0: Intel(R) PRO/1000 Network Connection",
+        "e1000 0000:00:03.0: enp0s3: renamed from eth0",
+        "IPv6: ADDRCONF(NETDEV_CHANGE): enp0s3: link becomes ready",
+        "e1000: enp0s3 NIC Link is Up 1000 Mbps Full Duplex, Flow Control: RX",
+        "systemd-udevd[318]: Using default interface naming scheme v250.",
+        "systemd-udevd[318]: Successfully forked to handle new events",
+        "systemd[1]: Starting Create List of Static Device Nodes...",
+        "systemd[1]: Finished Create List of Static Device Nodes.",
+        "systemd[1]: Created slice system-getty.slice.",
+        "systemd[1]: Created slice system-modprobe.slice.",
+        "systemd[1]: Created slice system-fsck.slice.",
+        "systemd[1]: Set up automount proc-sys-fs-binfmt_misc.automount.",
+        "systemd[1]: Started Forward Password Requests to Wall Directory Watch.",
+        "systemd[1]: Reached target Local Encrypted Volumes.",
+        "systemd[1]: Reached target Local Integrity Protected Volumes.",
+        "systemd[1]: Reached target Remote File Systems.",
+        "systemd[1]: Reached target Paths.",
+        "systemd[1]: Listening on udev Control Socket.",
+        "systemd[1]: Listening on udev Kernel Socket.",
+        "systemd[1]: Listening on D-Bus System Message Bus Socket.",
+        "systemd[1]: Listening on Disk Manager Socket.",
+        "systemd[1]: Listening on Journal Audit Socket.",
+        "systemd[1]: Listening on initctl Compatibility Named Pipe.",
+        "systemd[1]: Reached target Socket Units.",
+        "systemd[1]: Set hostname to <arcade>.",
+        "systemd[1]: Started Dispatch Password Requests to Console Directory Watch.",
+        "systemd[1]: Condition check resulted in MNT systemd-automount being skipped.",
+        "systemd[1]: Activating swap /dev/nvme0n1p3...",
+        "systemd[1]: Activated swap /dev/nvme0n1p3.",
+        "systemd[1]: Reached target Swaps.",
+        "systemd[1]: Mounting Huge Pages File System...",
+        "systemd[1]: Mounted Huge Pages File System.",
+        "systemd[1]: Mounting POSIX Message Queue File System...",
+        "systemd[1]: Mounted POSIX Message Queue File System.",
+        "systemd[1]: Mounting Kernel Debug File System...",
+        "systemd[1]: Mounted Kernel Debug File System.",
+        "systemd[1]: Mounting Kernel Trace File System...",
+        "systemd[1]: Mounted Kernel Trace File System.",
+        "systemd[1]: Mounting FUSE Control File System...",
+        "systemd[1]: Mounted FUSE Control File System.",
+        "systemd[1]: Starting Create Static Device Nodes in /dev...",
+        "systemd[1]: Finished Create Static Device Nodes in /dev.",
+        "systemd[1]: Reached target Local File Systems (Pre).",
+        "systemd[1]: Reached target Local File Systems.",
+        "systemd[1]: Reached target System Initialization.",
+        "systemd[1]: Started Arch Linux systemd-firstboot service.",
+        "systemd[1]: systemd 254.5-1-arch running in system mode.",
+        "systemd[1]: Startup finished in 2.418s (firmware) + 1.204s (loader) + 3.876s (kernel) + 9.412s (userspace) = 16.911s."
+    ];
+    for (var k2 = 0; k2 < kernel2.length; k2++) {
+        add('<span class="dim">' + esc(kernel2[k2]) + '</span>', 3 + Math.floor(Math.random() * 5));
+    }
+    add('', 60);
+
+    // ---- bulk filler: kernel / driver spam ----
+    var fkSub = ['xhci_hcd', 'ahci', 'nvme', 'i915', 'amdgpu', 'snd_hda_intel', 'usb', 'hid-generic', 'e1000e', 'EXT4-fs', 'systemd-udevd', 'acpi', 'pci', 'scsi', 'sd', 'tty', 'input', 'bluetooth', 'rfkill', 'cfg80211', 'iwlwifi', 'mei_me', 'intel_pmc_core', 'kvm', 'audit', 'cgroup', 'btrfs', 'workqueue', 'rcu_sched', 'thermal'];
+    var fkMsg = ['registered new interface driver', 'device link up', 'link is up', 'enabling device', 'bound to device', 'firmware loaded successfully', 'initialized subsystem', 'probe succeeded', 'power state changed to D0', 'hotplug event received', 'link training complete', 'queue depth set to 32', 'using 64-bit DMA mask', 'mounted filesystem', 're-mounted read-write', 'detected new device', 'reset complete', 'driver loaded', 'ACPI event processed', 'PCI resource assigned'];
+    for (var fa = 0; fa < fkSub.length; fa++) {
+        for (var fb = 0; fb < 6; fb++) {
+            kt += 0.01 + Math.random() * 0.55;
+            var fkHex = (0x1000 + ((fa * 977 + fb * 131) % 0xE000)).toString(16);
+            add('<span class="ts">[' + kt.toFixed(6) + ']</span> ' + esc(fkSub[fa] + ': ' + fkMsg[(fa + fb) % fkMsg.length] + ' [0x' + fkHex + ']'), 4 + ((fa + fb) % 5));
+        }
+    }
+    add('', 60);
+
+    // ---- systemd userspace ----
+    var svc = [
+        ['tgt', 'Reached target System Initialization.'],
+        ['ok', 'Started Journal Service.'],
+        ['ok', 'Started Flush Journal to Persistent Storage.'],
+        ['ok', 'Started udev Kernel Device Manager.'],
+        ['ok', 'Started Rule-based Manager for Device Events and Files.'],
+        ['ok', 'Started udev Coldplug all Devices.'],
+        ['ok', 'Started Create Static Device Nodes in /dev.'],
+        ['ok', 'Started Apply Kernel Variables.'],
+        ['ok', 'Started Load Kernel Modules.'],
+        ['ok', 'Started Remount Root and Kernel File Systems.'],
+        ['ok', 'Started File System Check on Root Device.'],
+        ['ok', 'Started Create Volatile Files and Directories.'],
+        ['ok', 'Started Update UTMP about System Boot/Shutdown.'],
+        ['ok', 'Started Network Time Synchronization.'],
+        ['ok', 'Started Load/Save Random Seed.'],
+        ['ok', 'Started Set Up Additional Binary Formats.'],
+        ['ok', 'Started Create System Users.'],
+        ['ok', 'Started User Login Management.'],
+        ['tgt', 'Reached target Home.'],
+        ['tgt', 'Reached target System Time Set.'],
+        ['tgt', 'Reached target System Time Synchronized.'],
+        ['tgt', 'Reached target Local File Systems.'],
+        ['tgt', 'Reached target Local Integrity Protected Volumes.'],
+        ['tgt', 'Reached target Swaps.'],
+        ['tgt', 'Reached target Basic System.'],
+        ['ok', 'Started D-Bus System Message Bus.'],
+        ['ok', 'Started Network Manager.'],
+        ['ok', 'Started WPA supplicant.'],
+        ['ok', 'Started Network Manager Wait Online.'],
+        ['ok', 'Started OpenSSH Daemon.'],
+        ['ok', 'Started Authorization Manager.'],
+        ['ok', 'Started RealtimeKit Scheduling Policy Service.'],
+        ['ok', 'Started Avahi mDNS/DNS-SD Stack.'],
+        ['ok', 'Started CUPS Scheduler.'],
+        ['ok', 'Started Bluetooth service.'],
+        ['ok', 'Started Modem Manager.'],
+        ['ok', 'Started PC/SC Smart Card Daemon.'],
+        ['ok', 'Started Accounts Service.'],
+        ['ok', 'Started System Logging Service.'],
+        ['ok', 'Started Virtual Console Setup.'],
+        ['ok', 'Started Login Service.'],
+        ['ok', 'Started Hostname Service.'],
+        ['ok', 'Started Local Session.'],
+        ['ok', 'Started Seat Management.'],
+        ['ok', 'Started Sound Service.'],
+        ['ok', 'Started Thermal Daemon Service.'],
+        ['ok', 'Started Power Profiles daemon.'],
+        ['ok', 'Started UPower daemon.'],
+        ['ok', 'Started Firmware update daemon.'],
+        ['ok', 'Started Daily Cleanup of Temporary Directories.'],
+        ['ok', 'Started RPC Bind.'],
+        ['ok', 'Started Disk Manager.'],
+        ['ok', 'Started Snap Daemon.'],
+        ['ok', 'Started Docker Application Container Engine.'],
+        ['ok', 'Started containerd container runtime.'],
+        ['ok', 'Started Permit User Sessions.'],
+        ['ok', 'Started Getty on tty1.'],
+        ['ok', 'Started Raise Network Interfaces.'],
+        ['ok', 'Started Set Console Font.'],
+        ['ok', 'Started Arch Linux Keyring Refresh.'],
+        ['ok', 'Started Manage Sound Card State.'],
+        ['ok', 'Started Initialize Pacman keyring.'],
+        ['ok', 'Started Record System Boot/Shutdown in UTMP.'],
+        ['ok', 'Started LSB: Set the CPU Frequency Scaling governor.'],
+        ['ok', 'Started LSB: automatic crash report generation.'],
+        ['ok', 'Started LSB: network benchmark.'],
+        ['ok', 'Started LSB: Start NTP daemon.'],
+        ['ok', 'Started LSB: AppArmor initialization.'],
+        ['ok', 'Started LSB: disk temperature monitoring daemon.'],
+        ['ok', 'Started LSB: Start/stop sysstat monitoring.'],
+        ['ok', 'Started LSB: Load kernel modules needed to enable cpufreq scaling.'],
+        ['ok', 'Started LSB: set CPUFreq kernel parameters.'],
+        ['tgt', 'Reached target Socket Units.'],
+        ['tgt', 'Reached target Sockets.'],
+        ['tgt', 'Reached target Timer Units.'],
+        ['tgt', 'Reached target Timers.'],
+        ['tgt', 'Reached target Path Units.'],
+        ['tgt', 'Reached target Paths.'],
+        ['tgt', 'Reached target Network.'],
+        ['ok', 'Started Network Time Service.'],
+        ['ok', 'Started Network Manager Script Dispatcher Service.'],
+        ['tgt', 'Reached target Network is Online.'],
+        ['tgt', 'Reached target Network Online.'],
+        ['warn', 'Received 1 warning from unit nvidia-persistenced.service (not fatal).'],
+        ['ok', 'Started Nvidia Persistence Daemon.'],
+        ['ok', 'Started Load Kernel Modules.'],
+        ['ok', 'Started Apply Kernel Variables.'],
+        ['ok', 'Mounted /boot.'],
+        ['ok', 'Mounted /home.'],
+        ['ok', 'Mounted /var.'],
+        ['ok', 'Activated swap /dev/nvme0n1p3.'],
+        ['ok', 'Started File System Check on /dev/nvme0n1p1.'],
+        ['tgt', 'Reached target Cryptsetup.'],
+        ['tgt', 'Reached target Local Encrypted Volumes.'],
+        ['tgt', 'Reached target Verity Integrity Protected Volumes.'],
+        ['tgt', 'Reached target Remote File Systems.'],
+        ['tgt', 'Reached target Slice Units.'],
+        ['ok', 'Started Daily man-db cache update.'],
+        ['ok', 'Started Daily rotation of log files.'],
+        ['ok', 'Started Weekly locate database update.'],
+        ['ok', 'Started Discard unused blocks on filesystems from /etc/fstab.'],
+        ['ok', 'Started Refresh Pacman keyring.'],
+        ['ok', 'Started Periodic TRIM for SSD.'],
+        ['ok', 'Started systemd-tmpfiles cleanup.'],
+        ['ok', 'Started Update a timestamp on /etc/machine-id.'],
+        ['ok', 'Started Detect the available GPUs and deal with any system changes.'],
+        ['ok', 'Started Save RF Kill Switch State.'],
+        ['ok', 'Started Raise Network Interfaces.'],
+        ['ok', 'Started Wait for Network to be Configured.'],
+        ['ok', 'Started User Manager for UID 1000.'],
+        ['ok', 'Started Session 1 of User arcade.'],
+        ['ok', 'Reached target Multi-User System.'],
+        ['ok', 'Started Getty on tty1.'],
+        ['ok', 'Started Permit User Sessions.'],
+        ['warn', 'Reached target Graphical Interface delayed, waiting for display server.'],
+        ['ok', 'Started Display Manager.'],
+        ['ok', 'Started GNOME Display Manager.'],
+        ['ok', 'Started X11 Display Manager.'],
+        ['ok', 'Started Terminal Arcade Display Server.'],
+        ['tgt', 'Reached target Graphical Interface.']
+    ];
+    for (var si = 0; si < svc.length; si++) {
+        var s = svc[si];
+        var sd = 9 + Math.floor(Math.random() * 10);
+        var pre = s[0] === 'tgt' ? '<span class="ok">[  OK  ]</span> <span class="cy">'
+                : s[0] === 'warn' ? '<span class="warn">[ WARN ]</span> '
+                : '<span class="ok">[  OK  ]</span> ';
+        add(pre + esc(s[1]), sd);
+        if (si % 40 === 39) add('', 60);
+    }
+    add('', 60);
+
+    // ---- bulk filler: service / target spam ----
+    var fsUnits = ['Accounts Service', 'Acpi Daemon', 'Avahi mDNS/DNS-SD Stack', 'Bluetooth Management', 'Colord Color Manager', 'CUPS Scheduler', 'D-Bus System Message Bus', 'Disk Manager', 'Docker Application Container Engine', 'fwupd Firmware Daemon', 'Geoclue Location Service', 'GNOME Display Manager', 'GNOME Remote Desktop', 'Hostname Service', 'IIO Sensor Proxy', 'Journal Service', 'Kernel Module Loader', 'Local Session', 'Login Service', 'Modem Manager', 'Multipath Daemon', 'Network Manager', 'Network Time Service', 'Nvidia Persistence Daemon', 'OpenSSH Daemon', 'PackageKit Daemon', 'PC/SC Smart Card Daemon', 'Polkit Daemon', 'Power Profiles daemon', 'RealtimeKit Scheduling Policy Service', 'Resolvectl Service', 'RPC Bind', 'Seat Management', 'Secure Boot DBX Update', 'Snap Daemon', 'Socket Activation', 'Sound Service', 'System Logging Service', 'Thermal Daemon Service', 'Time & Date Service', 'TPM2 Daemon', 'Udisks Daemon', 'UPower daemon', 'User Login Management', 'Virtual Console Setup', 'WPA supplicant', 'X11 Display Server', 'Wayland Compositor', 'Zram Swap Setup', 'Firewall Service', 'Chrony NTP Client', 'Cron Scheduler', 'Man Database Cache', 'Locate Database Update', 'Filesystem Trim', 'Tmpfiles Cleanup', 'Pacman Keyring Refresh', 'Reflector Mirror Update', 'Btrfs Scrub Service', 'RAID Monitor'];
+    var fsVerbs = ['Started', 'Finished', 'Started', 'Reloaded', 'Started', 'Finished'];
+    for (var fu = 0; fu < fsUnits.length; fu++) {
+        for (var fv = 0; fv < 5; fv++) {
+            add('<span class="ok">[  OK  ]</span> ' + esc(fsVerbs[(fu + fv) % fsVerbs.length] + ' ' + fsUnits[fu] + '.'), 4 + ((fu + fv) % 6));
+        }
+    }
+    var fsTargets = ['Basic System', 'Multi-User System', 'Graphical Interface', 'Network', 'Network Online', 'Sockets', 'Timers', 'Paths', 'Local File Systems', 'Swaps', 'Sound', 'Bluetooth', 'Sysinit', 'Login Prompts', 'Remote File Systems', 'Local Encrypted Volumes', 'System Time Set', 'System Time Synchronized'];
+    for (var ft = 0; ft < fsTargets.length; ft++) {
+        add('<span class="ok">[  OK  ]</span> <span class="cy">' + esc('Reached target ' + fsTargets[ft] + '.') + '</span>', 3 + (ft % 5));
+    }
+    add('', 60);
+
+    // ---- login + MOTD ----
+    add(esc('Arch Linux 6.6.1-arch1-1 (tty1)'), 100);
+    add(esc('arcade login: root'), 90);
+    add(esc('Password: '), 130);
+    add(esc('Last login: ' + new Date().toUTCString() + ' on tty1'), 55);
+    add(esc('root@arcade ~ # systemctl --user start terminal-arcade.service'), 120);
+    ok('Started Terminal Arcade Hub.', 90);
+    add(esc('root@arcade ~ # '), 120);
+    add('', 40);
+    add(esc('Welcome to Arch Linux \u2014 Terminal Arcade Edition'), 100);
+    add(esc('  \u2022 624 games indexed and ready'), 40);
+    add(esc('  \u2022 offline runtime verified'), 40);
+    add(esc('  \u2022 launching interface ...'), 110);
+    add('', 60);
+
+    // ---- Arch ASCII logo ----
+    var archLogo = [
+        '                   -`                 ',
+        '                  .o+`                ',
+        '                 `ooo/                ',
+        '                `+oooo:               ',
+        '               `+oooooo:              ',
+        '               -+oooooo+:             ',
+        '             `/:-:++oooo+:            ',
+        '            `/++++/+++++++:           ',
+        '           `/++++++++++++++:          ',
+        '          `/+++ooooooooooooo/`        ',
+        '         ./ooosssso++osssssso+`       ',
+        '        .oossssso-````/ossssss+`      ',
+        '       -osssssso.      :ssssssso.     ',
+        '      :osssssss/        osssso+++.    ',
+        '     /ossssssss/        +ssssooo/-    ',
+        '   `/ossssso+/:-        -:/+osssso+-  ',
+        '  `+sso+:-`                 `.-/+oso: ',
+        ' `++:.                           `-/+ ',
+        ' .`                                 `/'
+    ];
+    for (var ai = 0; ai < archLogo.length; ai++) {
+        add('<span class="arch">' + esc(archLogo[ai]) + '</span>', 18);
+    }
+    add('', 55);
+    add('<span class="ok">' + esc('Welcome. Terminal Arcade is ready.') + '</span>', 150);
+
+    // ---- stepper ----
+    var idx = 0, timer = null;
+    var spin = ['\u280B', '\u2819', '\u2839', '\u2838', '\u283C', '\u2834', '\u2826', '\u2827', '\u2807', '\u280F'];
+    function statusFor(pct) {
+        return spin[(Date.now() >> 6) % spin.length] + '  booting \u2022 ' + pct + '%';
+    }
+    function appendLine(item) {
+        var div = document.createElement('div');
+        div.className = 'bl';
+        div.innerHTML = item.html;
+        logEl.appendChild(div);
+    }
+    function done() {
+        statusEl.textContent = '\u2714  system ready';
+        barEl.style.width = '100%';
+        setTimeout(exitBoot, skipRequested ? 200 : 950);
+    }
+    function step() {
+        if (idx >= SEQ.length) { done(); return; }
+        if (skipRequested) {
+            while (idx < SEQ.length) { appendLine(SEQ[idx]); idx++; }
+            logEl.scrollTop = logEl.scrollHeight;
+            done();
+            return;
+        }
+        appendLine(SEQ[idx]);
+        idx++;
+        var pct = Math.round(idx / SEQ.length * 100);
+        barEl.style.width = pct + '%';
+        statusEl.textContent = statusFor(pct);
+        timer = setTimeout(step, SEQ[idx - 1].d);
+    }
+
+    // Smoothly auto-follow the newest line (lerped scroll)
+    function follow() {
+        if (!scrollRunning) return;
+        var target = logEl.scrollHeight - logEl.clientHeight;
+        if (target < 0) target = 0;
+        var cur = logEl.scrollTop;
+        if (target - cur > 0.5) logEl.scrollTop = cur + (target - cur) * 0.22;
+        requestAnimationFrame(follow);
+    }
+
+    function requestSkip() {
+        if (finished || skipRequested) return;
+        skipRequested = true;
+        if (timer) { clearTimeout(timer); timer = null; }
+        step();
+    }
+    bootEl.addEventListener('click', requestSkip);
+    document.addEventListener('keydown', function (e) {
+        if (!finished && (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter')) {
+            e.preventDefault();
+            requestSkip();
+        }
+    });
+
+    requestAnimationFrame(follow);
+    timer = setTimeout(step, 240);
+})();
+</script>
+<script src=".hub/.shared-features.js"></script>
 </body>
 </html>
