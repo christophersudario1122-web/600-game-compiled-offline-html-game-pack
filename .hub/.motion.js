@@ -36,7 +36,16 @@
     "@keyframes mPowerOn{0%{opacity:0}10%{opacity:.85}100%{opacity:0}}" +
     "html.m-js #m-power{position:fixed;inset:0;z-index:99998;pointer-events:none;" +
       "background:radial-gradient(ellipse at center,rgba(0,255,136,.45),rgba(0,255,136,0) 62%);" +
-      "animation:mPowerOn .75s cubic-bezier(.22,1,.36,1) forwards}";
+      "animation:mPowerOn .75s cubic-bezier(.22,1,.36,1) forwards}" +
+    /* cinematic boot wordmark — big, faint kinetic type behind the terminal */
+    "@keyframes mWordIn{from{opacity:0;transform:translateY(34px) scale(.9);filter:blur(9px)}" +
+      "to{opacity:1;transform:none;filter:none}}" +
+    "html.m-js #m-boot-mark{position:absolute;left:0;right:0;top:44%;text-align:center;z-index:1;" +
+      "pointer-events:none;font-family:'Segoe UI',system-ui,Arial,sans-serif;font-weight:800;" +
+      "letter-spacing:.03em;font-size:clamp(54px,13vw,210px);line-height:.9;color:rgba(0,255,136,.11);" +
+      "white-space:nowrap;user-select:none}" +
+    "html.m-js #m-boot-mark b{display:inline-block;font-weight:inherit;opacity:0;" +
+      "animation:mWordIn .7s cubic-bezier(.22,1,.36,1) both}";
   var style = document.createElement("style");
   style.id = "motion-style";
   style.textContent = CSS;
@@ -193,6 +202,20 @@
     tagAll(document.body);
     if (!document.getElementById("bt-screen")) { bootDone(); return; }
     hadBoot = true;
+    // cinematic wordmark sting: big faint kinetic type behind the terminal
+    var bt = document.getElementById("bt-screen");
+    if (!reduce && bt) {
+      var mark = document.createElement("div");
+      mark.id = "m-boot-mark";
+      var word = "FORBIDDEN";
+      for (var ci = 0; ci < word.length; ci++) {
+        var ch = document.createElement("b");
+        ch.textContent = word.charAt(ci);
+        ch.style.animationDelay = (0.15 + ci * 0.05) + "s";
+        mark.appendChild(ch);
+      }
+      bt.appendChild(mark);
+    }
     var watch = new MutationObserver(function () {
       if (!document.getElementById("bt-screen")) { watch.disconnect(); bootDone(); }
     });
