@@ -1,0 +1,103 @@
+name: "🐞 The hub or launcher is broken"
+description: Something in PRESSHERETOSTART.html or the hub pages (library, settings, notes, ...) does not work.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! This form is for the **app itself** — the start screen and the
+        hub pages. If a single *game* will not play, please use the **"A game won't play"**
+        template instead.
+
+        Before you post: skim the README (especially *If something looks wrong*), search the
+        existing issues, and post **one problem per issue**. See the
+        [guidelines](https://github.com/christophersudario1122-web/600-game-compiled-offline-html-game-pack/blob/main/.github/CONTRIBUTING.md).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What goes wrong?
+      description: Describe it in your own words. Plain and simple is perfect.
+      placeholder: "When I click ENTER GAME DATABASE the screen goes black and nothing loads."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: What did you do, step by step?
+      description: The exact clicks that lead to the problem, so we can do the same thing.
+      placeholder: |
+        1. Opened PRESSHERETOSTART.html
+        2. Clicked ENTER GAME DATABASE
+        3. Typed "2048" in the search box
+        4. Clicked the game
+    validations:
+      required: true
+
+  - type: input
+    id: expected
+    attributes:
+      label: What did you expect to happen instead?
+      placeholder: "The 2048 game should open."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options:
+        - The start screen (PRESSHERETOSTART.html)
+        - The game library / game list
+        - A hub page (Settings, Stats, Notes, Secrets, ...)
+        - The secret login page
+        - Downloading or extracting the files
+        - Something else / not sure
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      description: The machine and the browser you used. If you know the version, add it.
+      placeholder: "Chromebook, Chrome 130  —  or  —  Windows 11, Edge 131"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: how-opened
+    attributes:
+      label: How are you opening the pack?
+      options:
+        - A normal folder on the computer (unzipped)
+        - A USB stick or portable drive
+        - A local web server (python -m http.server and friends)
+        - Not sure
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Which download are you using?
+      description: The date or version from the Releases page, if you know it.
+      placeholder: "v1.0.0, downloaded 2026-10-14"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Please confirm
+      options:
+        - label: I searched the existing issues for this problem.
+          required: true
+        - label: I read the README's "If something looks wrong" section.
+          required: true
+        - label: This is a problem with the app/hub, not one specific game.
+          required: true
+        - label: I have extracted everything into one folder (PRESSHERETOSTART.html, .hub and .games side by side).
+          required: false

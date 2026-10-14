@@ -4,6 +4,23 @@ All notable changes to this project. Newest first. Dates are local build dates.
 
 ## [Unreleased] — 2026-10-14
 
+### Added — issue templates and guidelines (so reports are actually actionable)
+- `.github/ISSUE_TEMPLATE/` with three forms plus a chooser:
+  **🐞 The hub or launcher is broken**, **🎮 A game won't play**, and
+  **🧾 Removal or credit request**. Each asks for exactly the details needed to act
+  (device + browser, steps, which game, how it was opened) and requires the reporter to
+  confirm they searched first and read the README. Blank issues stay enabled so nobody is
+  blocked, and the chooser links the README, Releases, `CREDITS.md` and the guidelines.
+- `.github/CONTRIBUTING.md` — the short rules (be decent, one problem per issue, use a
+  template, no paid/pirated-game requests, don't post personal info, the hub password is
+  public) plus an honest **"what we can and can't fix"** table (third-party games missing
+  their own assets: sometimes; network filters and a 6 GB download: no) and the removal
+  policy (we remove first, ask questions later).
+- Labels `game issue` and `removal request` created (`bug` already existed).
+- README gained a **Reporting a problem** section pointing at both.
+- `.github/` is excluded from `start-here-app.zip` (it is repo plumbing, not something a
+  player should find inside the app folder).
+
 ### Fixed — service worker never registered from the hub pages
 - `.hub/.library.html` and `.hub/.shared-features.js` registered `'../sw.js'` / `'./sw.js'`,
   but the file is **`.sw.js`** (dotted). The registration 404'd and was swallowed by

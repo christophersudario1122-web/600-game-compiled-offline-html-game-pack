@@ -1,0 +1,94 @@
+name: "🎮 A game won't play"
+description: One (or a few) specific games show a blank page, a black screen, or an error. The rest of the pack is fine.
+title: "[Game] "
+labels: ["game issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Which game, and what it does, is all we need. **One game (or one small group) per issue** —
+        please do not list 20 games in one report.
+
+        Heads up: this pack collects games made by other people. A handful were saved without all
+        of their own files (a font, a loading logo, an ad banner), so a few games will look
+        slightly broken no matter what we do. Telling us the name is still useful — we may be able
+        to swap in a working copy.
+
+        Useful: if the game shows **error text**, copy it. If it is blank or black, just say so.
+        See the [guidelines](https://github.com/christophersudario1122-web/600-game-compiled-offline-html-game-pack/blob/main/.github/CONTRIBUTING.md).
+
+  - type: input
+    id: game
+    attributes:
+      label: Which game?
+      description: The name as it appears in the library, or the file name if you know it.
+      placeholder: "e.g. paperio2, 2048, vex6, retrobowl"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: symptom
+    attributes:
+      label: What happens when you open it?
+      options:
+        - Blank white page
+        - Black page, nothing on it
+        - Error text or a "file not found" message is shown
+        - It loads, but a picture / font / logo is missing
+        - It freezes or the controls do not respond
+        - Nothing happens at all when I click it
+        - Something else
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-text
+    attributes:
+      label: Any error text on screen?
+      description: Copy and paste it exactly, if there is any. If not, leave this empty.
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: others-work
+    attributes:
+      label: Do other games work?
+      options:
+        - "Yes, other games open fine"
+        - "No, nothing opens"
+        - "I only tried this one"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: how-opened
+    attributes:
+      label: How are you opening the pack?
+      options:
+        - A normal folder on the computer (unzipped)
+        - A USB stick or portable drive
+        - A local web server (python -m http.server and friends)
+        - Not sure
+    validations:
+      required: false
+
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: "Chromebook, Chrome 130  —  or  —  Windows 11, Edge 131"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Please confirm
+      options:
+        - label: I searched the existing issues for this game.
+          required: true
+        - label: This is about a specific game (not the hub or the download).
+          required: true
+        - label: I know some games are third-party and may not be fully repairable.
+          required: false

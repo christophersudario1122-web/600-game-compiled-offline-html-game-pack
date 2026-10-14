@@ -108,6 +108,13 @@ and you'd rather it wasn't, open an issue and it'll be taken down.
 - The pack author — for assembling and maintaining the collection.
 - **Big Pickle** — the OpenCode AI agent that packaged it up and put it on GitHub.
 
+## Reporting a problem
+
+Found a bug, or a game that won't play? Open an
+**[issue](../../issues)** — there's a short template for each kind, and the
+**[guidelines](../../blob/main/.github/CONTRIBUTING.md)** say what we can fix and what we
+can't. If a game is yours and you'd rather it wasn't here, say so and it goes.
+
 ## Notes
 
 Public repo. The four release zips add up to roughly 5.8 GB (about 7.8 GB once

@@ -1,0 +1,75 @@
+name: "🧾 Removal or credit request"
+description: A game in this pack is yours (or your company's) and you want it removed, or credited differently.
+title: "[Removal] "
+labels: ["removal request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This pack only *collects* games that other people made; we did not make them and we claim
+        no rights over them. Every game is listed in
+        [CREDITS.md](https://github.com/christophersudario1122-web/600-game-compiled-offline-html-game-pack/blob/main/CREDITS.md).
+
+        **If you are the owner and you want something gone, say so and it goes.** You do not have
+        to explain yourself, and you do not have to prove anything before we act. The fields below
+        just help us find the right file quickly.
+
+  - type: input
+    id: game
+    attributes:
+      label: Which game?
+      description: Name or file name. If it is many games, list them or say "all of pack X".
+      placeholder: "e.g. paperio2  (file: .games/pack/offline/paperio2.htm)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: connection
+    attributes:
+      label: What is your connection to it?
+      options:
+        - I made it
+        - I own the rights to it (company / publisher)
+        - I am asking on behalf of the creator
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: request
+    attributes:
+      label: What would you like us to do?
+      options:
+        - Remove it completely
+        - Keep it, but fix or add the credit
+        - Keep it, but link to my official page instead
+        - Something else
+    validations:
+      required: true
+
+  - type: input
+    id: proof
+    attributes:
+      label: A link that shows it is yours (optional)
+      description: Your site, store page, itch.io, the original repository — helpful, but not required.
+      placeholder: "https://..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: Optional. Anything you want us to know.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Please confirm
+      options:
+        - label: I am the creator/owner, or I am asking on the creator's behalf.
+          required: true
+        - label: I understand the game will be removed from the repo and from future downloads.
+          required: false

@@ -1,0 +1,14 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "📖 Read this first: how to install and play"
+    url: https://github.com/christophersudario1122-web/600-game-compiled-offline-html-game-pack#readme
+    about: What to download, how to extract it, and the "If something looks wrong" section.
+  - name: "⬇️ Downloads and checksums (Releases)"
+    url: https://github.com/christophersudario1122-web/600-game-compiled-offline-html-game-pack/releases
+    about: start-here-app.zip and the four game parts, each with a matching .sha256 file.
+  - name: "🧾 Who made these games (CREDITS.md)"
+    url: https://github.com/christophersudario1122-web/600-game-compiled-offline-html-game-pack/blob/main/CREDITS.md
+    about: Attribution for every game, and how to ask for a removal.
+  - name: "💬 Guidelines and rules for issues"
+    url: https://github.com/christophersudario1122-web/600-game-compiled-offline-html-game-pack/blob/main/.github/CONTRIBUTING.md
+    about: Please skim this before posting - it is short, and it explains what we can and cannot fix.
