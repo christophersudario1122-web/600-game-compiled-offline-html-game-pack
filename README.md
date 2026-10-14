@@ -28,6 +28,13 @@ playable copy:
 Windows 10+, macOS and Linux all include `tar` out of the box. Each part has a
 matching `.sha256` file if you want to verify the download first.
 
+## Portable use
+
+Copy the whole folder — `PRESSHERETOSTART.html`, `.hub/` and `.games/` — onto a USB
+stick. Every path is relative, so it runs from any drive letter and needs no server:
+just open the HTML file in a browser. Chromebooks, locked-down school laptops, and
+old machines work fine too, because nothing is installed and nothing calls home.
+
 ## What is in the box
 
 - **`PRESSHERETOSTART.html`** — the launcher and entry point.
