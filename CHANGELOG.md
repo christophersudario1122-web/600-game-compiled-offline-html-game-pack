@@ -4,6 +4,20 @@ All notable changes to this project. Newest first. Dates are local build dates.
 
 ## [Unreleased] — 2026-10-14
 
+### Added — `start-here-app.zip` on the Releases page
+- **The app itself is now a release download.** A new 195 KB asset,
+  `start-here-app.zip`, bundles `PRESSHERETOSTART.html` + `.hub/` + `.docs/` + `.tools/`
+  + `README.md` / `CREDITS.md` / `CHANGELOG.md` / `get-the-games.sh` (27 files), so a
+  Chromebook user can get *everything* from the Releases page instead of using
+  **Code → Download ZIP**. The release notes now lead with it as "Step 1".
+- Packaged by a new tool, `tooling/tests/build-app-release.mjs`, reusing the same
+  dependency-free ZIP writer as the corpus build (forward-slash, UTF-8 flag-bit-11
+  names). **Gotcha:** PowerShell's `Compress-Archive` / .NET
+  `ZipFile.CreateFromDirectory` write **backslash** entry names on Windows
+  (`.hub\foo.js`), which break on ChromeOS/Linux — so that path is unusable here.
+  Verified by re-extracting with .NET: real `.hub/` folder, 0 backslash names.
+- `get-the-games.sh` inside the bundle still fetches and verifies the four game parts.
+
 ### Changed — de-duplicated folder names
 - **Hub page renamed** `.hub/.library1.html` → `.hub/.library.html`. The old name
   collided with the games folder, which was *also* called `library1`. All 18 files that

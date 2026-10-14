@@ -10,22 +10,24 @@ handed a locked-down laptop that won't let you add a single program, this is for
 
 ## Get the games (about as easy as it gets)
 
-The games are about 5.8 GB, which is far too much to keep inside a normal git repo, so
-they live on the **Releases** page in four parts. Each part is a plain `.zip` that any
-computer can open — no special tools, no terminal.
+Everything is on the **[Releases](../../releases)** page. The games are about 5.8 GB,
+which is far too much to keep inside a normal git repo, so they ship there in four parts.
+Each part is a plain `.zip` that any computer can open — no special tools, no terminal.
 
 ### On a Chromebook (no terminal needed)
 
-1. On this repo page: **Code → Download ZIP**, then extract that zip. You now have the
-   app folder (with `PRESSHERETOSTART.html` in it).
-2. Go to **[Releases](../../releases)** and download all four `games-corpus-part*.zip`
-   files into that same folder.
-3. For each of the four zips: **right-click → Extract all**. Extract each one into the
-   same folder, so all four sets of files merge into one `.games` folder.
+1. Open **[Releases](../../releases)** and download **`start-here-app.zip`** (195 KB).
+   Extract it — you now have `PRESSHERETOSTART.html` with a `.hub` folder beside it.
+2. On the same page, download all four `games-corpus-part*.zip` files.
+3. For each of the four zips: **right-click → Extract all**, into the folder that holds
+   `PRESSHERETOSTART.html`, so all four merge into one `.games` folder.
 4. Open `PRESSHERETOSTART.html`.
 
 That's it. The zips are independent, so you can extract them in any order, one at a
 time (handy if you're short on space — you can delete each zip after it's extracted).
+
+> Prefer the source bundle? **Code → Download ZIP** on this page has the same files as
+> `start-here-app.zip`. Either way, you need the four game parts as well.
 
 > Note: `.games` starts with a dot, so your Files app hides it by default. It's there,
 > and the hub finds it automatically. You never need to open it yourself.
