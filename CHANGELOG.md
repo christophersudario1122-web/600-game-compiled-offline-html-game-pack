@@ -49,6 +49,6 @@ All notable changes to this project. Newest first. Dates are local build dates.
 - Initial public source drop: hub app (`.hub/`), launcher (`PRESSHERETOSTART.html`),
   PWA files (`.sw.js`, `.manifest.json`), tools (`.tools/`), docs (`.docs/`), and
   `CREDITS.md`.
-- Release **v1.0.0** with the game corpus split into four `.tar.gz` archives
-  (~5.8 GB total, 14,315 files, 7.8 GB uncompressed) plus `.sha256` files and a
-  `MANIFEST.json`.
+- Release **v1.0.0** with the game corpus as four archives (~5.8 GB total, 14,315
+  files, 7.8 GB uncompressed) plus `.sha256` files and a `MANIFEST.json`. (Originally
+  `.tar.gz`; replaced with `.zip` on 2026-10-14 — see Unreleased above.)
