@@ -4,7 +4,7 @@
 
   // Register Service Worker
   if ('serviceWorker' in navigator) {
-    const swPath = window.location.pathname.includes('/.hub/') ? '../sw.js' : './sw.js';
+    const swPath = window.location.pathname.includes('/.hub/') ? '../.sw.js' : './.sw.js';
     navigator.serviceWorker.register(swPath).catch(() => {});
   }
 

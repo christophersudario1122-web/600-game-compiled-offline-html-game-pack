@@ -4,6 +4,28 @@ All notable changes to this project. Newest first. Dates are local build dates.
 
 ## [Unreleased] — 2026-10-14
 
+### Fixed — service worker never registered from the hub pages
+- `.hub/.library.html` and `.hub/.shared-features.js` registered `'../sw.js'` / `'./sw.js'`,
+  but the file is **`.sw.js`** (dotted). The registration 404'd and was swallowed by
+  `.catch(() => {})`, so the hub pages silently had no offline cache. Now points at
+  `'../.sw.js'` / `'./.sw.js'`, matching `PRESSHERETOSTART.html`, which was already correct.
+
+### Added — a real playthrough bug-check (headless Chrome over `file://`)
+- `tooling/tests/release-bugcheck.mjs` — static: every one of the 627 registry entries
+  resolves to a file with the **exact case and extension** the launch code builds (the
+  ChromeOS/Linux case-sensitivity trap), the launcher's random-game list is checked against
+  its own `.htm` exception list, and every registered service-worker path must exist.
+- `tooling/tests/playthrough-bugcheck.mjs` — runtime: boots the launcher, the library, all
+  13 hub pages and a dozen games in headless Chrome over `file://`, recording every missing
+  file, uncaught exception and failed launch. Also drives the secret login (wrong password
+  rejected; default `Chrsiischeeks` unlocks `tisrealyaint.html`) and captures screenshots.
+- `tooling/tests/game-asset-sweep.mjs` — opens 62 games and lists any asset a game asks for
+  that isn't in the pack (8/62; all pre-existing third-party capture gaps, cosmetic).
+- `tooling/tests/release-layout-check.mjs` — proves the download merge is correct
+  (`start-here-app.zip` unpacks at the root, the four parts unpack under `.games/`), that
+  extraction produces real `.hub`/`.docs` directories (not `.hub\x` names), and that the app
+  boots cleanly *before* the games are downloaded.
+
 ### Added — `start-here-app.zip` on the Releases page
 - **The app itself is now a release download.** A new 195 KB asset,
   `start-here-app.zip`, bundles `PRESSHERETOSTART.html` + `.hub/` + `.docs/` + `.tools/`

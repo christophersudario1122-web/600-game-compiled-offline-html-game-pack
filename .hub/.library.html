@@ -1643,7 +1643,7 @@ window.addEventListener('load', () => {
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('../sw.js').catch(() => {});
+  navigator.serviceWorker.register('../.sw.js').catch(() => {});
 }
 
 // Auto theme by time (6am-6pm lighter, 6pm-6am darker)

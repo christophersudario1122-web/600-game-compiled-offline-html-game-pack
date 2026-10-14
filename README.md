@@ -32,6 +32,21 @@ time (handy if you're short on space — you can delete each zip after it's extr
 > Note: `.games` starts with a dot, so your Files app hides it by default. It's there,
 > and the hub finds it automatically. You never need to open it yourself.
 
+### If something looks wrong
+
+- **A new folder appeared when you extracted** (e.g. you now have
+  `start-here-app/PRESSHERETOSTART.html` inside another folder). Some extractors wrap the
+  contents in a folder named after the zip. Move everything up one level so that
+  `PRESSHERETOSTART.html`, `.hub` and `.games` all sit side by side in the *same* folder.
+  If those three are in the same folder, the app will find everything.
+- **You can't see `.games` or `.hub`.** They start with a dot, so file managers hide them.
+  In the ChromeOS Files app, open the ⋮ menu and turn on **Show hidden files**. Don't
+  rename them — the app looks for these exact names.
+- **One game shows a blank page or a missing-image icon.** A handful of the 627 games were
+  captured without all of their own assets (a font, a loading logo, an ad banner). That's
+  baked into those games, not something the pack can fix, and it doesn't affect the rest.
+  Close the tab and pick another game.
+
 ### On Windows / macOS
 
 Same idea: double-click each downloaded zip to extract it into the app folder. (Or use
