@@ -4,28 +4,39 @@ All notable changes to this project. Newest first. Dates are local build dates.
 
 ## [Unreleased] — 2026-10-14
 
+### Changed — Chromebook-first release format (important)
+- **Release assets are now `.zip`, not `.tar.gz`.** The primary target is Chromebooks,
+  and ChromeOS has **no native tar/tar.gz extraction** (the Files app can only
+  "Extract all" a `.zip`). The four `games-corpus-part*` archives were rebuilt as four
+  independent `.zip` files, so each one now extracts on its own, with no terminal and no
+  extra software, on Chromebook / Windows / macOS / Linux alike.
+  - Sizes: 1.385 / 1.401 / 1.469 / 1.528 GB (all under the 2 GiB per-asset limit).
+  - Verified: all 14,315 files present, **0 CRC failures**, the two non-ASCII `n-gon`
+    filenames preserved byte-for-byte (stored as UTF-8 with flag bit 11).
+- **Removed `GET-THE-GAMES.bat` and `get-the-games.ps1`.** `.bat`/`.ps1` cannot run on a
+  Chromebook, so they're gone. The primary install path is now the Files app
+  ("Extract all" on each zip); the terminal path is the single `get-the-games.sh`.
+- **`get-the-games.sh`** rewritten to download the four `.zip` parts, verify each
+  against built-in SHA-256, and extract (uses `unzip`, falling back to `python3 -m
+  zipfile`). Runs on ChromeOS Linux (Crostini), macOS and Linux.
+- **`README.md`**: rewritten Chromebook-first — the Files-app steps lead, the terminal
+  is optional. Added a note that `.games` is hidden in the Files app.
+- **Tools updated**: `scripts/tests/build-games-release.mjs` now writes ZIP (dependency-
+  free ZIP writer: CRC-32, UTF-8 names, explicit directory entries, no data descriptors);
+  `scripts/tests/verify-games-release.mjs` parses ZIP and CRC-checks every entry.
+
 ### Added
-- **`GET-THE-GAMES.bat`** (Windows) and **`get-the-games.sh`** (macOS/Linux):
-  one-step installers that download the four game-pack archives, verify each one
-  against built-in SHA-256 fingerprints, and extract them in place. Replaces the
-  old "copy and paste the hashes yourself" routine.
 - **`CHANGELOG.md`** (this file) to record changes in detail.
-- **`get-the-games.ps1`**: the PowerShell worker behind `GET-THE-GAMES.bat`.
 
 ### Changed
 - **Repository renamed** to `600-game-compiled-offline-html-game-pack`.
 - **Repository is now public** (was private).
-- **Repository description** rewritten in plain language and now notes that the pack
-  can bypass most block apps as long as they don't block HTML files completely.
-- **`README.md`** rewritten to be friendlier: a one-click install section, a plain
-  "will it run" section, a contributors list, and the block-app note.
+- **Repository description** rewritten in plain language; notes the block-app behavior.
 - **Hub password is now changeable.** `login.html` reads the password from
   `localStorage["arcade_hub_password"]` (set from **Settings → Security**) and falls
-  back to the built-in default only when nothing custom is saved. Previously the
-  settings page saved a new password but the login page ignored it.
+  back to the built-in default only when nothing custom is saved.
 - **Settings → Security**: clearer description, a new **RESET** button to restore the
-  built-in default password, and an honest success message (the old one wrongly said
-  the change would not take effect).
+  built-in default password, and an honest success message.
 
 ### Fixed
 - Login error text typo: `INVALid KEY` → `INVALID KEY`.
