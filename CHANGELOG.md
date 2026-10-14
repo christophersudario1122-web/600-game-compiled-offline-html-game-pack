@@ -4,6 +4,15 @@ All notable changes to this project. Newest first. Dates are local build dates.
 
 ## [Unreleased] — 2026-10-14
 
+### Changed — boot animation on the start screen is roughly twice as fast
+- `PRESSHERETOSTART.html` paced the Arch-style boot log by a per-line delay measured in
+  milliseconds, and the whole sequence came to about **11.7 s** on a real boot. A single
+  `BOOT_SPEED` factor (now `0.4`, applied through a small `pace()` helper) multiplies every
+  line's delay, so the identical log — every line, the ASCII logo, the login, the MOTD — now
+  plays in about **6.6 s**. The wait before the exit animation was trimmed too
+  (950 ms → 400 ms). Nothing was deleted; the sequence is just paced faster.
+- Click / Esc / Space / Enter still skip the boot instantly.
+
 ### Added — issue templates and guidelines (so reports are actually actionable)
 - `.github/ISSUE_TEMPLATE/` with three forms plus a chooser:
   **🐞 The hub or launcher is broken**, **🎮 A game won't play**, and

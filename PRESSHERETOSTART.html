@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- ARCADE HUB BUILD: arch-boot-2026-10-09b (Arch boot + dense filler, faster scroll, ~5s shorter) -->
+<!-- ARCADE HUB BUILD: arch-boot-2026-10-09b (Arch boot + dense filler, faster scroll; sequence paced by BOOT_SPEED) -->
 <html lang="en" class="preload">
 <head>
 <meta charset="utf-8">
@@ -899,6 +899,11 @@ document.addEventListener('keydown', (e) => {
         return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
+    // Global pacing for the whole boot sequence. Every line's delay below is multiplied
+    // by this, so 0.4 plays the exact same log roughly 2.5x faster (about 5s total).
+    var BOOT_SPEED = 0.4;
+    function pace(ms) { return Math.max(1, Math.round(ms * BOOT_SPEED)); }
+
     var SEQ = [];
     var scrollRunning = true;
     function add(html, d) { SEQ.push({ html: html, d: (d == null ? 30 : d) }); }
@@ -1303,7 +1308,7 @@ document.addEventListener('keydown', (e) => {
     function done() {
         statusEl.textContent = '\u2714  system ready';
         barEl.style.width = '100%';
-        setTimeout(exitBoot, skipRequested ? 200 : 950);
+        setTimeout(exitBoot, skipRequested ? 120 : 400);
     }
     function step() {
         if (idx >= SEQ.length) { done(); return; }
@@ -1318,7 +1323,7 @@ document.addEventListener('keydown', (e) => {
         var pct = Math.round(idx / SEQ.length * 100);
         barEl.style.width = pct + '%';
         statusEl.textContent = statusFor(pct);
-        timer = setTimeout(step, SEQ[idx - 1].d);
+        timer = setTimeout(step, pace(SEQ[idx - 1].d));
     }
 
     // Smoothly auto-follow the newest line (lerped scroll)
@@ -1346,7 +1351,7 @@ document.addEventListener('keydown', (e) => {
     });
 
     requestAnimationFrame(follow);
-    timer = setTimeout(step, 240);
+    timer = setTimeout(step, pace(240));
 })();
 </script>
 <script src=".hub/.shared-features.js"></script>
