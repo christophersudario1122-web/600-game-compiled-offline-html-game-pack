@@ -1,78 +1,80 @@
-# Forbidden USB Stick Games
+# 600-Game Compiled Offline HTML Game Pack
 
-A fully offline HTML game hub — 600+ browser games collected into one folder you can
-run from a USB stick, a Chromebook, a school laptop, or any machine with a browser.
-No install, no account, and no internet connection required once it is on the stick.
+Six hundred-odd browser games, all stuffed into one folder. Drop it on a USB stick (or
+just a normal folder), open `PRESSHERETOSTART.html`, and you're playing. No install, no
+sign-in, no internet, no launcher. It just runs — even on the locked-down school
+laptops and Chromebooks that won't let you add a single program.
 
-**Start here:** open `PRESSHERETOSTART.html`.
+## Get the games (about as easy as it gets)
 
-## Quick start
+The games are about 5.8 GB, which is far too much to keep inside a normal repo, so they
+live on the **Releases** page in four parts.
 
-The playable games are far too large for a normal git repo (7.8 GB across 14,315
-files), so they ship as four split archives on the **Releases** page. To build a
-playable copy:
+- **Windows:** double-click **`GET-THE-GAMES.bat`**. That's it. It downloads all four
+  parts, checks them so you know nothing arrived corrupted, and unpacks them for you.
+  When it says ALL DONE, open `PRESSHERETOSTART.html` and play.
+- **macOS / Linux:** run **`bash get-the-games.sh`** in this folder. Same deal.
 
-1. Download all four `games-corpus-part1of4.tar.gz` … `part4of4.tar.gz` files into
-   the repo root — the folder that contains `PRESSHERETOSTART.html`.
-2. Extract each one **in that same folder**:
+You never have to copy and paste those long SHA-256 hashes around — the checking happens
+on its own. If a download comes through damaged, the script tells you, and you just run
+it again.
 
-   ```
-   tar -xzf games-corpus-part1of4.tar.gz
-   tar -xzf games-corpus-part2of4.tar.gz
-   tar -xzf games-corpus-part3of4.tar.gz
-   tar -xzf games-corpus-part4of4.tar.gz
-   ```
+### Doing it by hand (if you really want to)
 
-3. A `.games/` folder now sits beside `PRESSHERETOSTART.html`. Open the hub and play.
+Download all four `games-corpus-part*of4.tar.gz` files into this folder, then run:
 
-Windows 10+, macOS and Linux all include `tar` out of the box. Each part has a
-matching `.sha256` file if you want to verify the download first.
+```
+tar -xzf games-corpus-part1of4.tar.gz
+tar -xzf games-corpus-part2of4.tar.gz
+tar -xzf games-corpus-part3of4.tar.gz
+tar -xzf games-corpus-part4of4.tar.gz
+```
 
-## Portable use
+A `.games` folder appears next to `PRESSHERETOSTART.html`. Done.
 
-Copy the whole folder — `PRESSHERETOSTART.html`, `.hub/` and `.games/` — onto a USB
-stick. Every path is relative, so it runs from any drive letter and needs no server:
-just open the HTML file in a browser. Chromebooks, locked-down school laptops, and
-old machines work fine too, because nothing is installed and nothing calls home.
+## What's in here
 
-## What is in the box
+- `PRESSHERETOSTART.html` — the thing you open.
+- `.hub/` — the hub itself: library, search, filters, favourites, recently played,
+  themes, keybinds, stats, notes, a soundboard, settings, and a couple of hidden pages.
+- `.games/` — the games (not stored in the repo — see above).
+- `.sw.js` and `.manifest.json` — make the hub installable and keep it working offline.
+- `.tools/` and `.docs/` — helper scripts and design notes.
+- `CREDITS.md` — who actually made all these games (not us).
 
-- **`PRESSHERETOSTART.html`** — the launcher and entry point.
-- **`.hub/`** — the hub application: game library, search and filters, favourites,
-  recently played, themes, keybinds, stats, notes, a soundboard, settings, and a few
-  hidden easter-egg pages.
-- **`.games/`** — the games themselves (not stored in the repo — see Releases).
-- **`.sw.js`** and **`.manifest.json`** — a service worker and web-app manifest, so
-  the hub can be installed and keeps working offline.
-- **`.tools/`** — helper scripts, including the feature-registry generator.
-- **`.docs/`** — design notes, including the 2000-feature master list.
-- **`CREDITS.md`** — attribution for the third-party game packs.
+## Will it run on my machine?
+
+It's plain HTML, so it runs in basically any modern browser, and it's happiest on a
+Chromebook or a locked-down laptop because nothing needs installing. In practice this
+can bypass most block apps — as long as they don't block HTML files completely.
 
 ## Features
 
-The library is searchable across all 627 indexed titles, with genre filters,
-favourites, recently-played history, and several sort modes. It runs offline via a
-service worker, remembers your settings locally, and includes an animation layer,
-customisable keybinds, a stats screen, and assorted mini-apps. The feature registry
-(`window.Arcade`) tracks roughly 2000 individual features. A password gate guards the
-hub; it is documented in `.hub/.settings.html`.
+Search across all 627 games, filter by genre, favourite the good ones, see what you
+played last, and set your own theme and controls. The hub remembers your choices, works
+offline through a service worker, and quietly tracks around 2000 little features under
+the hood (`window.Arcade`). The secret page is password-protected, and you can change
+that password whenever you like in **Settings → Security** (there's a reset button too).
 
-## Known quirks
+## The odd bit
 
-Two `n-gon` image files have non-ASCII names (`Ψ(t) collapse.webp` and
-`spin–statistics theorem.webp`). The built-in **Windows** `tar` mis-decodes UTF-8
-filenames when extracting, so those two images may come out garbled on Windows.
-macOS/Linux `tar`, 7-Zip and WinRAR extract them correctly. Only those two images are
-affected.
+Two `n-gon` images have characters in their names that Windows' built-in `tar` gets
+confused by, so they can come out with scrambled names on Windows. Nothing breaks — it's
+two images in one game. macOS/Linux `tar`, 7-Zip and WinRAR get them right.
 
-## Credits and ownership
+## Credits
 
-None of the games are original work — they were gathered from public sources and
-remain the property of their respective authors. Full attribution is in
-**`CREDITS.md`**, including the primary third-party pack this hub is built on. If you
-own a title here and want it removed, open an issue.
+Every game here belongs to whoever made it; we just collected them. The full list is in
+`CREDITS.md`, including the main pack this started from. If something of yours is here
+and you'd rather it wasn't, open an issue and it'll be taken down.
+
+## Contributors
+
+- The pack author — for assembling and maintaining the collection.
+- **Big Pickle** — the OpenCode AI agent that packaged it up and put it on GitHub.
 
 ## Notes
 
-This repository is private. The release archives are ~5.8 GB total and require a
-signed-in GitHub account to download.
+Public repo. The release files add up to roughly 5.8 GB, so give the download a little
+time on a slow connection. See [Releases](../../releases) for the archives and their
+checksums, and `CHANGELOG.md` for what changed and when.

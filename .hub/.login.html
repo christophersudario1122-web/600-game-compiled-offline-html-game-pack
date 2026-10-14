@@ -206,13 +206,26 @@ function playClickSound() {
 }
 
 // --- PASSWORD CHECK ---
+// The password can be changed from the hub's Settings page (SECURITY section).
+// A custom password is stored in localStorage under "arcade_hub_password";
+// if none has been set, the built-in default below is used.
+const DEFAULT_HUB_PASSWORD = "Chrsiischeeks";
+
+function getHubPassword() {
+    try {
+        const stored = localStorage.getItem('arcade_hub_password');
+        if (stored && stored.length) return stored;
+    } catch (e) {}
+    return DEFAULT_HUB_PASSWORD;
+}
+
 function checkPassword() {
     const pass = document.getElementById('password-input').value;
-    
-    if (pass === "Chrsiischeeks") {
+
+    if (pass === getHubPassword()) {
         window.location.href = "./.boot-launch.html?g=tisrealyaint.html";
     } else {
-        document.getElementById('error-msg').innerText = "> ACCESS DENIED: INVALid KEY";
+        document.getElementById('error-msg').innerText = "> ACCESS DENIED: INVALID KEY";
     }
 }
 

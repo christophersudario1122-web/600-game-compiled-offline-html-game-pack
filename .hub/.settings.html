@@ -461,11 +461,12 @@
         <div class="setting-row">
             <div class="setting-label">
                 <span class="key">Hub Password</span>
-                <div class="desc">Password required to access the secret login page</div>
+                <div class="desc">Password for the secret login page. Change it here. Press RESET to go back to the built-in default.</div>
             </div>
             <div class="setting-control">
                 <input type="password" id="new-password" placeholder="New password">
                 <button onclick="changePassword()">CHANGE</button>
+                <button onclick="resetPassword()">RESET</button>
             </div>
         </div>
         <div id="password-status" class="status-msg" style="display:none"></div>
@@ -659,6 +660,9 @@ function getLS(key, fallback) {
 function setLS(key, value) {
     try { localStorage.setItem(key, value); return true; } catch(e) { return false; }
 }
+function resetLS(key) {
+    try { localStorage.removeItem(key); return true; } catch(e) { return false; }
+}
 
 // Shared achievement list comes from the library ('arcade_achievements' = array of earned ids)
 function getArcadeAchievementIds() {
@@ -755,12 +759,26 @@ function changePassword() {
     if (setLS('arcade_hub_password', newPwd)) {
         status.className = 'status-msg success';
         status.style.display = 'block';
-        status.innerText = '> SUCCESS: Password updated. Note: login.html still uses the original "Chrsiischeeks" until pou update that fileh';
+        status.innerText = '> SUCCESS: Password updated. It now takes effect on the login page.';
         input.value = '';
     } else {
         status.className = 'status-msg error';
         status.style.display = 'block';
         status.innerText = '> ERROR: Could not save (storage full?)';
+    }
+}
+
+// Restore the built-in default password by removing any custom one.
+function resetPassword() {
+    const status = document.getElementById('password-status');
+    if (resetLS('arcade_hub_password')) {
+        status.className = 'status-msg success';
+        status.style.display = 'block';
+        status.innerText = '> SUCCESS: Password reset to the built-in default.';
+    } else {
+        status.className = 'status-msg error';
+        status.style.display = 'block';
+        status.innerText = '> ERROR: Could not reset (storage unavailable)';
     }
 }
 
