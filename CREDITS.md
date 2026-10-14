@@ -40,7 +40,7 @@ or endorsed by them.
 ## Games included (627)
 
 The launcher indexes the following titles. Each maps to a file under
-`.games/.library1/offline/offline/` or a folder of the same name.
+`.games/pack/offline/` or a folder of the same name.
 
 - `1.5`
 - `1.8`

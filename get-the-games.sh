@@ -23,10 +23,10 @@ names=(
   "games-corpus-part4of4.zip"
 )
 shas=(
-  "d778e7dfa80d8f3ba882d238e57d44c64ef4a9ed66ff02ff5d52bb1b688db7e8"
-  "de3494483372e33d16f4312b02bd711e3dbbc575437e56a6c52242454536d9e5"
-  "eb8fbb13a6b750fe513059206cbc1dea5f34256a5a506974063e31521936f7a9"
-  "671b8fdb7b2098c3a9b853f8fd1a839d45ffaad6492b665d29c3dda46b24392c"
+  "61bc697e4373a3e4f0930b7b3555b2861b0a6eb5fc974f5108932f01b5b5f4ae"
+  "b54fddf387cde45ef0817838651421229e72189337ff787db3d0a87d0ff0158a"
+  "78c0bbf809d55151ceaf12c81fa23ee2eec56cc1d66526837e56f084c69fab7e"
+  "1d6eb8fbcbf88f74675b940f31116fbac58b61153d1814759f3795f4c2ceb538"
 )
 
 # ---- pick a hasher ----------------------------------------------------------
@@ -80,9 +80,13 @@ for name in "${names[@]}"; do
 done
 
 echo
-if [ -d ".games" ]; then
-  echo "  ALL DONE! The games are in the '.games' folder."
+if [ -d ".games/pack/offline" ]; then
+  echo "  ALL DONE! The games are in '.games/pack/offline/'."
   echo "  Now open PRESSHERETOSTART.html to play."
+elif [ -d ".games" ]; then
+  echo "  Extraction finished, but '.games/pack/offline' was not found."
+  echo "  Existing files were left untouched; delete '.games' and re-run to fully"
+  echo "  switch to the current layout."
 else
   echo "  Extraction finished, but the '.games' folder was not found."
   echo "  Make sure this script sits next to PRESSHERETOSTART.html."

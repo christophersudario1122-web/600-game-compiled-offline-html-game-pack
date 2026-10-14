@@ -15,7 +15,7 @@
    Usage:  .hub/.boot-launch.html?g=<filename-with-extension>
    No query -> returns to the library. Never traps the user: has a hard fallback. */
 (function () {
-  var GAMES = '../.games/.library1/offline/offline/';
+  var GAMES = '../.games/pack/offline/';
   var g = '';
   try {
     var qs = new URLSearchParams(window.location.search);
@@ -30,7 +30,7 @@
   // or ".." (defense in depth — the target dir is fixed anyway).
   var raw = String(g);
   if (!raw || /[\\/]/.test(raw) || raw.indexOf('..') !== -1 || !/^[A-Za-z0-9._-]+$/.test(raw)) {
-    window.location.replace('./.library1.html');
+    window.location.replace('./.library.html');
     return;
   }
   g = raw;

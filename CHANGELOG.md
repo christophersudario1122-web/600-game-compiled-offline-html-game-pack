@@ -4,6 +4,23 @@ All notable changes to this project. Newest first. Dates are local build dates.
 
 ## [Unreleased] — 2026-10-14
 
+### Changed — de-duplicated folder names
+- **Hub page renamed** `.hub/.library1.html` → `.hub/.library.html`. The old name
+  collided with the games folder, which was *also* called `library1`. All 18 files that
+  linked to it were updated; the launcher button now reads just "ENTER GAME DATABASE".
+- **Games folder renamed and flattened**: `.games/.library1/offline/offline/` →
+  `.games/pack/offline/`. No name means two different things any more, and the doubled
+  `offline/offline` is gone. The three references to the path (`PRESSHERETOSTART.html`,
+  `.hub/.boot-launch.html`, `.hub/.library.html`) were updated.
+- **Unreferenced upstream helper files** (`compressed.html`, `epicviewer.htm`,
+  `file-input.html`, `single-file.html`, `inline-tools/`, `methods/`, `README.md`) moved
+  out of the games folder to `.games/pack/`. This also keeps their relative `./offline/`
+  link to the games working, since both moved together.
+- **Deleted stray backup** `.hub/.library1.html.bak`.
+- **Release assets rebuilt** (the paths inside the zips changed) — re-download if you
+  already have the old ones.
+- **`README.md`** gained a "Where everything lives" folder map.
+
 ### Changed — Chromebook-first release format (important)
 - **Release assets are now `.zip`, not `.tar.gz`.** The primary target is Chromebooks,
   and ChromeOS has **no native tar/tar.gz extraction** (the Files app can only

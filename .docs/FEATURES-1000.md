@@ -287,7 +287,7 @@ unique ids). Regenerated output: `.hub/arcade-features.js`.
 | 11 | **widgets** | `widget-001..100` | `mountWidget`, `clearWidgets` | Live dashboard tiles (clock, streak, sessions, storage, favorites, notes, highs, plays, GOTD) mounted into a `[data-widgets]` host, 5s refresh. |
 | 12 | **tools** | `tool-001..100` | `launchTool` | Working overlay utilities: coin, d6, d20, random range, timer, stopwatch, countdown, pomodoro, list picker, UUID. |
 | 13 | **presets** | `preset-001..100` | `applyPreset` | UI density + font-scale presets (compact/comfortable/spacious/zen/deck/focus × 92/100/108/116%). |
-| 14 | **collections** | `col-001..100` | `applyCollection` | Curated game shelves. Tags map to the real library1 `getT` vocabulary; fires `arcade:collection`, which library1 handles to filter the live grid. |
+| 14 | **collections** | `col-001..100` | `applyCollection` | Curated game shelves. Tags map to the real library `getT` vocabulary; fires `arcade:collection`, which library handles to filter the live grid. |
 | 15 | **challenges** | `chal-001..100` | `startChallenge`, `challengeDone` | Daily-style play goals persisted in `arcade_challenge`, with a completion reward. |
 | 16 | **badges** | `badge-001..100` | `awardBadge`, `hasBadge` | Earnable achievement badges stored in `arcade_awards`. |
 | 17 | **greetings** | `gr-001..100` | `greet` | Boot/toast greeting lines surfaced via the toast engine. |
@@ -301,7 +301,7 @@ unique ids). Regenerated output: `.hub/arcade-features.js`.
   action buttons (Mount / Open / Apply / Earn / Greet / Snapshot / Play / Cast) and
   family-level actions (Mount 5, Clear, Stop ambience, Random burst, Show earned).
   Header/count/verification updated to 2000.
-- **Library** (`.hub/.library1.html`): a **📁 SHELVES** picker lists the 20 unique
+- **Library** (`.hub/.library.html`): a **📁 SHELVES** picker lists the 20 unique
   collections; applying one sets the grid's `currentFilter`, shows a sticky shelf
   banner with a live count, and a "✕ Show all" reset.
 

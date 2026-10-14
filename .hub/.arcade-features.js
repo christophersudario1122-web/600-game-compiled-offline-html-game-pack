@@ -16852,7 +16852,7 @@ function celebrate(f) {
 }
 // --- shortcuts engine ---
 const ACTIONS = {
-  'nav-library': () => { location.href = '.library1.html'; },
+  'nav-library': () => { location.href = '.library.html'; },
   'nav-hub': () => { location.href = '../PRESSHERETOSTART.html'; },
   'nav-settings': () => { location.href = '.settings.html'; },
   'nav-stats': () => { location.href = '.stats.html'; },

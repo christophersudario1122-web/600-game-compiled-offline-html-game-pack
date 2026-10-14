@@ -128,7 +128,7 @@ for (let i = 1; i <= 100; i++) {
     `UI preset: ${mode} density at ${font}% font scale.`, { mode, font });
 }
 
-// ---- 14. collections (100): curated game shelves (tags = real library1 getT tags) ----
+// ---- 14. collections (100): curated game shelves (tags = real library getT tags) ----
 const collectionNames = ['Papa’s Kitchen', 'Bloons Defense', 'Ducky Dash', 'Wheel of Chaos', 'Vex Volume', 'FNAF Night Shift', 'Moto X Track', 'Riddle Me This', 'Fireboy & Watergirl', 'Dadish Diner Dash', 'OVO Jump Academy', 'Retro Bowl League', 'Horror Novice Pack', 'Sports Arena', 'Shooter Bootcamp', 'Racing Grid', 'Grand Strategy', 'Platformer Peak', 'Action Replay', 'Arcade Classics'];
 const collectionTags = ['papa', 'bloons', 'duck', 'wheely', 'vex', 'fnaf', 'motox', 'riddle', 'fireboy', 'dadish', 'ovo', 'retrobowl', 'horror', 'sport', 'shooter', 'racing', 'strategy', 'platformer', 'action', 'arcade'];
 for (let i = 1; i <= 100; i++) {
@@ -338,7 +338,7 @@ function celebrate(f) {
 }
 // --- shortcuts engine ---
 const ACTIONS = {
-  'nav-library': () => { location.href = '.library1.html'; },
+  'nav-library': () => { location.href = '.library.html'; },
   'nav-hub': () => { location.href = '../PRESSHERETOSTART.html'; },
   'nav-settings': () => { location.href = '.settings.html'; },
   'nav-stats': () => { location.href = '.stats.html'; },

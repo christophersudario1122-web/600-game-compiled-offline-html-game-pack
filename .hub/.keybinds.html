@@ -263,7 +263,7 @@
     <div class="header">
         <h1>⌨️ Keybinds &amp; Feature Atlas <small>2000 features · 20 families · press <kbd>?</kbd> for cheatsheet · <kbd>/</kbd> to focus search</small></h1>
         <div class="header-actions">
-            <button type="button" class="btn" onclick="location.href='../.hub/.library1.html'">← Library</button>
+            <button type="button" class="btn" onclick="location.href='../.hub/.library.html'">← Library</button>
             <button type="button" class="btn" onclick="location.href='../PRESSHERETOSTART.html'">⌂ Home</button>
             <button type="button" class="btn secondary" onclick="location.href='./.shortcuts.html'">Shortcuts</button>
             <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;"></span>
@@ -565,7 +565,7 @@ function render() {
             const a = feat.action;
             if (window.Arcade && a && typeof window.Arcade[a] === 'function') { try { window.Arcade[a](); toast(a); } catch (ee) {} }
             else if (a && a.startsWith('nav-')) {
-                const map = { 'nav-library': '.library1.html', 'nav-hub': '../PRESSHERETOSTART.html', 'nav-settings': '.settings.html', 'nav-stats': '.stats.html', 'nav-notes': '.notes.html', 'nav-snake': '.snake.html', 'nav-sound': '.soundboard.html', 'nav-secrets': '.secrets.html', 'nav-calc': '.calculator.html', 'nav-shortcuts': '.shortcuts.html' };
+                const map = { 'nav-library': '.library.html', 'nav-hub': '../PRESSHERETOSTART.html', 'nav-settings': '.settings.html', 'nav-stats': '.stats.html', 'nav-notes': '.notes.html', 'nav-snake': '.snake.html', 'nav-sound': '.soundboard.html', 'nav-secrets': '.secrets.html', 'nav-calc': '.calculator.html', 'nav-shortcuts': '.shortcuts.html' };
                 const href = map[a];
                 if (href) { toast(a + ' → ' + href); setTimeout(() => { location.href = href; }, 450); }
                 else toast(a);

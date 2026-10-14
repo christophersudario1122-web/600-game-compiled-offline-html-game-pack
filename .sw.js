@@ -5,7 +5,7 @@
 const CACHE_NAME = 'arcade-hub-v4';
 const ASSETS = [
   './PRESSHERETOSTART.html',
-  './.hub/.library1.html',
+  './.hub/.library.html',
   './.hub/.settings.html',
   './.hub/.stats.html',
   './.hub/.notes.html',

@@ -46,15 +46,25 @@ bash get-the-games.sh
 It downloads all four parts, checks them automatically, and extracts them. No SHA-256
 copy-pasting — if a download is corrupted, it says so and you just run it again.
 
-## What's in here
+## Where everything lives
 
-- `PRESSHERETOSTART.html` — the thing you open.
-- `.hub/` — the hub: library, search, filters, favourites, recently played, themes,
-  keybinds, stats, notes, a soundboard, settings, and a couple of hidden pages.
-- `.games/` — the games (not stored in the repo — see above).
-- `.sw.js` and `.manifest.json` — make the hub installable and keep it working offline.
-- `.tools/` and `.docs/` — helper scripts and design notes.
-- `CREDITS.md` — who actually made all these games (not us).
+The names are chosen so the two things called "library" don't get mixed up: the hub
+**page** is `.hub/.library.html`, and the games **folder** is `.games/pack/offline/`.
+
+```
+PRESSHERETOSTART.html          the thing you open
+.hub/                          the hub pages and scripts
+  .library.html                the game grid (search, filters, favourites, ...)
+  .settings.html .stats.html .notes.html .secrets.html ...   the other pages
+.games/                        all the games (NOT in this repo - see Releases)
+  pack/offline/                one .html file (or folder) per game
+  pack/                        upstream helper files (viewers/inliners), unreferenced
+.tools/gen-features.mjs        dev helper that regenerates the feature code
+.docs/FEATURES-1000.md         feature reference
+.sw.js .manifest.json          offline support + installability
+CREDITS.md                     who actually made all these games (not us)
+get-the-games.sh               optional terminal installer
+```
 
 ## Will it run on my machine?
 
