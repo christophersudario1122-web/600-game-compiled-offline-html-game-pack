@@ -1,8 +1,9 @@
 // Arcade Hub Service Worker - offline-capable, but always fresh hub pages.
-// v4: adds the game boot-launcher page (.boot-launch.html) so every game launch
-// plays the 2s boot. Hub HTML is network-first so edits show immediately; static
-// assets are stale-while-revalidate. Bumping CACHE_NAME purges the old cache.
-const CACHE_NAME = 'arcade-hub-v4';
+// v5: precaches the motion layer (.motion.js, .motion-showreel.html), which v4
+// missed, so the first offline visit still animates. Hub HTML is network-first so
+// edits show immediately; static assets are stale-while-revalidate. Bumping
+// CACHE_NAME purges the old cache.
+const CACHE_NAME = 'arcade-hub-v5';
 const ASSETS = [
   './PRESSHERETOSTART.html',
   './.hub/.library.html',
@@ -19,6 +20,8 @@ const ASSETS = [
   './.hub/.keybinds.html',
   './.hub/.boot-launch.html',
   './.hub/.boot-transition.js',
+  './.hub/.motion.js',
+  './.hub/.motion-showreel.html',
   './.hub/.shared-features.js',
   './.hub/.arcade-features.js',
   './.manifest.json'
@@ -82,8 +85,13 @@ self.addEventListener('fetch', (e) => {
 
 // Message handler for manual cache updates
 self.addEventListener('message', (e) => {
-  if (e.data === 'skipWaiting') self.skipWaiting();
-  if (e.data === 'cacheGames' && e.data.urls) cacheGames(e.data.urls);
+  const data = e.data;
+  if (data === 'skipWaiting' || (data && data.type === 'skipWaiting')) self.skipWaiting();
+  // This used to read `e.data === 'cacheGames' && e.data.urls`, which can never be
+  // true (a string has no .urls). Games are multi-GB, so precaching stays opt-in.
+  if (data && data.type === 'cacheGames' && Array.isArray(data.urls)) {
+    e.waitUntil(cacheGames(data.urls));
+  }
 });
 
 async function cacheGames(urls) {

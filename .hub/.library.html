@@ -1485,7 +1485,8 @@ function playKonamiChord() {
 
 // ---------- 8. KEYBOARD SHORTCUTS (single listener) ----------
 document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key;
     konamiCheck(k);
     if (k === '/') {
@@ -1497,6 +1498,9 @@ document.addEventListener('keydown', e => {
     } else if (k === 'm' || k === 'M') {
         if (typeof toggleAmbientMusic === 'function') toggleAmbientMusic();
     } else if (k === 'f' || k === 'F') {
+        // Favourites wins over the global "F = fullscreen" hotkey: claim the event
+        // so .shared-features.js sees defaultPrevented and does not also toggle.
+        e.preventDefault();
         const fav = document.querySelector('.favorites-tab');
         if (fav) fav.click();
     } else if (k === 'Escape') {
@@ -1672,43 +1676,10 @@ setInterval(updateGamepadStatus, 1000);
 window.addEventListener('gamepadconnected', updateGamepadStatus);
 window.addEventListener('gamepaddisconnected', updateGamepadStatus);
 
-// Cheatsheet modal
-function showCheatsheet() {
-  const modal = document.createElement('div');
-  modal.id = 'cheatsheet-modal';
-  modal.innerHTML = `
-    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
-      <div style="background:#0a0a0f;border:2px solid #00ff88;border-radius:10px;padding:30px;max-width:600px;max-height:80vh;overflow:auto;">
-        <h2 style="color:#00ff88;margin:0 0 20px;text-shadow:0 0 10px #00ff88;">⌨️ KEYBOARD SHORTCUTS</h2>
-        <table style="width:100%;color:#00ff88;font-family:monospace;font-size:0.9rem;border-collapse:collapse;">
-          <tr><td style="padding:8px;width:120px;"><kbd>R</kbd></td><td>Random game (library)</td></tr>
-          <tr><td style="padding:8px;"><kbd>Space</kbd></td><td>Stop all sounds</td></tr>
-          <tr><td style="padding:8px;"><kbd>F</kbd></td><td>Toggle fullscreen</td></tr>
-          <tr><td style="padding:8px;"><kbd>?</kbd></td><td>Show this cheatsheet</td></tr>
-          <tr><td style="padding:8px;"><kbd>H</kbd></td><td>Home</td></tr>
-          <tr><td style="padding:8px;"><kbd>1-9</kbd></td><td>Soundboard hotkeys</td></tr>
-          <tr><td style="padding:8px;"><kbd>Q-P</kbd></td><td>Meme sounds</td></tr>
-          <tr><td style="padding:8px;"><kbd>A-L</kbd></td><td>COD sounds</td></tr>
-          <tr><td style="padding:8px;"><kbd>Z-B</kbd></td><td>Retro sounds</td></tr>
-        </table>
-        <button onclick="document.getElementById('cheatsheet-modal').remove()" style="margin-top:20px;padding:10px 20px;background:#00ff88;color:#000;border:none;border-radius:4px;font-weight:bold;cursor:pointer;">CLOSE</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-}
-document.addEventListener('keydown', (e) => {
-  if (e.key === '?' || (e.key === '/' && e.shiftKey)) { e.preventDefault(); showCheatsheet(); }
-  if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
-});
-
-// Fullscreen helper
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
-  } else {
-    document.exitFullscreen().catch(() => {});
-  }
-}
+// NOTE: showCheatsheet() / toggleFullscreen() and the "?"/"F" global hotkeys live in
+// .shared-features.js, which is loaded at the bottom of this page. They used to be
+// duplicated here, which made "?" open two stacked modals and made "F" both toggle
+// fullscreen and jump to Favorites. Favourites keeps its own binding below.
 </script>
 <script src="./.shared-features.js"></script>
 <script src="./.arcade-features.js"></script>

@@ -36,6 +36,8 @@
 
   // Cheatsheet modal
   window.showCheatsheet = function() {
+    const existing = document.getElementById('cheatsheet-modal');
+    if (existing) existing.remove();   // never stack two modals on repeated "?"
     const modal = document.createElement('div');
     modal.id = 'cheatsheet-modal';
     modal.innerHTML = `
@@ -68,8 +70,21 @@
     }
   };
 
-  // Global keydown handlers
-  document.addEventListener('keydown', (e) => {
+  // Global keydown handlers. Registered on WINDOW (not document) so they run LAST
+  // in the bubble phase - a page-level handler that calls preventDefault() (library
+  // Favourites, soundboard sounds, snake fullscreen) always wins.
+  // Skip when a page-level handler already claimed the key (e.defaultPrevented),
+  // when a browser/OS modifier is held (so Ctrl+F, Ctrl+P, ... keep working), and
+  // when the user is typing in a field.
+  function isTypingTarget(t) {
+    if (!t) return false;
+    var tag = (t.tagName || '').toUpperCase();
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable === true;
+  }
+  window.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (isTypingTarget(e.target)) return;
     if (e.key === '?' || (e.key === '/' && e.shiftKey)) { e.preventDefault(); window.showCheatsheet(); }
     if (e.key === 'f' || e.key === 'F') { e.preventDefault(); window.toggleFullscreen(); }
   });

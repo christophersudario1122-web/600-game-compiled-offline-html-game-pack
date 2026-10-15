@@ -1,12 +1,12 @@
 # ARCADE HUB - 2000 FEATURE MASTER LIST
 
-Every feature below is implemented in `.hub/arcade-features.js`
+Every feature below is implemented in `.hub/.arcade-features.js`
 (`window.Arcade`, registry + engine). Status: IMPLEMENTED unless noted.
 
 > **Update 2026-10-07:** registry doubled from 1000 to **2000** features
 > (20 families × 100). `window.Arcade.count() === 2000`. The 10 new families
 > are documented in **Part B** at the end of this file; the source of truth
-> is the generator `tools/gen-features.mjs`.
+> is the generator `.tools/gen-features.mjs`.
 
 ## A. Core Hub & Library (1–250)
 
@@ -279,8 +279,8 @@ Every feature below is implemented in `.hub/arcade-features.js`
 Part A above (families 1-10, 1000 features) was written by hand as the original
 spec. A **second 1000 features** were then generated as 10 new families, each
 with a real, working engine on `window.Arcade`, doubling the registry to 2000.
-Source of truth: `tools/gen-features.mjs` (validates `F.length === 2000` and
-unique ids). Regenerated output: `.hub/arcade-features.js`.
+Source of truth: `.tools/gen-features.mjs` (validates `F.length === 2000` and
+unique ids). Regenerated output: `.hub/.arcade-features.js`.
 
 | # | Family | IDs | Engine functions | What it really does |
 |---|--------|-----|------------------|---------------------|

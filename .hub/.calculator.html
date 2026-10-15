@@ -494,6 +494,10 @@ function safeEval(expr) {
 
 // ===== KEYBOARD INPUT =====
 document.addEventListener('keydown', (e) => {
+  if (e.defaultPrevented) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;   // keep Ctrl+C copy, Ctrl+P print, Ctrl+R reload ... with the browser
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
   const k = e.key;
   if (/^[0-9.]$/.test(k)) handleButton(k);
   else if (k === '+') handleButton('+');

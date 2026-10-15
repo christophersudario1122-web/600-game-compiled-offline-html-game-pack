@@ -433,9 +433,19 @@ renderSounds();
 
 // Keyboard shortcuts
 addEventListener('keydown', (e) => {
-if (e.code === 'Space') { e.preventDefault(); stopAllSounds(); playClickSound(); }
+if (e.defaultPrevented) return;
+if (e.ctrlKey || e.metaKey || e.altKey) return;
+const t = e.target;
+if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+if (e.code === 'Space') { e.preventDefault(); stopAllSounds(); playClickSound(); return; }
 const key = e.key;
-Object.values(sounds).flat().forEach(s => { if (s.kh === key) { s.fn(); playClickSound(); } });
+let hit = false;
+for (const s of Object.values(sounds).flat()) {
+  if (s.kh !== key) continue;
+  hit = true;
+  try { s.fn(); playClickSound(); } catch (err) {}
+}
+if (hit) e.preventDefault();   // claim the key so the global "F = fullscreen" hotkey does not also fire
 });
 
 // Test all

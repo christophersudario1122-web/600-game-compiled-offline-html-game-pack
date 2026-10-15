@@ -4,6 +4,60 @@ All notable changes to this project. Newest first. Dates are local build dates.
 
 ## [Unreleased] — 2026-10-14
 
+### Fixed — the keyboard layer was fighting the games, and the feature registry was stale
+A full-file audit (every hub page read, every inline script syntax-checked, plus a real
+headless-Chrome keypress test) turned up a cluster of input bugs. The worst ones made
+whole pages unusable, and none of them were visible without actually pressing keys.
+
+- **The 2000-feature "shortcuts" engine hijacked plain typing.** `.hub/.arcade-features.js`
+  bound **every bare letter A–Z and digit 0–9** (plus Shift+ and Alt+ forms) to navigation,
+  so on `snake.html` pressing **A** to move left navigated to the library, **S** toggled
+  fullscreen and **D** went to the stats page — Snake was unplayable with WASD. The
+  **calculator** could not even accept a number (each digit jumped to another page), and the
+  **soundboard**'s entire hotkey set (1–9, Q–P, A–L, Z–B) was stolen. Fixed at the source in
+  `.tools/gen-features.mjs`: the synthetic shortcuts now use only two/three-modifier combos
+  (`Ctrl+Alt+…`, `Shift+Alt+…`, `Ctrl+Shift+Alt+…`), so they never collide with a page's own
+  single-key bindings or with browser/OS shortcuts. The engine also now ignores
+  `e.defaultPrevented`, requires a modifier, and skips `contenteditable` targets; the easter-egg
+  sequence matcher skips text fields too.
+- **The generator was writing to a filename nothing loads.** `gen-features.mjs` emitted
+  `.hub/arcade-features.js`, but every page loads `.hub/.arcade-features.js` (all hub assets are
+  dot-prefixed). The shipped registry was therefore a stale hand-copied file and no generator
+  change had ever reached the app. Output path corrected to `../.hub/.arcade-features.js`, the
+  stray untracked `.hub/arcade-features.js` deleted, and the regenerated registry now ships.
+- **`?` / `F` global hotkeys had no guards.** `.hub/.shared-features.js` toggled fullscreen on
+  **Ctrl+F**, and typing the letter **f** in the library search box or the login password
+  toggled fullscreen. The global layer is now registered on `window` (so it runs *last*) and
+  bails on `e.defaultPrevented`, on Ctrl/Meta/Alt, and on any text field. Page handlers win:
+  in the library **F** opens Favourites, on the soundboard **F** plays a sound, in Snake **F**
+  toggles fullscreen exactly once.
+- **`?` opened two stacked modals.** `.hub/.library.html` and `PRESSHERETOSTART.html` each
+  re-defined `showCheatsheet`/`toggleFullscreen` and re-registered the same `?`/`F` handler
+  *and* loaded `.hub/.shared-features.js`, so every press queued two modals (two CLOSE clicks)
+  and the local copies were dead code overwritten on load. The duplicates are removed and
+  `showCheatsheet()` is now idempotent.
+- **Calculator and soundboard hijacked browser shortcuts.** Ctrl+C inserted `cos`, Ctrl+P
+  inserted π, Ctrl+S inserted `sin`; a bare Space always stopped all sounds even mid-typing.
+  Both handlers now ignore modifier keys and text fields.
+- **Duplicate DOM id in `konami.html`.** Memory Match and Math Sprint both used `id="mr"`
+  (only non-colliding by accident, because each minigame replaces the container). Math Sprint's
+  is now `mres`.
+- **Service worker precached the wrong set.** `.sw.js` v4 omitted `.hub/.motion.js` and
+  `.hub/.motion-showreel.html` (loaded by every hub page), so the first offline visit 404'd
+  their animation; the `cacheGames` message branch also tested a string as an object and could
+  never run. Cache bumped to **v5** with the missing assets added and the branch fixed.
+- **Stale names/docs.** `.hub/.settings.html` link "Library 1" → "Library";
+  `.hub/.shortcuts.html` "Open library 1" → "Open the library", the bogus **P → Python
+  terminal** row removed (no such page or binding exists), the unimplemented **T → cycle
+  theme** row removed, and the list corrected to reality — the global keys plus a separate
+  "In the library only" section. `.docs/FEATURES-1000.md` renamed to **`FEATURES-2000.md`**
+  (the registry has been 2000 since 2026-10-07); `tools/gen-features.mjs` → `.tools/gen-features.mjs`
+  and `.hub/arcade-features.js` → `.hub/.arcade-features.js` everywhere.
+- **New regression test:** `tooling/tests/keyboard-bugcheck.mjs` dispatches real key events in
+  headless Chrome and asserts 21 behaviours (typing in fields, Ctrl+combos, per-page hotkey
+  ownership, single-modal `?`, WASD in Snake). Added because none of these bugs were detectable
+  by loading the pages — only by pressing keys.
+
 ### Changed — the install instructions now actually answer "where do I put it?"
 - README's *Get the games* section was rewritten after the most common confusion, straight from
   the 5th-grader playthrough: **do you extract it, and where does everything go?** It now opens

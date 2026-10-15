@@ -435,12 +435,12 @@ function startMath(el) {
         const a = Math.floor(Math.random()*20), b = Math.floor(Math.random()*20);
         const oy = ['+','-','*'][Math.floor(Math.random()*3)];
         const ans = oy==='+'?a+b:oy==='-'?a-b:a*b;
-        el.innerHTML = `<h2>➕ Math Sprint (${total+1}/10)</h2><div style="font-size:3rem; margin:30px 0; color:#ffcc00;">${a} ${oy} ${b} = ?</div><input id="mi" type="number" style="background:#000; border:2px solid #ffcc00; color:#ffcc00; padding:10px; font-size:1.5rem; width:150px; text-align:center; font-family:monospace;" autofocus><div id="mr" style="margin-top:20px; font-size:1.2rem;"></div>`;
+        el.innerHTML = `<h2>➕ Math Sprint (${total+1}/10)</h2><div style="font-size:3rem; margin:30px 0; color:#ffcc00;">${a} ${oy} ${b} = ?</div><input id="mi" type="number" style="background:#000; border:2px solid #ffcc00; color:#ffcc00; padding:10px; font-size:1.5rem; width:150px; text-align:center; font-family:monospace;" autofocus><div id="mres" style="margin-top:20px; font-size:1.2rem;"></div>`;
         document.getElementById('mi').onkeydown = e => {
             if (e.key === 'Enter') {
                 total++;
-                if (parseInt(e.target.value) === ans) { score++; document.getElementById('mr').textContent = '✓ Correct!'; }
-                else { document.getElementById('mr').textContent = '✗ Was: ' + ans; }
+                if (parseInt(e.target.value) === ans) { score++; document.getElementById('mres').textContent = '✓ Correct!'; }
+                else { document.getElementById('mres').textContent = '✗ Was: ' + ans; }
                 setTimeout(next, 800);
             }
         };

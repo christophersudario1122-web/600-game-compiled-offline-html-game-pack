@@ -174,7 +174,7 @@ PRESSHERETOSTART.html          the thing you open
   pack/offline/                one .html file (or folder) per game
   pack/                        upstream helper files (viewers/inliners), unreferenced
 .tools/gen-features.mjs        dev helper that regenerates the feature code
-.docs/FEATURES-1000.md         feature reference
+.docs/FEATURES-2000.md         feature reference
 .sw.js .manifest.json          offline support + installability
 CREDITS.md                     who actually made all these games (not us)
 get-the-games.sh               optional terminal installer

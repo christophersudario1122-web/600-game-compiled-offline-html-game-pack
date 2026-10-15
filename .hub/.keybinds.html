@@ -497,7 +497,7 @@ function render() {
     countEl.textContent = list.length + ' / ' + F.length + (needle ? ' · "' + needle + '"' : '') + (activeFamily !== 'all' ? ' · ' + activeFamily : '');
 
     if (!F.length) {
-        mount.innerHTML = `<div class="family-section"><div class="family-body"><p style="color:#ff6666;">No features loaded. Check that <code>.hub/arcade-features.js</code> is present and <code>tools/gen-features.mjs</code> has been run.</p></div></div>`;
+        mount.innerHTML = `<div class="family-section"><div class="family-body"><p style="color:#ff6666;">No features loaded. Check that <code>.hub/.arcade-features.js</code> is present and <code>.tools/gen-features.mjs</code> has been run.</p></div></div>`;
         return;
     }
     if (!list.length) {
