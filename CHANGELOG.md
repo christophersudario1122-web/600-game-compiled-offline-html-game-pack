@@ -4,6 +4,25 @@ All notable changes to this project. Newest first. Dates are local build dates.
 
 ## [Unreleased] — 2026-10-14
 
+### Changed — the install instructions now actually answer "where do I put it?"
+- README's *Get the games* section was rewritten after the most common confusion, straight from
+  the 5th-grader playthrough: **do you extract it, and where does everything go?** It now opens
+  with the five downloads in a table (one small app zip + four game parts), states plainly that
+  you **must** extract every zip, and that there is no "root" and nothing to install — you make
+  **one folder** and extract all five into it.
+- Added a **"What you should end up with"** layout tree so a user can compare their folder at a
+  glance, plus **"The short version"** four-step list.
+- Chromebook steps went from four lines to six, naming the actual ChromeOS Files actions
+  (⋮ → New folder, right-click → Extract all…, choose the destination) and the merge prompt.
+- New **Windows / macOS** steps with the specific trap spelled out — the Windows Extract wizard
+  defaults to a subfolder named after the zip, which is exactly what creates the
+  "one level too deep" problem.
+- New sections: **Do I need a USB stick?** (no — copy the whole folder if you do) and
+  **How much space does this take?** (~14 GB during setup, ~7.8 GB after).
+- *If something looks wrong* grew from three bullets to six: the extra top-level folder, game
+  parts extracted into separate folders, hub opens but shows no games, hidden dot-folders on all
+  three OSes, and the "files already exist → Merge, never keep both" prompt.
+
 ### Changed — boot animation on the start screen is roughly twice as fast
 - `PRESSHERETOSTART.html` paced the Arch-style boot log by a per-line delay measured in
   milliseconds, and the whole sequence came to about **11.7 s** on a real boot. A single
