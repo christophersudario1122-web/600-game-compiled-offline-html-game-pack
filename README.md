@@ -24,10 +24,9 @@ computer can open it — no installer, no special tools, no terminal.
 > files as `start-here-app.zip`. Either way, you still need the four game parts.
 
 **Yes, you have to extract them.** Downloading a `.zip` and double-clicking it is not enough —
-the files have to come *out* of the zip and sit on your drive as ordinary folders. And no, you
-don't put anything "at the root" of your computer: there is nothing to install and nothing to
-register. You just make **one folder**, and all five zips are extracted into it, so everything
-ends up side by side.
+the files have to come *out* of the zip and sit on your drive as ordinary folders. There is
+nothing to install and nothing to register: you just make **one folder**, and all five zips are
+extracted into it, so everything ends up side by side.
 
 ### The short version
 
@@ -56,9 +55,9 @@ Arcade/                       <- the folder you made. Everything lives in here.
   get-the-games.sh
 ```
 
-That *is* the "root" — the top level of that one folder. You never have to open `.hub` or
-`.games`, and you never have to move anything around inside them. If `PRESSHERETOSTART.html`,
-`.hub` and `.games` are all sitting together like that, it will work.
+You never have to open `.hub` or `.games`, and you never have to move anything around inside
+them. If `PRESSHERETOSTART.html`, `.hub` and `.games` are all sitting together like that, it
+will work.
 
 > `.hub` and `.games` begin with a dot, so your file manager hides them by default. That's
 > normal — the app still finds them. To see them anyway, see *If something looks wrong* below.

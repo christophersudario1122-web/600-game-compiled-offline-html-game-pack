@@ -8,8 +8,8 @@ All notable changes to this project. Newest first. Dates are local build dates.
 - README's *Get the games* section was rewritten after the most common confusion, straight from
   the 5th-grader playthrough: **do you extract it, and where does everything go?** It now opens
   with the five downloads in a table (one small app zip + four game parts), states plainly that
-  you **must** extract every zip, and that there is no "root" and nothing to install — you make
-  **one folder** and extract all five into it.
+  you **must** extract every zip, and that there is nothing to install — you make **one folder**
+  and extract all five into it.
 - Added a **"What you should end up with"** layout tree so a user can compare their folder at a
   glance, plus **"The short version"** four-step list.
 - Chromebook steps went from four lines to six, naming the actual ChromeOS Files actions
