@@ -343,6 +343,86 @@
         box-shadow: 0 0 25px var(--neon-green);
     }
 
+    /* ★ Play-count + playtime + rating badges (Injected by v2) */
+    .play-badge {
+        background: rgba(0, 255, 136, 0.12);
+        border: 1px solid rgba(0, 255, 136, 0.45);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 0.7rem;
+        font-family: monospace;
+        font-weight: bold;
+        color: var(--neon-green);
+    }
+    .playtime-badge {
+        background: rgba(0, 210, 255, 0.12);
+        border: 1px solid rgba(0, 210, 255, 0.45);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 0.7rem;
+        font-family: monospace;
+        color: #00d2ff;
+    }
+    .rating-badge {
+        background: rgba(255, 215, 0, 0.12);
+        border: 1px solid rgba(255, 215, 0, 0.45);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 0.7rem;
+        font-family: monospace;
+        font-weight: bold;
+        color: #ffd700;
+    }
+    .rating-badge.locked {
+        opacity: 0.3;
+    }
+
+    /* Online-features tile — links to the services hub, styled to match the grid */
+    .services-card {
+        border-color: #00d4ff;
+        color: #00d4ff;
+        box-shadow: 0 0 14px rgba(0, 212, 255, 0.25), inset 0 0 10px rgba(0, 212, 255, 0.05);
+    }
+    .services-card:hover {
+        background: #00d4ff;
+        border-color: #00d4ff;
+        color: var(--dark-bg);
+        box-shadow: 0 0 25px #00d4ff;
+    }
+    .services-card .icon {
+        filter: drop-shadow(0 0 5px #00d4ff);
+    }
+    .services-card:hover .icon {
+        filter: drop-shadow(0 0 2px var(--dark-bg));
+    }
+    .services-sub {
+        margin-top: 6px;
+        font-size: 0.68rem;
+        letter-spacing: 1px;
+        opacity: 0.65;
+    }
+
+    /* Themed scrollbar (replaces the default browser slider look) */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--neon-green) var(--dark-bg);
+    }
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--dark-bg);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(var(--neon-green), #00d4ff);
+        border: 2px solid var(--dark-bg);
+        border-radius: 6px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--neon-green);
+    }
+
 </style>
 </head>
 <body>
@@ -357,6 +437,7 @@
             <button id="ambient-toggle" class="audio-toggle-btn" onclick="toggleAmbientMusic(); playClickSound();" onmouseenter="playHoverSound()">🔊 HACKER AMBIENT: OFF</button>
             <a href="./.soundboard.html" class="hub-btn" onmouseenter="playHoverSound()" onclick="playClickSound()" style="margin-left: 8px; padding: 8px 14px; font-size: 0.85rem;">🎵 SOUNDBOARD</a>
             <a href="./.motion-showreel.html" class="hub-btn" onmouseenter="playHoverSound()" onclick="playClickSound()" style="margin-left: 8px; padding: 8px 14px; font-size: 0.85rem;">▶ MOTION</a>
+            <a href="./services-hub.html" class="hub-btn" onmouseenter="playHoverSound()" onclick="playClickSound()" style="margin-left: 8px; padding: 8px 14px; font-size: 0.85rem;">⚙ SERVICES</a>
             <span id="gamepad-badge" style="display:none;background:rgba(0,255,136,0.15);border:1px solid #00ff88;padding:4px 10px;border-radius:4px;font-family:monospace;font-size:0.8rem;color:#00ff88;margin:0 8px;"></span>
         </div>
         <select id="theme-select" class="theme-selector" onchange="changeTheme(this.value); playClickSound();" onmouseenter="playHoverSound()">
@@ -908,7 +989,21 @@ function displayGames() {
     c.innerHTML = "";
     filteredCache = getFilteredGames();
     document.getElementById("game-count").textContent = `[ SHOWING ${filteredCache.length} FILTERED GAMES ]` + ((typeof totalPlays !== 'undefined') ? ' | PLAYS: ' + totalPlays : '');
-    
+
+    // Online features live outside the game pack, so they get a dedicated tile
+    // on the unfiltered view (hidden while searching or using a category tab).
+    const searchEmpty = document.getElementById("search-input").value.trim() === "";
+    if (currentFilter === "all" && searchEmpty) {
+        const svc = document.createElement("a");
+        svc.className = "card services-card";
+        svc.href = "./services-hub.html";
+        svc.title = "Open the Services Hub — 5 fun features and games";
+        svc.onmouseenter = playHoverSound;
+        svc.onclick = () => { playClickSound(); };
+        svc.innerHTML = '<div class="icon">🎮</div><b>ONLINE FEATURES</b><span class="services-sub">⚙ 5 FEATURES — SERVICES HUB</span>';
+        c.appendChild(svc);
+    }
+
     // All 23 .htm games (rest use .html) — global HTM_GAMES/getExt shared by GOTD, rollDice, shelf & grid
 
     filteredCache.forEach(g => {

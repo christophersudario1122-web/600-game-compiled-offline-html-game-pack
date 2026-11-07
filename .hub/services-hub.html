@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Online Features — Services Hub</title>
+    <style>
+        :root {
+            --neon-green: #00ff88;
+            --neon-cyan: #00d4ff;
+            --neon-red: #ff3366;
+            --neon-yellow: #ffd700;
+            --neon-purple: #b78bff;
+            --dark-bg: #050508;
+            --box-bg: rgba(10, 10, 15, 0.88);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            padding: 30px 24px 40px;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.18;
+            pointer-events: none;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--neon-green);
+            margin: 10px 0 6px;
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .subtitle {
+            text-align: center;
+            opacity: 0.6;
+            margin: 0 0 34px;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .integration-card {
+            position: relative;
+            background: var(--box-bg);
+            border: 2px solid var(--neon-green);
+            border-radius: 6px;
+            padding: 22px 24px 20px;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+        .integration-card:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 18px rgba(0, 212, 255, 0.22);
+            transform: translateY(-2px);
+        }
+
+        .card-index {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: rgba(0, 255, 136, 0.35);
+        }
+
+        .integration-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding-right: 44px;
+        }
+
+        .integration-name {
+            font-size: 1.35rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.35);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 3px;
+            font-size: 0.68rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .badge-game {
+            background: rgba(0, 255, 136, 0.12);
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+        }
+        .badge-tool {
+            background: rgba(183, 139, 255, 0.12);
+            color: var(--neon-purple);
+            border: 1px solid var(--neon-purple);
+        }
+        .badge-online {
+            background: rgba(255, 215, 0, 0.12);
+            color: var(--neon-yellow);
+            border: 1px solid var(--neon-yellow);
+        }
+
+        .integration-desc {
+            margin: 10px 0 0;
+            color: rgba(0, 255, 136, 0.72);
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .integration-actions {
+            margin-top: auto;
+            padding-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .launch-btn {
+            background: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 7px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85rem;
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .launch-btn:hover,
+        .launch-btn:focus-visible {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 16px rgba(0, 255, 136, 0.5);
+            outline: none;
+        }
+        .launch-btn.ghost {
+            color: var(--neon-yellow);
+            border-color: var(--neon-yellow);
+        }
+        .launch-btn.ghost:hover,
+        .launch-btn.ghost:focus-visible {
+            background: var(--neon-yellow);
+            color: var(--dark-bg);
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
+        }
+
+        .feature-status {
+            margin-top: 10px;
+            font-size: 0.76rem;
+            line-height: 1.5;
+            color: var(--neon-yellow);
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.25s, opacity 0.25s;
+        }
+        .feature-status.show {
+            max-height: 80px;
+            opacity: 1;
+        }
+
+        .launch-note {
+            margin-top: 10px;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+            color: rgba(0, 255, 136, 0.38);
+        }
+
+        .offline-note {
+            margin: 26px 0 0;
+            padding: 16px 20px;
+            border-left: 2px solid rgba(0, 212, 255, 0.6);
+            background: rgba(0, 212, 255, 0.05);
+            color: rgba(0, 255, 136, 0.6);
+            font-size: 0.84rem;
+            line-height: 1.65;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 32px;
+        }
+        .footer-link a {
+            color: var(--neon-cyan);
+            text-decoration: none;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+        .footer-link a:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; letter-spacing: 2px; }
+            .feature-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="matrix-canvas" aria-hidden="true"></canvas>
+
+<main class="page">
+
+    <h1>⚙ SERVICES HUB</h1>
+    <p class="subtitle">
+        Five arcade features — games and tools.<br>
+        Three run from the bundled offline builds, two need a live endpoint.
+    </p>
+
+    <div class="feature-grid">
+
+        <!-- 01 — Mineral -->
+        <article class="integration-card">
+            <span class="card-index">01</span>
+            <div class="integration-header">
+                <span class="integration-name">Mineral</span>
+                <span class="badge badge-game">Game</span>
+            </div>
+            <p class="integration-desc">Play Minecraft in your browser.</p>
+            <div class="integration-actions">
+                <a class="launch-btn" href=".boot-launch.html?g=1.8.html">▶ Play local build</a>
+            </div>
+            <div class="launch-note">Bundled offline sandbox — no download required.</div>
+        </article>
+
+        <!-- 02 — Basalt -->
+        <article class="integration-card">
+            <span class="card-index">02</span>
+            <div class="integration-header">
+                <span class="integration-name">Basalt</span>
+                <span class="badge badge-game">Game</span>
+            </div>
+            <p class="integration-desc">Browser-based FPS shooter.</p>
+            <div class="integration-actions">
+                <a class="launch-btn" href=".boot-launch.html?g=doom.html">▶ Play local build</a>
+            </div>
+            <div class="launch-note">Bundled offline FPS — keyboard + mouse.</div>
+        </article>
+
+        <!-- 03 — Vent -->
+        <article class="integration-card">
+            <span class="card-index">03</span>
+            <div class="integration-header">
+                <span class="integration-name">Vent</span>
+                <span class="badge badge-game">Game</span>
+            </div>
+            <p class="integration-desc">A web recreation of Among Us.</p>
+            <div class="integration-actions">
+                <a class="launch-btn" href=".boot-launch.html?g=amongus.html">▶ Play local build</a>
+            </div>
+            <div class="launch-note">Bundled offline social-deduction round.</div>
+        </article>
+
+        <!-- 04 — Slate -->
+        <article class="integration-card">
+            <span class="card-index">04</span>
+            <div class="integration-header">
+                <span class="integration-name">Slate</span>
+                <span class="badge badge-tool">Tool</span>
+            </div>
+            <p class="integration-desc">Chat with frontier AI models.</p>
+            <div class="integration-actions">
+                <button class="launch-btn ghost" type="button" onclick="showStatus(this, 'Slate needs a live model endpoint. It is not bundled with this USB build — plug in a provider URL to enable it.')">ℹ Online only</button>
+            </div>
+            <div class="feature-status" role="status" aria-live="polite"></div>
+            <div class="launch-note">Requires network + provider key.</div>
+        </article>
+
+        <!-- 05 — Magma -->
+        <article class="integration-card">
+            <span class="card-index">05</span>
+            <div class="integration-header">
+                <span class="integration-name">Magma</span>
+                <span class="badge badge-tool">Tool</span>
+            </div>
+            <p class="integration-desc">Unblock any website, on any network.</p>
+            <div class="integration-actions">
+                <button class="launch-btn ghost" type="button" onclick="showStatus(this, 'Magma needs a live proxy endpoint. It is not bundled with this USB build — plug in a proxy URL to enable it.')">ℹ Online only</button>
+            </div>
+            <div class="feature-status" role="status" aria-live="polite"></div>
+            <div class="launch-note">Requires network + proxy service.</div>
+        </article>
+
+    </div>
+
+    <div class="offline-note">
+        ℹ <strong>About this hub:</strong> these five features mirror the Mantle line-up —
+        <em>Mineral</em>, <em>Basalt</em>, <em>Vent</em>, <em>Slate</em> and <em>Magma</em>.
+        Mineral, Basalt and Vent launch self-contained builds from this USB stick.
+        Slate and Magma are online-only tools with no endpoint configured in this build.
+    </div>
+
+    <div class="footer-link">
+        <a href="./.library.html">← Back to Library</a>
+    </div>
+
+</main>
+
+<script src="./.boot-transition.js"></script>
+<script>
+    function showStatus(btn, message) {
+        var card = btn.closest('.integration-card');
+        if (!card) return;
+        var el = card.querySelector('.feature-status');
+        if (!el) return;
+        el.textContent = message;
+        el.classList.add('show');
+    }
+
+    // Lightweight matrix rain — decorative only, respects reduced motion.
+    (function () {
+        var canvas = document.getElementById('matrix-canvas');
+        if (!canvas || !canvas.getContext) return;
+        var ctx = canvas.getContext('2d');
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var glyphs = 'アイウエオカキクケコ01ABCDEF<>{}[]$#@%&';
+        var cols = 0;
+        var drops = [];
+        var step = 16;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            cols = Math.max(1, Math.floor(canvas.width / step));
+            drops = [];
+            for (var i = 0; i < cols; i++) {
+                drops[i] = Math.random() * (canvas.height / step);
+            }
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.09)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ff88';
+            ctx.font = '14px monospace';
+            for (var i = 0; i < cols; i++) {
+                var ch = glyphs.charAt(Math.floor(Math.random() * glyphs.length));
+                ctx.fillText(ch, i * step, drops[i] * step);
+                if (drops[i] * step > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        resize();
+        window.addEventListener('resize', resize);
+        if (!reduce) {
+            draw();
+            setInterval(draw, 70);
+        }
+    })();
+</script>
+</body>
+</html>

@@ -444,9 +444,9 @@ function importNotes() {
         const reader = new FileReader();
         reader.onload = ev => {
             try {
-                const importedd = JSON.parse(ev.target.result);
-                if (Array.isArray(importedd)) {
-                    notes = notes.concat(importedd);
+                const imported = JSON.parse(ev.target.result);
+                if (Array.isArray(imported)) {
+                    notes = notes.concat(imported);
                     saveNotes();
                     renderList();
                     alert('Imported ' + imported.length + ' notes!');
@@ -460,7 +460,7 @@ function importNotes() {
 }
 
 function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amy;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function formatDate(ts) {
@@ -474,37 +474,47 @@ loadNotes();
 let konamiBuffer = [];
 const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
-document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    const k = e.key.toLowerCase();
-    const kRaw = e.key;
-    if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
-        konamiBuffer.push(kRaw);
-    } else {
-        konamiBuffer.push(k);
+// Guard helper: skip letter hotkeys when the user is typing in a field or contenteditable
+    function isEditableTarget(t) {
+        if (!t) return false;
+        var tag = (t.tagName || '').toUpperCase();
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+        if (t.isContentEditable === true) return true;
+        return false;
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
-    if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
-        konamiBuffer = [];
-        window.location.href = '../.hub/.konami.html';
-        return;
-    }
-    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
-        e.preventDefault();
-        window.location.href = '../.hub/.secrets.html';
-        return;
-    }
-    if (k === '?' || (e.shiftKey && k === '/')) {
-        e.preventDefault();
-        window.location.href = '../.hub/.shortcuts.html';
-        return;
-    }
-    if (k === 'h' && !e.ctrlKey) { window.location.href = '../PRESSHERETOSTART.html'; }
-    if (k === 'l' && !e.ctrlKey) { window.location.href = '../.hub/.library.html'; }
-    if (k === 's' && !e.ctrlKey) { window.location.href = '../.hub/.settings.html'; }
-    if (k === 'n' && !e.ctrlKey) { window.location.href = '../.hub/.notes.html'; }
-    if (k === 'd' && !e.ctrlKey) { window.location.href = '../.hub/.stats.html'; }
-});
+
+    document.addEventListener('keydown', e => {
+        if (isEditableTarget(e.target)) return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        const k = e.key.toLowerCase();
+        const kRaw = e.key;
+        if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
+            konamiBuffer.push(kRaw);
+        } else {
+            konamiBuffer.push(k);
+        }
+        if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+        if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
+            konamiBuffer = [];
+            window.location.href = '../.hub/.konami.html';
+            return;
+        }
+        if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
+            e.preventDefault();
+            window.location.href = '../.hub/.secrets.html';
+            return;
+        }
+        if (k === '?' || (e.shiftKey && k === '/')) {
+            e.preventDefault();
+            window.location.href = '../.hub/.shortcuts.html';
+            return;
+        }
+        if (k === 'h') { window.location.href = '../PRESSHERETOSTART.html'; }
+        if (k === 'l') { window.location.href = '../.hub/.library.html'; }
+        if (k === 's') { window.location.href = '../.hub/.settings.html'; }
+        if (k === 'n') { window.location.href = '../.hub/.notes.html'; }
+        if (k === 'd') { window.location.href = '../.hub/.stats.html'; }
+    });
 
 // ===== UNIVERSAL CLICK TRACKER =====
 document.addEventListener('click', function(e) {

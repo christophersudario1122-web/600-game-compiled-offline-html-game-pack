@@ -224,8 +224,18 @@ window.addEventListener("storage", (e) => {
 let konamiBuffer = [];
 const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
+// Guard helper: skip letter hotkeys when the user is typing in a field or contenteditable
+    function isEditableTarget(t) {
+        if (!t) return false;
+        var tag = (t.tagName || '').toUpperCase();
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+        if (t.isContentEditable === true) return true;
+        return false;
+    }
+
 document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (isEditableTarget(e.target)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     const k = e.key.toLowerCase();
     const kRaw = e.key;
     if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
@@ -249,11 +259,11 @@ document.addEventListener('keydown', e => {
         window.location.href = '../.hub/.shortcuts.html';
         return;
     }
-    if (k === 'h' && !e.ctrlKey) { window.location.href = '../PRESSHERETOSTART.html'; }
-    if (k === 'l' && !e.ctrlKey) { window.location.href = '../.hub/.library.html'; }
-    if (k === 's' && !e.ctrlKey) { window.location.href = '../.hub/.settings.html'; }
-    if (k === 'n' && !e.ctrlKey) { window.location.href = '../.hub/.notes.html'; }
-    if (k === 'd' && !e.ctrlKey) { window.location.href = '../.hub/.stats.html'; }
+    if (k === 'h') { window.location.href = '../PRESSHERETOSTART.html'; }
+    if (k === 'l') { window.location.href = '../.hub/.library.html'; }
+    if (k === 's') { window.location.href = '../.hub/.settings.html'; }
+    if (k === 'n') { window.location.href = '../.hub/.notes.html'; }
+    if (k === 'd') { window.location.href = '../.hub/.stats.html'; }
 });
 
 // ===== UNIVERSAL CLICK TRACKER =====

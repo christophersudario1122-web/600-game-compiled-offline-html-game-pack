@@ -55,7 +55,9 @@
       logEl.appendChild(d);
     }
     function statusFor(pct) {
-      return spin[(Date.now() >> 6) % spin.length] + '  booting \u2022 ' + pct + '%';
+      // Use division (not a 32-bit bit-shift) so the index never goes negative
+      // once Date.now() exceeds the signed 32-bit range.
+      return spin[Math.floor(Date.now() / 64) % spin.length] + '  booting \u2022 ' + pct + '%';
     }
     function done() {
       statusEl.textContent = '\u2714  system ready';

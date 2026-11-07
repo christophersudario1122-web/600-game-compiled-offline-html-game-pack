@@ -343,6 +343,273 @@
         box-shadow: 0 0 25px var(--neon-green);
     }
 
+    /* ---- Settings layout (these classes were previously unstyled) ---- */
+    .container {
+        position: relative;
+        z-index: 2;
+        max-width: 980px;
+        margin: 0 auto;
+    }
+
+    .subtitle {
+        text-align: center;
+        opacity: 0.55;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        margin: -4px 0 24px;
+    }
+
+    .top-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+    }
+
+    .back-btn {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--neon-green);
+        border: 2px solid var(--neon-green);
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 700;
+        font-family: monospace;
+        font-size: 0.85rem;
+        text-decoration: none;
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.2);
+        transition: 0.2s;
+    }
+    .back-btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 20px var(--neon-green);
+    }
+
+    .section {
+        background: var(--box-bg);
+        border: 2px solid rgba(0, 255, 136, 0.55);
+        border-radius: 8px;
+        padding: 20px 24px;
+        margin-bottom: 18px;
+        box-shadow: 0 0 14px rgba(0, 255, 136, 0.12);
+        backdrop-filter: blur(5px);
+    }
+
+    .section h2 {
+        margin: 0 0 10px;
+        font-size: 1.1rem;
+        letter-spacing: 2px;
+        color: var(--neon-green);
+        border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+        padding-bottom: 10px;
+    }
+
+    .setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(0, 255, 136, 0.12);
+    }
+    .setting-row:last-child { border-bottom: none; }
+
+    .setting-label { flex: 1 1 280px; min-width: 0; }
+    .setting-label .key {
+        display: block;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--neon-green);
+    }
+    .setting-label .desc {
+        margin-top: 4px;
+        font-size: 0.78rem;
+        line-height: 1.45;
+        opacity: 0.6;
+    }
+
+    .setting-control {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .setting-control button,
+    .btn,
+    .test-btn {
+        background: rgba(0, 255, 136, 0.1);
+        color: var(--neon-green);
+        border: 1px solid var(--neon-green);
+        border-radius: 4px;
+        padding: 8px 14px;
+        font-family: monospace;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .setting-control button:hover,
+    .btn:hover,
+    .test-btn:hover {
+        background: var(--neon-green);
+        color: var(--dark-bg);
+        box-shadow: 0 0 14px var(--neon-green);
+    }
+    .setting-control button.danger {
+        border-color: #ff3366;
+        color: #ff3366;
+        background: rgba(255, 51, 102, 0.1);
+    }
+    .setting-control button.danger:hover {
+        background: #ff3366;
+        color: #fff;
+        box-shadow: 0 0 14px #ff3366;
+    }
+
+    .setting-control input[type="password"] {
+        background: #0a0a0f;
+        color: var(--neon-green);
+        border: 1px solid rgba(0, 255, 136, 0.5);
+        border-radius: 4px;
+        padding: 8px 10px;
+        font-family: monospace;
+        outline: none;
+    }
+
+    .intensity-label {
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        opacity: 0.75;
+        min-width: 96px;
+        text-align: right;
+    }
+
+    /* ---- Neon range sliders (previously rendered as browser defaults) ---- */
+    input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 220px;
+        max-width: 46vw;
+        height: 6px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--neon-green), #00d4ff);
+        outline: none;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.35);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--dark-bg);
+        border: 2px solid var(--neon-green);
+        box-shadow: 0 0 10px var(--neon-green);
+        cursor: pointer;
+    }
+    input[type="range"]::-moz-range-track {
+        height: 6px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--neon-green), #00d4ff);
+    }
+    input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--dark-bg);
+        border: 2px solid var(--neon-green);
+        box-shadow: 0 0 10px var(--neon-green);
+        cursor: pointer;
+    }
+
+    /* ---- Theme swatches + data panels ---- */
+    .theme-swatch {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        padding: 0;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .theme-swatch:hover { transform: scale(1.15); }
+    .theme-swatch.active {
+        border-color: #fff;
+        box-shadow: 0 0 12px currentColor;
+    }
+
+    .status-msg {
+        margin-top: 10px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-family: monospace;
+    }
+    .status-msg.success {
+        color: var(--neon-green);
+        background: rgba(0, 255, 136, 0.08);
+        border: 1px solid rgba(0, 255, 136, 0.4);
+    }
+    .status-msg.error {
+        color: #ff3366;
+        background: rgba(255, 51, 102, 0.08);
+        border: 1px solid rgba(255, 51, 102, 0.4);
+    }
+
+    .storage-info,
+    .raw-data-display {
+        font-size: 0.8rem;
+        line-height: 1.6;
+        color: rgba(0, 255, 136, 0.8);
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(0, 255, 136, 0.18);
+        border-radius: 5px;
+        padding: 12px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .achievement-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+    }
+    .achievement {
+        border: 1px solid rgba(0, 255, 136, 0.25);
+        border-radius: 5px;
+        padding: 8px 10px;
+        font-size: 0.78rem;
+        background: rgba(0, 0, 0, 0.3);
+    }
+    .achievement.unlocked {
+        border-color: var(--neon-green);
+        box-shadow: 0 0 8px rgba(0, 255, 136, 0.25);
+    }
+    .achievement.locked { opacity: 0.45; }
+
+    /* ---- Themed scrollbar ---- */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--neon-green) var(--dark-bg);
+    }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: var(--dark-bg); }
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(var(--neon-green), #00d4ff);
+        border: 2px solid var(--dark-bg);
+        border-radius: 6px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+
 </style>
 </head>
 <body>
@@ -622,9 +889,9 @@ function testTone(freq) {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
         gain.gain.setValueAtTime(0, audioCtx.currentTime);
-        gain.gain.linearRamyToValueAtTime(0.15, audioCtx.currentTime + 0.05);
+        gain.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime + 0.05);
         gain.gain.setValueAtTime(0.15, audioCtx.currentTime + 0.5);
-        gain.gain.linearRamyToValueAtTime(0, audioCtx.currentTime + 0.6);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
@@ -816,7 +1083,21 @@ function buildStats() {
     try {
         favorites = JSON.parse(getLS('arcade_favorites', '[]'));
         recent = JSON.parse(getLS('arcade_recent', '[]'));
-        plays = JSON.parse(getLS('arcade_plays', '{}'));
+        // Use canonical arcade_play_counts, migrate legacy arcade_plays if needed
+        let plays = {};
+        try { plays = JSON.parse(getLS('arcade_play_counts') || '{}'); } catch(e) {}
+        // Migrate legacy arcade_plays (object of name->count) if arcade_play_counts is empty
+        try {
+            const legacy = JSON.parse(getLS('arcade_plays') || '{}');
+            if (legacy && typeof legacy === 'object' && Object.keys(plays).length === 0) {
+                for (const [k, v] of Object.entries(legacy)) {
+                    if (typeof v === 'number') plays[k] = v;
+                }
+                if (Object.keys(plays).length > 0) {
+                    setLS('arcade_play_counts', JSON.stringify(plays));
+                }
+            }
+        } catch(e) {}
     } catch(e) {}
     
     const totalPlays = Object.values(plays).reduce((a, b) => a + b, 0);
@@ -826,7 +1107,7 @@ function buildStats() {
         '★ Favorites: ' + favorites.length,
         '⏱  Recently played: ' + recent.length,
         '▶ Total plays: ' + totalPlays,
-        '🎯 Unique games played: ' + uniqueGames + ' / 302',
+        '🎯 Unique games played: ' + uniqueGames + ' / 627',
         '🏆 Achievements: ' + getArcadeAchievementIds().length + ' / ' + ACHIEVEMENTS.length,
         '🎨 Current theme: ' + (getLS('arcade_theme', 'matrix'))
     ];
@@ -876,7 +1157,7 @@ function importAllData(event) {
                     count++;
                 }
             }
-            showStatus('import-status', 'success', '> IMPORTED: ' + count + ' keys restoredh Reload pages to see changesh');
+            showStatus('import-status', 'success', '> IMPORTED: ' + count + ' keys restored. Reload pages to see changes.');
             playClickSound();
             refreshAll();
         } catch(err) {
@@ -945,13 +1226,13 @@ function buildRawStorage() {
 // === STORAGE QUOTA ===
 function updateStorageQuota() {
     const el = document.getElementById('storage-quota-display');
-    if (!el || !navigator.storage || !navigator.storagehestimate) {
+    if (!el || !navigator.storage || !navigator.storage.estimate) {
         el.innerText = '';
         return;
     }
-    navigator.storagehestimate().then(est => {
-        const used = (esthusage / 1024).toFixed(1);
-        const total = (esthquota / 1024 / 1024).toFixed(0);
+    navigator.storage.estimate().then(est => {
+        const used = (est.usage / 1024).toFixed(1);
+        const total = (est.quota / 1024 / 1024).toFixed(0);
         el.innerText = '💾 ' + used + ' KB / ' + total + ' MB used';
     });
 }
@@ -1125,37 +1406,47 @@ if (themeObj) {
 let konamiBuffer = [];
 const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
 
-document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    const k = e.key.toLowerCase();
-    const kRaw = e.key;
-    if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
-        konamiBuffer.push(kRaw);
-    } else {
-        konamiBuffer.push(k);
+// Guard helper: skip letter hotkeys when the user is typing in a field or contenteditable
+    function isEditableTarget(t) {
+        if (!t) return false;
+        var tag = (t.tagName || '').toUpperCase();
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+        if (t.isContentEditable === true) return true;
+        return false;
     }
-    if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
-    if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
-        konamiBuffer = [];
-        window.location.href = '../.hub/.konami.html';
-        return;
-    }
-    if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
-        e.preventDefault();
-        window.location.href = '../.hub/.secrets.html';
-        return;
-    }
-    if (k === '?' || (e.shiftKey && k === '/')) {
-        e.preventDefault();
-        window.location.href = '../.hub/.shortcuts.html';
-        return;
-    }
-    if (k === 'h' && !e.ctrlKey && !e.metaKey) { window.location.href = '../PRESSHERETOSTART.html'; }
-    if (k === 'l' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/.library.html'; }
-    if (k === 's' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/.settings.html'; }
-    if (k === 'n' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/.notes.html'; }
-    if (k === 'd' && !e.ctrlKey && !e.metaKey) { window.location.href = '../.hub/.stats.html'; }
-});
+
+    document.addEventListener('keydown', e => {
+        if (isEditableTarget(e.target)) return;
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        const k = e.key.toLowerCase();
+        const kRaw = e.key;
+        if (kRaw === 'ArrowUp' || kRaw === 'ArrowDown' || kRaw === 'ArrowLeft' || kRaw === 'ArrowRight') {
+            konamiBuffer.push(kRaw);
+        } else {
+            konamiBuffer.push(k);
+        }
+        if (konamiBuffer.length > konamiCode.length) konamiBuffer.shift();
+        if (konamiBuffer.length === konamiCode.length && konamiBuffer.every((v, i) => v === konamiCode[i])) {
+            konamiBuffer = [];
+            window.location.href = '../.hub/.konami.html';
+            return;
+        }
+        if (e.ctrlKey && e.shiftKey && (k === 'a' || kRaw === 'A')) {
+            e.preventDefault();
+            window.location.href = '../.hub/.secrets.html';
+            return;
+        }
+        if (k === '?' || (e.shiftKey && k === '/')) {
+            e.preventDefault();
+            window.location.href = '../.hub/.shortcuts.html';
+            return;
+        }
+        if (k === 'h') { window.location.href = '../PRESSHERETOSTART.html'; }
+        if (k === 'l') { window.location.href = '../.hub/.library.html'; }
+        if (k === 's') { window.location.href = '../.hub/.settings.html'; }
+        if (k === 'n') { window.location.href = '../.hub/.notes.html'; }
+        if (k === 'd') { window.location.href = '../.hub/.stats.html'; }
+    });
 
 // ===== UNIVERSAL CLICK TRACKER =====
 document.addEventListener('click', function(e) {

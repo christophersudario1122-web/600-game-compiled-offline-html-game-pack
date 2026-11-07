@@ -1,12 +1,13 @@
 // Arcade Hub Service Worker - offline-capable, but always fresh hub pages.
-// v5: precaches the motion layer (.motion.js, .motion-showreel.html), which v4
-// missed, so the first offline visit still animates. Hub HTML is network-first so
-// edits show immediately; static assets are stale-while-revalidate. Bumping
-// CACHE_NAME purges the old cache.
-const CACHE_NAME = 'arcade-hub-v5';
+// v6: adds the Services Hub page and its five-feature catalogue. v5 precached the
+// motion layer (.motion.js, .motion-showreel.html), which v4 missed, so the first
+// offline visit still animates. Hub HTML is network-first so edits show immediately;
+// static assets are stale-while-revalidate. Bumping CACHE_NAME purges the old cache.
+const CACHE_NAME = 'arcade-hub-v6';
 const ASSETS = [
   './PRESSHERETOSTART.html',
   './.hub/.library.html',
+  './.hub/services-hub.html',
   './.hub/.settings.html',
   './.hub/.stats.html',
   './.hub/.notes.html',

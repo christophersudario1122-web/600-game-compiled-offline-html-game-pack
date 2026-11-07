@@ -2,7 +2,31 @@
 
 All notable changes to this project. Newest first. Dates are local build dates.
 
-## [Unreleased] — 2026-10-14
+## [v1.1.0] — 2026-11-06
+
+### Added — a five-feature Services Hub, matching the Mantle line-up
+- **New page: `.hub/services-hub.html`.** The old Google-CDN / NLP / font "integrations"
+  list is gone, as is the short-lived coin/dice/timer placeholder. The hub now presents the
+  five features from Mantle — **Mineral** (Minecraft in the browser), **Basalt** (browser
+  FPS), **Vent** (a web recreation of Among Us), **Slate** (frontier-AI chat) and **Magma**
+  (unblock any site) — each with its one-line description and a direct action.
+- **Mineral, Basalt and Vent are playable from the stick.** They launch the bundled offline
+  builds through `.hub/.boot-launch.html` (`1.8.html`, `doom.html`, `amongus.html`).
+  Slate and Magma are marked **online only** with an inline notice rather than a dead link.
+- **Library entry point.** The unfiltered All Games grid now starts with a
+  `🎮 ONLINE FEATURES` tile (`⚙ 5 FEATURES — SERVICES HUB`), and the top bar has a
+  `⚙ SERVICES` button. Both open the Services Hub; the tile hides while filtering/searching.
+- **Service worker cache v6** now precaches `services-hub.html` too.
+
+### Fixed — visual defects across the hub pages
+- **Boot spinner could print "undefined".** The spinner index used
+  `(Date.now() >> 6) % spin.length`; once `Date.now()` passed the signed 32-bit range the
+  shift produced a negative index and `spin[negative]` was `undefined`. Both the transition
+  overlay and `PRESSHERETOSTART.html` now use `Math.floor(Date.now() / 64) % spin.length`.
+- **Settings layout and sliders.** Added the missing layout CSS and neon range-slider styling
+  so every control renders and lines up.
+- **Soundboard master-volume slider** now uses the same neon styling.
+- **Library scrollbars** are themed to match the rest of the UI.
 
 ### Fixed — the keyboard layer was fighting the games, and the feature registry was stale
 A full-file audit (every hub page read, every inline script syntax-checked, plus a real
