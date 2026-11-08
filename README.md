@@ -223,7 +223,7 @@ and you'd rather it wasn't, open an issue and it'll be taken down.
 ## Contributors
 
 - The pack author — for assembling and maintaining the collection.
-- **Big Pickle** — the OpenCode AI agent that packaged it up and put it on GitHub.
+- **Big Pickle** — the OpenCode AI agent that packaged it up and put it on GitHub (GitHub: [@Big-Pickley](https://github.com/Big-Pickley)).
 
 ## Reporting a problem
 
