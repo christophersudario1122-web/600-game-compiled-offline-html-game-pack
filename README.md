@@ -169,6 +169,7 @@ games **folder** is `.games/pack/offline/`.
 PRESSHERETOSTART.html          the thing you open
 .hub/                          the hub pages and scripts
   .library.html                the game grid (search, filters, favourites, ...)
+  services-hub.html            the five-feature online hub
   .settings.html .stats.html .notes.html .secrets.html ...   the other pages
 .games/                        all the games (NOT in this repo - see Releases)
   pack/offline/                one .html file (or folder) per game
@@ -193,6 +194,25 @@ played last, and set your own theme and controls. The hub remembers your choices
 offline through a service worker, and quietly tracks around 2000 little features under
 the hood (`window.Arcade`). The secret page is password-protected, and you can change
 that password whenever you like in **Settings → Security** (there's a reset button too).
+
+## Online features (Mineral, Basalt, Vent, Slate, Magma)
+
+The library has a **🎮 ONLINE FEATURES** tile, and the top bar has a **⚙ SERVICES**
+button. Both open the Services Hub, which mirrors the five features from the original
+Mantle page:
+
+| Feature | What it is | Offline build? |
+|---|---|---|
+| **Mineral** | Minecraft in your browser | yes — `1.8.html` |
+| **Basalt** | A browser FPS shooter | yes — `doom.html` |
+| **Vent** | A web recreation of Among Us | yes — `amongus.html` |
+| **Slate** | Chat with frontier AI models | online only |
+| **Magma** | Unblock any website, on any network | online only |
+
+Clicking a card opens the live Mantle service in a full-screen window, exactly the way
+the original launcher does — no keys, no setup. Allow pop-ups for the hub the first
+time. If you're offline, Mineral, Basalt and Vent still launch their bundled builds
+straight from the stick.
 
 ## Credits
 

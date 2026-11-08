@@ -170,6 +170,16 @@
             box-shadow: 0 0 16px rgba(0, 255, 136, 0.5);
             outline: none;
         }
+        .launch-btn.primary {
+            color: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+        }
+        .launch-btn.primary:hover,
+        .launch-btn.primary:focus-visible {
+            background: var(--neon-cyan);
+            color: var(--dark-bg);
+            box-shadow: 0 0 16px rgba(0, 212, 255, 0.5);
+        }
         .launch-btn.ghost {
             color: var(--neon-yellow);
             border-color: var(--neon-yellow);
@@ -192,7 +202,7 @@
             transition: max-height 0.25s, opacity 0.25s;
         }
         .feature-status.show {
-            max-height: 80px;
+            max-height: 120px;
             opacity: 1;
         }
 
@@ -225,6 +235,130 @@
         }
         .footer-link a:hover { text-decoration: underline; }
 
+        /* ---- Mantle-style modals (chooser + Slate welcome) ---- */
+        .mantle-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(0, 0, 0, 0.78);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.16s ease;
+        }
+        .mantle-modal.show { opacity: 1; }
+
+        .mantle-modal-card {
+            background: #0f0f11;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 26px;
+            width: 100%;
+            max-width: 460px;
+            color: #e4e4e7;
+            box-sizing: border-box;
+            max-height: 90vh;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .mantle-modal-card h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin: 0 0 6px;
+            color: #fafafa;
+        }
+        .mantle-modal-card p {
+            font-size: 0.8rem;
+            color: #b0b0b3;
+            margin: 0 0 18px;
+            line-height: 1.55;
+        }
+
+        .link-option {
+            display: block;
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            color: #fafafa;
+            font-family: inherit;
+            font-size: 0.85rem;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .link-option:hover,
+        .link-option:focus-visible {
+            border-color: var(--accent, var(--neon-cyan));
+            background: rgba(255, 255, 255, 0.06);
+            outline: none;
+        }
+        .link-option .label { display: block; }
+        .link-option .hint {
+            display: block;
+            margin-top: 3px;
+            font-size: 0.7rem;
+            color: #9a9a9d;
+        }
+
+        .modal-cancel {
+            width: 100%;
+            margin-top: 14px;
+            padding: 10px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #b0b0b3;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+        }
+        .modal-cancel:hover { background: rgba(255, 255, 255, 0.05); }
+
+        .terms-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 0 0 16px;
+            font-size: 0.78rem;
+            line-height: 1.5;
+            color: #d4d4d8;
+        }
+        .terms-row input {
+            margin-top: 3px;
+            width: 15px;
+            height: 15px;
+            accent-color: var(--neon-green);
+            flex-shrink: 0;
+        }
+        .terms-row a { color: #fafafa; }
+
+        .modal-launch {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            background: #18181b;
+            color: #52525b;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: not-allowed;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .modal-launch.enabled {
+            background: var(--neon-green);
+            color: #050508;
+            border-color: var(--neon-green);
+            cursor: pointer;
+        }
+
         @media (max-width: 600px) {
             h1 { font-size: 1.8rem; letter-spacing: 2px; }
             .feature-grid { grid-template-columns: 1fr; }
@@ -240,7 +374,7 @@
     <h1>⚙ SERVICES HUB</h1>
     <p class="subtitle">
         Five arcade features — games and tools.<br>
-        Three run from the bundled offline builds, two need a live endpoint.
+        Every card launches the live Mantle service. Mineral, Basalt and Vent also ship a bundled offline build.
     </p>
 
     <div class="feature-grid">
@@ -251,12 +385,15 @@
             <div class="integration-header">
                 <span class="integration-name">Mineral</span>
                 <span class="badge badge-game">Game</span>
+                <span class="badge badge-online">Online</span>
             </div>
             <p class="integration-desc">Play Minecraft in your browser.</p>
             <div class="integration-actions">
-                <a class="launch-btn" href=".boot-launch.html?g=1.8.html">▶ Play local build</a>
+                <button class="launch-btn primary" type="button" id="launch-mineral">▶ Play online</button>
+                <a class="launch-btn" href=".boot-launch.html?g=1.8.html">Play local build</a>
             </div>
-            <div class="launch-note">Bundled offline sandbox — no download required.</div>
+            <div class="feature-status" id="mineral-status" role="status" aria-live="polite"></div>
+            <div class="launch-note">Streams the Mantle Mineral bundle (~129 MB) — first load needs internet.</div>
         </article>
 
         <!-- 02 — Basalt -->
@@ -265,12 +402,15 @@
             <div class="integration-header">
                 <span class="integration-name">Basalt</span>
                 <span class="badge badge-game">Game</span>
+                <span class="badge badge-online">Online</span>
             </div>
             <p class="integration-desc">Browser-based FPS shooter.</p>
             <div class="integration-actions">
-                <a class="launch-btn" href=".boot-launch.html?g=doom.html">▶ Play local build</a>
+                <button class="launch-btn primary" type="button" id="launch-basalt">▶ Play online</button>
+                <a class="launch-btn" href=".boot-launch.html?g=doom.html">Play local build</a>
             </div>
-            <div class="launch-note">Bundled offline FPS — keyboard + mouse.</div>
+            <div class="feature-status" role="status" aria-live="polite"></div>
+            <div class="launch-note">Live Mantle servers — two mirrors, no setup.</div>
         </article>
 
         <!-- 03 — Vent -->
@@ -279,12 +419,15 @@
             <div class="integration-header">
                 <span class="integration-name">Vent</span>
                 <span class="badge badge-game">Game</span>
+                <span class="badge badge-online">Online</span>
             </div>
             <p class="integration-desc">A web recreation of Among Us.</p>
             <div class="integration-actions">
-                <a class="launch-btn" href=".boot-launch.html?g=amongus.html">▶ Play local build</a>
+                <button class="launch-btn primary" type="button" id="launch-vent">▶ Play online</button>
+                <a class="launch-btn" href=".boot-launch.html?g=amongus.html">Play local build</a>
             </div>
-            <div class="launch-note">Bundled offline social-deduction round.</div>
+            <div class="feature-status" role="status" aria-live="polite"></div>
+            <div class="launch-note">Live Mantle relays — two mirrors, no setup.</div>
         </article>
 
         <!-- 04 — Slate -->
@@ -293,13 +436,14 @@
             <div class="integration-header">
                 <span class="integration-name">Slate</span>
                 <span class="badge badge-tool">Tool</span>
+                <span class="badge badge-online">Online</span>
             </div>
             <p class="integration-desc">Chat with frontier AI models.</p>
             <div class="integration-actions">
-                <button class="launch-btn ghost" type="button" onclick="showStatus(this, 'Slate needs a live model endpoint. It is not bundled with this USB build — plug in a provider URL to enable it.')">ℹ Online only</button>
+                <button class="launch-btn primary" type="button" id="launch-slate">▶ Launch Slate</button>
             </div>
             <div class="feature-status" role="status" aria-live="polite"></div>
-            <div class="launch-note">Requires network + provider key.</div>
+            <div class="launch-note">Live Mantle endpoint — accept the terms once, then chat.</div>
         </article>
 
         <!-- 05 — Magma -->
@@ -308,22 +452,24 @@
             <div class="integration-header">
                 <span class="integration-name">Magma</span>
                 <span class="badge badge-tool">Tool</span>
+                <span class="badge badge-online">Online</span>
             </div>
             <p class="integration-desc">Unblock any website, on any network.</p>
             <div class="integration-actions">
-                <button class="launch-btn ghost" type="button" onclick="showStatus(this, 'Magma needs a live proxy endpoint. It is not bundled with this USB build — plug in a proxy URL to enable it.')">ℹ Online only</button>
+                <button class="launch-btn primary" type="button" id="launch-magma">▶ Launch Magma</button>
             </div>
             <div class="feature-status" role="status" aria-live="polite"></div>
-            <div class="launch-note">Requires network + proxy service.</div>
+            <div class="launch-note">Live Mantle proxy — no configuration needed.</div>
         </article>
 
     </div>
 
     <div class="offline-note">
-        ℹ <strong>About this hub:</strong> these five features mirror the Mantle line-up —
-        <em>Mineral</em>, <em>Basalt</em>, <em>Vent</em>, <em>Slate</em> and <em>Magma</em>.
-        Mineral, Basalt and Vent launch self-contained builds from this USB stick.
-        Slate and Magma are online-only tools with no endpoint configured in this build.
+        ℹ <strong>How this works:</strong> this hub mirrors the original Mantle launcher.
+        <em>Mineral</em>, <em>Basalt</em>, <em>Vent</em>, <em>Slate</em> and <em>Magma</em>
+        all open the live Mantle services in a full-screen window. Mineral, Basalt and Vent
+        also have a bundled offline build on this USB stick, so they keep working without
+        internet. Pop-ups must be allowed for the online launches.
     </div>
 
     <div class="footer-link">
@@ -334,14 +480,254 @@
 
 <script src="./.boot-transition.js"></script>
 <script>
-    function showStatus(btn, message) {
-        var card = btn.closest('.integration-card');
-        if (!card) return;
-        var el = card.querySelector('.feature-status');
-        if (!el) return;
-        el.textContent = message;
-        el.classList.add('show');
+    'use strict';
+
+    /* ------------------------------------------------------------------
+       Mantle service endpoints — reverse-engineered from
+       dobberr/mantle-menu index.html + dobberr/cfg r.txt.
+       ------------------------------------------------------------------ */
+    var MINERAL_SOURCES = [
+        'https://media.githubusercontent.com/media/dobberr/min/refs/heads/main/index.html',
+        'https://cdn.jsdelivr.net/gh/dobberr/min@main/index.html',
+        'https://fastly.jsdelivr.net/gh/dobberr/min@main/index.html',
+        'https://raw.githack.com/dobberr/min/main/index.html',
+        'https://cdn.statically.io/gh/dobberr/min/main/index.html'
+    ];
+    var SLATE_URL = 'https://slate-mantle.truegrid.cloud';
+    var MAGMA_URL = 'https://magma-mantle.truegrid.cloud';
+    var BASALT_URLS = [
+        { label: 'Server #1', hint: 'basalt.mantle.dpdns.org', url: 'https://basalt.mantle.dpdns.org/' },
+        { label: 'Server #2 (if the first one doesn\'t work)', hint: 'basalt.mantleunblocked.workers.dev', url: 'https://basalt.mantleunblocked.workers.dev' }
+    ];
+    var VENT_URLS = [
+        { label: 'Relay #1', hint: 'vent.mantleunblocked.workers.dev', url: 'https://vent.mantleunblocked.workers.dev/' },
+        { label: 'Relay #2 (if the first one doesn\'t work)', hint: 'vent.mantle.dpdns.org', url: 'https://vent.mantle.dpdns.org/' }
+    ];
+
+    var FRAME_ALLOW = 'fullscreen; pointer-lock; gamepad; keyboard-map; clipboard-read; clipboard-write; camera; microphone; autoplay';
+    var WINDOW_FEATURES = 'width=' + screen.width + ',height=' + screen.height +
+        ',menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes,popup=yes';
+
+    var MINERAL_SPLASH_HTML = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Mineral</title>' +
+        '<style>html,body{height:100%;margin:0;background:#0a0a0b;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;font-family:-apple-system,Arial,sans-serif}' +
+        '.ring{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.10);border-top-color:rgba(255,255,255,0.55);animation:spin 0.8s linear infinite}' +
+        '@keyframes spin{to{transform:rotate(360deg)}}p{color:#9a9a9d;font-size:13px;letter-spacing:0.02em;margin:0}' +
+        '#mProg{color:#b0b0b3;font-size:12.5px;margin:0;min-height:1.4em;font-variant-numeric:tabular-nums}</style></head>' +
+        '<body><div class="ring"></div><p>Loading Mineral</p><p id="mProg"></p></body></html>';
+
+    function mineralErrorHtml(reason) {
+        return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Mineral</title></head>' +
+            '<body style="height:100vh;margin:0;background:#0a0a0b;display:flex;align-items:center;justify-content:center;font-family:-apple-system,Arial,sans-serif">' +
+            '<div style="text-align:center;color:#b0b0b3;max-width:440px;padding:20px">' +
+            '<h2 style="color:#fafafa;font-size:17px;font-weight:600;margin:0 0 10px">Mineral couldn\'t load</h2>' +
+            '<p style="font-size:14px;line-height:1.6;margin:0 0 8px">' + reason + '</p>' +
+            '<p style="font-size:13px;color:#9a9a9d;margin:0 0 18px">The bundled local build still works offline.</p>' +
+            '<a href=".boot-launch.html?g=1.8.html" style="display:inline-block;padding:10px 18px;border:1px solid #00ff88;border-radius:6px;color:#00ff88;text-decoration:none;font-size:13px">Play local build</a>' +
+            '</div></body></html>';
     }
+
+    function looksLikeBundle(text) {
+        if (/^version https:\/\/git-lfs/i.test(text.slice(0, 300))) return false;
+        if (text.length < 200) return false;
+        if (!/<!doctype html|<html|<body|<script/i.test(text)) return false;
+        if (/<title>[^<]*(blocked|restricted|denied|web filter|url filter|policy)[^<]*<\/title>/i.test(text)) return false;
+        return true;
+    }
+
+    function fmtMB(n) { return (n / (1024 * 1024)).toFixed(1); }
+
+    /* Opens a full-screen about:blank window and returns its document.
+       Called synchronously from a click so pop-up blockers stay happy. */
+    function openShell(title) {
+        var win = window.open('about:blank', '_blank', WINDOW_FEATURES);
+        if (!win) {
+            alert('Please allow pop-ups for this page, then try again.');
+            return null;
+        }
+        var d = win.document;
+        d.open();
+        d.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title +
+            '</title></head><body style="margin:0;padding:0;background:#000;overflow:hidden;width:100vw;height:100vh;"></body></html>');
+        d.close();
+        return { win: win, doc: d };
+    }
+
+    function launchFrame(url, title) {
+        var shell = openShell(title || 'Mantle');
+        if (!shell) return false;
+        var frame = shell.doc.createElement('iframe');
+        frame.src = url;
+        frame.style.cssText = 'width:100vw;height:100vh;border:none;display:block;position:absolute;top:0;left:0;background:#000';
+        frame.setAttribute('allow', FRAME_ALLOW);
+        frame.setAttribute('referrerpolicy', 'no-referrer');
+        shell.doc.body.appendChild(frame);
+        return true;
+    }
+
+    /* --------------------------- Mineral --------------------------- */
+    async function launchMineral() {
+        var status = document.getElementById('mineral-status');
+        var shell = openShell('Mineral');
+        if (!shell) return;
+        var d = shell.doc;
+        d.open(); d.write(MINERAL_SPLASH_HTML); d.close();
+        var prog = function () { try { return d.getElementById('mProg'); } catch (e) { return null; } };
+
+        for (var i = 0; i < MINERAL_SOURCES.length; i++) {
+            var url = MINERAL_SOURCES[i];
+            try {
+                var res = await fetch(url, { cache: 'no-cache' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+
+                var text;
+                if (res.body && res.body.getReader) {
+                    var reader = res.body.getReader();
+                    var total = parseInt(res.headers.get('content-length') || '0', 10);
+                    var chunks = [];
+                    var received = 0;
+                    for (;;) {
+                        var step = await reader.read();
+                        if (step.done) break;
+                        chunks.push(step.value);
+                        received += step.value.length;
+                        var p = prog();
+                        if (p) p.textContent = total ? fmtMB(received) + ' / ' + fmtMB(total) + ' MB'
+                                                     : fmtMB(received) + ' MB loaded';
+                    }
+                    text = await new Blob(chunks).text();
+                } else {
+                    text = await res.text();
+                }
+
+                if (!looksLikeBundle(text)) throw new Error('Response was not the Mineral bundle');
+
+                var finalHtml = text;
+                if (!/<base\s/i.test(finalHtml)) {
+                    try {
+                        var abs = new URL(url).href;
+                        var baseTag = '<base href="' + abs.substring(0, abs.lastIndexOf('/') + 1) + '">';
+                        finalHtml = /<head[^>]*>/i.test(finalHtml)
+                            ? finalHtml.replace(/<head[^>]*>/i, function (m) { return m + baseTag; })
+                            : baseTag + finalHtml;
+                    } catch (e) {}
+                }
+
+                var frame = d.createElement('iframe');
+                frame.style.cssText = 'width:100vw;height:100vh;border:none;display:block;position:absolute;top:0;left:0';
+                frame.setAttribute('allow', FRAME_ALLOW);
+                frame.srcdoc = finalHtml;
+                d.body.innerHTML = '';
+                d.body.appendChild(frame);
+                return;
+            } catch (err) {
+                if (status) {
+                    status.textContent = 'Mirror ' + (i + 1) + ' failed: ' + (err && err.message ? err.message : err);
+                    status.classList.add('show');
+                }
+            }
+        }
+
+        d.open();
+        d.write(mineralErrorHtml('Every download mirror was unreachable on this network.'));
+        d.close();
+    }
+
+    /* --------------------- Chooser (Basalt / Vent) ------------------ */
+    function showChooser(cfg) {
+        var modalId = cfg.id + '-chooser-modal';
+        var existing = document.getElementById(modalId);
+        if (existing) existing.remove();
+
+        var optionsHtml = cfg.options.map(function (opt) {
+            return '<button type="button" class="link-option" data-chooser-url="' + opt.url +
+                '" style="--accent:' + cfg.accent + '"><span class="label">' + opt.label +
+                '</span><span class="hint">' + opt.hint + '</span></button>';
+        }).join('');
+
+        var modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'mantle-modal';
+        modal.innerHTML = '<div class="mantle-modal-card">' +
+            '<h2>Choose a ' + cfg.app + ' ' + cfg.noun + '</h2>' +
+            '<p>If ' + cfg.noun + ' #1 doesn\'t load on your network, try #2.</p>' +
+            optionsHtml +
+            '<button type="button" class="modal-cancel" data-chooser-cancel>Cancel</button>' +
+            '</div>';
+        document.body.appendChild(modal);
+        requestAnimationFrame(function () { modal.classList.add('show'); });
+
+        modal.querySelectorAll('[data-chooser-url]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var url = this.getAttribute('data-chooser-url');
+                closeModal(modalId);
+                launchFrame(url, cfg.app);
+            });
+        });
+        modal.querySelector('[data-chooser-cancel]').addEventListener('click', function () { closeModal(modalId); });
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(modalId); });
+    }
+
+    /* ----------------------------- Slate ---------------------------- */
+    function showSlateModal() {
+        var modalId = 'slate-welcome-modal';
+        var existing = document.getElementById(modalId);
+        if (existing) existing.remove();
+
+        var modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'mantle-modal';
+        modal.innerHTML = '<div class="mantle-modal-card">' +
+            '<h2>Welcome to Slate</h2>' +
+            '<p>Chat with frontier AI models, in your browser. Slate can answer questions, draft and edit writing, summarise documents and brainstorm ideas.</p>' +
+            '<div class="terms-row">' +
+            '<input type="checkbox" id="slate-terms-checkbox">' +
+            '<label for="slate-terms-checkbox">I agree to the Slate terms of service and privacy policy, and I understand my legal responsibilities regarding acceptable use.</label>' +
+            '</div>' +
+            '<button id="slate-launch-btn" class="modal-launch" type="button" disabled>Accept agreements to continue</button>' +
+            '<button type="button" class="modal-cancel" data-slate-cancel>Cancel</button>' +
+            '</div>';
+        document.body.appendChild(modal);
+        requestAnimationFrame(function () { modal.classList.add('show'); });
+
+        var btn = modal.querySelector('#slate-launch-btn');
+        var checkbox = modal.querySelector('#slate-terms-checkbox');
+        checkbox.addEventListener('change', function () {
+            btn.disabled = !checkbox.checked;
+            btn.classList.toggle('enabled', checkbox.checked);
+            btn.textContent = checkbox.checked ? 'Launch Slate' : 'Accept agreements to continue';
+        });
+        btn.addEventListener('click', function () {
+            if (btn.disabled) return;
+            closeModal(modalId);
+            launchFrame(SLATE_URL, 'Slate');
+        });
+        modal.querySelector('[data-slate-cancel]').addEventListener('click', function () { closeModal(modalId); });
+        modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(modalId); });
+    }
+
+    function closeModal(id) {
+        var m = document.getElementById(id);
+        if (!m) return;
+        m.classList.remove('show');
+        setTimeout(function () { if (m.parentNode) m.parentNode.removeChild(m); }, 170);
+    }
+
+    /* --------------------------- Wiring ---------------------------- */
+    var launchMineralBtn = document.getElementById('launch-mineral');
+    var launchBasaltBtn = document.getElementById('launch-basalt');
+    var launchVentBtn = document.getElementById('launch-vent');
+    var launchSlateBtn = document.getElementById('launch-slate');
+    var launchMagmaBtn = document.getElementById('launch-magma');
+
+    if (launchMineralBtn) launchMineralBtn.addEventListener('click', launchMineral);
+    if (launchBasaltBtn) launchBasaltBtn.addEventListener('click', function () {
+        showChooser({ id: 'basalt', app: 'Basalt', noun: 'server', accent: '#00d4ff', options: BASALT_URLS });
+    });
+    if (launchVentBtn) launchVentBtn.addEventListener('click', function () {
+        showChooser({ id: 'vent', app: 'Vent', noun: 'relay', accent: '#00d4ff', options: VENT_URLS });
+    });
+    if (launchSlateBtn) launchSlateBtn.addEventListener('click', showSlateModal);
+    if (launchMagmaBtn) launchMagmaBtn.addEventListener('click', function () { launchFrame(MAGMA_URL, 'Magma'); });
 
     // Lightweight matrix rain — decorative only, respects reduced motion.
     (function () {

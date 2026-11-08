@@ -4,6 +4,43 @@ All notable changes to this project, newest first. Dates are local build dates.
 
 ---
 
+## 🔓 v1.1.1 — November 7, 2026
+
+### ✨ The online features actually launch now
+
+This is the release where the Services Hub stops saying "online only" and starts working
+exactly like the original Mantle page. I pulled apart `DRAG-INTO-BROWSER.svg` — the
+stealth launcher is a tiny SVG wrapper around a base64-encoded HTML page that fetches
+Mantle from GitHub and injects it into an iframe — then traced every button in Mantle's
+`index.html` and its live routing file (`dobberr/cfg/main/r.txt`).
+
+Here is what the reverse-engineering turned up, and what now happens when you click:
+
+| Feature | How Mantle does it | What this build does |
+|---|---|---|
+| **Mineral** | Streams a ~129 MB Minecraft bundle from GitHub LFS, then injects it with a `<base>` tag | Same, with a live MB progress readout; falls back to the bundled `1.8.html` |
+| **Basalt** | Picks between two live servers, opens a popup + iframe | Same two servers, same chooser, plus the local `doom.html` build |
+| **Vent** | Picks between two live relays, opens a popup + iframe | Same two relays, same chooser, plus the local `amongus.html` build |
+| **Slate** | Terms modal, then `https://slate-mantle.truegrid.cloud` | Same terms gate, same live endpoint |
+| **Magma** | `https://magma-mantle.truegrid.cloud` | Same live endpoint |
+
+- **No configuration, no API keys.** The endpoints are public Mantle services, so the
+  cards work on any network that can reach them.
+- **Pop-up note.** The live launches open a full-screen window and embed the service in an
+  iframe, which is exactly what Mantle does. Allow pop-ups for the hub the first time.
+- **Graceful offline fallback.** Mineral, Basalt and Vent still offer their bundled
+  offline build, so the stick keeps working without internet.
+
+### 🧪 Verification
+
+- 16 automated launch checks (headless Chrome, `window.open` stubbed) pass at 1280, 768
+  and 500 px: all five cards, both Basalt servers, both Vent relays, the Slate consent
+  gate, the Magma endpoint, and no horizontal overflow.
+- All four live services were loaded inside iframes and confirmed to render.
+- The 47-check regression suite still passes: **47 passed, 0 failed**.
+
+---
+
 ## 🎮 v1.1.0 — November 6, 2026
 
 ### ✨ New: A proper Services Hub with five Mantle features

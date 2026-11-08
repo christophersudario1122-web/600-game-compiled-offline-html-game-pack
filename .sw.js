@@ -1,9 +1,9 @@
 // Arcade Hub Service Worker - offline-capable, but always fresh hub pages.
-// v6: adds the Services Hub page and its five-feature catalogue. v5 precached the
-// motion layer (.motion.js, .motion-showreel.html), which v4 missed, so the first
-// offline visit still animates. Hub HTML is network-first so edits show immediately;
+// v7: the Services Hub now launches the live Mantle services (Mineral, Basalt,
+// Vent, Slate, Magma) instead of showing "online only" notices. v6 added the
+// Services Hub page itself. Hub HTML is network-first so edits show immediately;
 // static assets are stale-while-revalidate. Bumping CACHE_NAME purges the old cache.
-const CACHE_NAME = 'arcade-hub-v6';
+const CACHE_NAME = 'arcade-hub-v7';
 const ASSETS = [
   './PRESSHERETOSTART.html',
   './.hub/.library.html',
