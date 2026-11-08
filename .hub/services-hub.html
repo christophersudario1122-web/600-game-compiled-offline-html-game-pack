@@ -515,14 +515,14 @@
         '#mProg{color:#b0b0b3;font-size:12.5px;margin:0;min-height:1.4em;font-variant-numeric:tabular-nums}</style></head>' +
         '<body><div class="ring"></div><p>Loading Mineral</p><p id="mProg"></p></body></html>';
 
-    function mineralErrorHtml(reason) {
+    function mineralErrorHtml(reason, localUrl) {
         return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Mineral</title></head>' +
             '<body style="height:100vh;margin:0;background:#0a0a0b;display:flex;align-items:center;justify-content:center;font-family:-apple-system,Arial,sans-serif">' +
             '<div style="text-align:center;color:#b0b0b3;max-width:440px;padding:20px">' +
             '<h2 style="color:#fafafa;font-size:17px;font-weight:600;margin:0 0 10px">Mineral couldn\'t load</h2>' +
             '<p style="font-size:14px;line-height:1.6;margin:0 0 8px">' + reason + '</p>' +
             '<p style="font-size:13px;color:#9a9a9d;margin:0 0 18px">The bundled local build still works offline.</p>' +
-            '<a href=".boot-launch.html?g=1.8.html" style="display:inline-block;padding:10px 18px;border:1px solid #00ff88;border-radius:6px;color:#00ff88;text-decoration:none;font-size:13px">Play local build</a>' +
+            '<a href="' + localUrl + '" style="display:inline-block;padding:10px 18px;border:1px solid #00ff88;border-radius:6px;color:#00ff88;text-decoration:none;font-size:13px">Play local build</a>' +
             '</div></body></html>';
     }
 
@@ -545,10 +545,16 @@
             return null;
         }
         var d = win.document;
-        d.open();
-        d.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title +
-            '</title></head><body style="margin:0;padding:0;background:#000;overflow:hidden;width:100vw;height:100vh;"></body></html>');
-        d.close();
+        try {
+            d.open();
+            d.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + title +
+                '</title></head><body style="margin:0;padding:0;background:#000;overflow:hidden;width:100vw;height:100vh;"></body></html>');
+            d.close();
+        } catch (e) {
+            try { win.close(); } catch (_) {}
+            alert('The browser blocked the launch window. Please allow pop-ups for this page and try again.');
+            return null;
+        }
         return { win: win, doc: d };
     }
 
@@ -628,7 +634,8 @@
         }
 
         d.open();
-        d.write(mineralErrorHtml('Every download mirror was unreachable on this network.'));
+        d.write(mineralErrorHtml('Every download mirror was unreachable on this network.',
+            new URL('.boot-launch.html?g=1.8.html', location.href).href));
         d.close();
     }
 
