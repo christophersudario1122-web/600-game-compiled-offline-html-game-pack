@@ -3,7 +3,7 @@
 // Vent, Slate, Magma) instead of showing "online only" notices. v6 added the
 // Services Hub page itself. Hub HTML is network-first so edits show immediately;
 // static assets are stale-while-revalidate. Bumping CACHE_NAME purges the old cache.
-const CACHE_NAME = 'arcade-hub-v7';
+const CACHE_NAME = 'arcade-hub-v8';
 const ASSETS = [
   './PRESSHERETOSTART.html',
   './.hub/.library.html',

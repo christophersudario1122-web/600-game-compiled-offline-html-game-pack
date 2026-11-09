@@ -4,6 +4,39 @@ All notable changes to this project, newest first. Dates are local build dates.
 
 ---
 
+## ✨ v1.1.2 — November 8, 2026
+
+### 🖱️ The background now follows your mouse
+
+The Services Hub got its last visual feature: a gentle stream of characters that trails the
+pointer across the background.
+
+- **Background only.** The stream emits glyphs only when the pointer is off the cards,
+  buttons, chooser modals and footer links. Move over a control and the trail stops, so the
+  UI stays clean and readable.
+- **Follows the pointer.** Glyphs spawn along the path the mouse actually travelled (not a
+  blob at the cursor), drift slightly, and fade out over a couple of seconds.
+- **Cheap and safe.** It is a second fixed `<canvas>` at `z-index: 0` with
+  `pointer-events: none`, so it never blocks a click, never reflows the page, and sits
+  behind the cards (`z-index: 1`).
+- **Respects reduced motion.** With `prefers-reduced-motion: reduce` the loop is skipped
+  entirely.
+- **Touch too.** `touchmove` drives the same trail on touch screens.
+
+### 🧪 Verification
+
+- 25 checks × 3 viewport widths (1280 / 768 / 500 px) pass, including:
+  - the canvas exists, is fixed, ignores pointer events, and sits behind `.page`;
+  - **zero** glyphs are emitted while the pointer is over a card;
+  - glyphs are emitted over the background and stay a sparse trail (< 5% of the canvas);
+  - no JavaScript errors and no horizontal overflow.
+- 47/47 regression tests pass (`node scripts/tests/afterfix-rendertest.mjs`).
+- Confirmed with a real Chrome DevTools Protocol capture: real mouse events produced
+  ~3,400 drawn canvas pixels and a visible trail in the captured screenshot.
+- Service-worker cache bumped to `arcade-hub-v8` so the updated page is picked up.
+
+---
+
 ## 🔓 v1.1.1 — November 7, 2026
 
 ### ✨ The online features actually launch now

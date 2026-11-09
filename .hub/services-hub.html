@@ -39,6 +39,19 @@
             pointer-events: none;
         }
 
+        /* Cursor-following character stream — sits behind the cards and
+           buttons so they stay on top and readable. */
+        #cursor-stream {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
         .page {
             position: relative;
             z-index: 1;
@@ -368,6 +381,7 @@
 <body>
 
 <canvas id="matrix-canvas" aria-hidden="true"></canvas>
+<canvas id="cursor-stream" aria-hidden="true"></canvas>
 
 <main class="page">
 
@@ -777,6 +791,127 @@
         if (!reduce) {
             draw();
             setInterval(draw, 70);
+        }
+    })();
+
+    /* ------------------------------------------------------------------
+       Cursor-following character stream.
+       When the pointer is over the background (not over a card or button),
+       the window tracks it and leaves a gentle stream of glyphs behind —
+       the characters flow along with the mouse and slowly fade out.
+       Pure canvas, no layout cost, respects reduced motion.
+       ------------------------------------------------------------------ */
+    (function () {
+        var canvas = document.getElementById('cursor-stream');
+        if (!canvas || !canvas.getContext) return;
+        var ctx = canvas.getContext('2d');
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        var STREAM_GLYPHS = 'アイウエオカキクケコ0123456789ABCDEF<>{}[]$#@%&';
+        var particles = [];
+        var mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        var prev = { x: mouse.x, y: mouse.y };
+        var overUi = false;
+
+        function randGlyph() {
+            return STREAM_GLYPHS.charAt(Math.floor(Math.random() * STREAM_GLYPHS.length));
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function spawnAt(x, y) {
+            particles.push({
+                x: x + (Math.random() * 8 - 4),
+                y: y + (Math.random() * 8 - 4),
+                vx: (Math.random() - 0.5) * 0.35,
+                vy: 0.10 + Math.random() * 0.35,
+                glyph: randGlyph(),
+                life: 1,
+                decay: 0.010 + Math.random() * 0.008,
+                hue: 130 + Math.random() * 60
+            });
+            if (particles.length > 180) particles.shift();
+        }
+
+        function emitTrail() {
+            var dx = mouse.x - prev.x;
+            var dy = mouse.y - prev.y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            var steps = Math.min(6, Math.max(1, Math.floor(dist / 14)));
+            for (var i = 0; i < steps; i++) {
+                var t = steps === 1 ? 1 : i / (steps - 1);
+                spawnAt(prev.x + dx * t, prev.y + dy * t);
+            }
+            prev.x = mouse.x;
+            prev.y = mouse.y;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0; i < particles.length; i++) {
+                var p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vx *= 0.99;
+                p.vy *= 0.995;
+                p.life -= p.decay;
+
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    i--;
+                    continue;
+                }
+
+                ctx.fillStyle = 'hsla(' + p.hue + ', 100%, 62%, ' + (p.life * 0.6) + ')';
+                ctx.font = '13px monospace';
+                ctx.fillText(p.glyph, p.x, p.y);
+            }
+        }
+
+        function isOverUi(el) {
+            return !!(el && el.closest && el.closest('.integration-card, .mantle-modal, .launch-btn, .footer-link'));
+        }
+
+        function onMove(x, y, target) {
+            mouse.x = x;
+            mouse.y = y;
+            overUi = isOverUi(target);
+            if (overUi) {
+                // Don't leave a trail while the pointer is on a control, and
+                // keep the anchor current so the next background move doesn't
+                // draw a line all the way across the page.
+                prev.x = mouse.x;
+                prev.y = mouse.y;
+            } else {
+                emitTrail();
+            }
+        }
+
+        window.addEventListener('mousemove', function (e) {
+            onMove(e.clientX, e.clientY, e.target);
+        }, { passive: true });
+
+        window.addEventListener('touchmove', function (e) {
+            if (e.touches && e.touches[0]) {
+                onMove(e.touches[0].clientX, e.touches[0].clientY, e.target);
+            }
+        }, { passive: true });
+
+        window.addEventListener('mouseleave', function () {
+            prev.x = mouse.x;
+            prev.y = mouse.y;
+        });
+
+        resize();
+        window.addEventListener('resize', resize);
+
+        if (!reduce) {
+            draw();
+            setInterval(draw, 45);
         }
     })();
 </script>

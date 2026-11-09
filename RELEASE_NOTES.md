@@ -1,3 +1,27 @@
+# 🖱️ v1.1.2 — The background follows your mouse
+
+A small, purely visual update for the Services Hub.
+
+Move the pointer anywhere off the cards and buttons and the background starts tracking it:
+a gentle stream of characters flows along the path the mouse travelled, drifts a little, and
+fades away. Move onto a card or button and the stream stops, so the controls stay clean and
+readable.
+
+It is a second fixed `<canvas>` (`z-index: 0`, `pointer-events: none`) sitting behind the
+cards, so it never blocks a click or reflows the page. It also honours
+`prefers-reduced-motion` and works with touch input.
+
+## 🧪 Verified
+
+- 25 checks × 3 widths (1280 / 768 / 500 px): canvas present, fixed, non-interactive,
+  behind `.page`; zero glyphs over a card; glyphs over the background; sparse trail; no JS
+  errors; no overflow.
+- 47/47 regression tests pass.
+- Confirmed in a real Chrome DevTools Protocol capture with real mouse events.
+- Service-worker cache bumped to `arcade-hub-v8`.
+
+---
+
 # 🎉 v1.1.1 — The online features actually launch now
 
 This one started with a single SVG file.
